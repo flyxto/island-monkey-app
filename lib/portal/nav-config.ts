@@ -1,4 +1,4 @@
-import { Home, Package, Camera, Building2, UserCheck } from "lucide-react";
+import { Home, Package, Camera, Building2, UserCheck, History, Tag } from "lucide-react";
 import React from "react";
 
 export interface NavItemConfig {
@@ -50,15 +50,15 @@ export const PORTAL_CONFIGS: Record<string, PortalNavConfig> = {
       },
     ],
   },
-  // Future Partner Portal reference configuration
   partner: {
     portalId: "partner",
-    wordmark: "IslandMonkey Partner",
+    wordmark: "Pepper St.",
     activeBadgeBg: "#e1e0ff",
     activeBadgeText: "#4648d4",
     navItems: [
-      { id: "dashboard", label: "Dashboard", href: "/partner", icon: Home },
-      { id: "redemptions", label: "Redeem", href: "/partner/redemptions", icon: Building2 },
+      { id: "home", label: "Home", href: "/partner", icon: Home },
+      { id: "history", label: "History", href: "/partner/history", icon: History, matchPrefix: true },
+      { id: "offers", label: "Offers", href: "/partner/offers", icon: Tag, matchPrefix: true },
     ],
   },
   // Future Model Portal reference configuration
