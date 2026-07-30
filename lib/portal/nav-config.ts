@@ -1,4 +1,4 @@
-import { Home, Package, Camera, Building2, UserCheck, History, Tag } from "lucide-react";
+import { Home, Package, Camera, Building2, UserCheck, History, Tag, Calendar } from "lucide-react";
 import React from "react";
 
 export interface NavItemConfig {
@@ -61,15 +61,15 @@ export const PORTAL_CONFIGS: Record<string, PortalNavConfig> = {
       { id: "offers", label: "Offers", href: "/partner/offers", icon: Tag, matchPrefix: true },
     ],
   },
-  // Future Model Portal reference configuration
   model: {
     portalId: "model",
-    wordmark: "IslandMonkey Talent",
+    wordmark: "IslandMonkey",
     activeBadgeBg: "#e1e0ff",
     activeBadgeText: "#4648d4",
     navItems: [
-      { id: "jobs", label: "Jobs", href: "/model", icon: Home },
-      { id: "profile", label: "Profile", href: "/model/profile", icon: UserCheck },
+      { id: "home", label: "Home", href: "/model", icon: Home },
+      { id: "gigs", label: "Gigs", href: "/model/gigs", icon: Camera, matchPrefix: true },
+      { id: "bookings", label: "Bookings", href: "/model/bookings", icon: Calendar, matchPrefix: true },
     ],
   },
 };

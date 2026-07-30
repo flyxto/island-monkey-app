@@ -7,19 +7,31 @@ import { Camera } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+import { StatusBadge, StatusType } from "./StatusBadge";
+
 export interface PackageCardProps {
   packageItem: PackageItem;
   onSelect?: (pkg: PackageItem) => void;
+  priceSuffix?: string; // e.g. "/hr"
+  detailHref?: string;
+  statusBadge?: StatusType;
 }
 
 /**
  * Package Card component using shadcn UI components:
- * Top image block (128px tall, light blue bg #d3e4fe) with "Best Seller" badge.
+ * Top image block (128px tall, light blue bg #d3e4fe) with "Best Seller" badge or StatusBadge overlay.
  * Body (24px padding): name (24px medium), description (16px),
- * bottom row with black "View Package" button (left) and price right-aligned (24px medium, e.g. LKR 24000).
+ * bottom row with black "View Package" button (left) and price right-aligned (24px medium, e.g. LKR 24000 or LKR 4500/hr).
  */
-export function PackageCard({ packageItem, onSelect }: PackageCardProps) {
-  const formattedPrice = `LKR ${packageItem.priceLKR.toLocaleString()}`;
+export function PackageCard({
+  packageItem,
+  onSelect,
+  priceSuffix = "",
+  detailHref,
+  statusBadge,
+}: PackageCardProps) {
+  const formattedPrice = `LKR ${packageItem.priceLKR.toLocaleString()}${priceSuffix}`;
+  const targetHref = detailHref || `/customer/packages/${packageItem.id}`;
 
   return (
     <Card className="w-full bg-white border border-[#c6c6cd] rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col p-0 gap-0">
@@ -30,11 +42,17 @@ export function PackageCard({ packageItem, onSelect }: PackageCardProps) {
           <span className="text-[12px] font-medium mt-1">Studio Photography</span>
         </div>
 
-        {/* Best Seller Badge using shadcn Badge */}
-        {packageItem.isBestSeller && (
-          <Badge className="absolute top-3 left-3 bg-[#e1e0ff] text-[#4648d4] text-[12px] font-semibold px-3 py-1 rounded-full shadow-sm hover:bg-[#e1e0ff] border-none">
-            Best Seller
-          </Badge>
+        {/* Status Badge overlay (Model Portal Gigs) */}
+        {statusBadge ? (
+          <div className="absolute top-3 left-3">
+            <StatusBadge status={statusBadge} />
+          </div>
+        ) : (
+          packageItem.isBestSeller && (
+            <Badge className="absolute top-3 left-3 bg-[#e1e0ff] text-[#4648d4] text-[12px] font-semibold px-3 py-1 rounded-full shadow-sm hover:bg-[#e1e0ff] border-none">
+              Best Seller
+            </Badge>
+          )
         )}
       </div>
 
@@ -52,7 +70,7 @@ export function PackageCard({ packageItem, onSelect }: PackageCardProps) {
         {/* Bottom Row */}
         <div className="flex items-center justify-between pt-2 border-t border-[#c6c6cd]/30 mt-2">
           <Link
-            href={`/customer/packages/${packageItem.id}`}
+            href={targetHref}
             onClick={() => onSelect?.(packageItem)}
             className="px-4 py-2 bg-black text-white text-[15px] font-medium rounded-[2px] hover:bg-black/90 active:bg-black/80 transition-colors inline-block text-center"
           >
