@@ -40,17 +40,17 @@ export function BottomNavBar({
             key={item.id}
             href={item.href}
             className={`flex flex-col items-center justify-center transition-all duration-200 ${
-              active ? "py-1 px-4 rounded-xl" : "py-1 px-3 text-[#9e9e9e]"
+              active ? "py-1 px-4 rounded-xl" : "py-1 px-3 text-[#45464D]"
             }`}
             style={{
               backgroundColor: active ? activeBadgeBg : "transparent",
-              color: active ? activeBadgeText : "#9e9e9e",
+              color: active ? activeBadgeText : "#45464D",
             }}
           >
             <Icon className="w-6 h-6 mb-1" />
             <span
               className={`text-[12px] ${
-                active ? "font-semibold text-[#4648d4]" : "font-normal text-[#9e9e9e]"
+                active ? "font-semibold text-[#EE3523]" : "font-normal text-[#45464D]"
               }`}
             >
               {item.label}

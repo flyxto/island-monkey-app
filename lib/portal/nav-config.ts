@@ -25,8 +25,8 @@ export const PORTAL_CONFIGS: Record<string, PortalNavConfig> = {
   customer: {
     portalId: "customer",
     wordmark: "IslandMonkey",
-    activeBadgeBg: "#e1e0ff",
-    activeBadgeText: "#4648d4",
+    activeBadgeBg: "#EE352333",
+    activeBadgeText: "#EE3523",
     navItems: [
       {
         id: "home",
@@ -53,19 +53,36 @@ export const PORTAL_CONFIGS: Record<string, PortalNavConfig> = {
   partner: {
     portalId: "partner",
     wordmark: "Pepper St.",
-    activeBadgeBg: "#e1e0ff",
-    activeBadgeText: "#4648d4",
+    activeBadgeBg: "#EE352333",
+    activeBadgeText: "#EE3523",
     navItems: [
-      { id: "home", label: "Home", href: "/partner", icon: Home },
-      { id: "history", label: "History", href: "/partner/history", icon: History, matchPrefix: true },
-      { id: "offers", label: "Offers", href: "/partner/offers", icon: Tag, matchPrefix: true },
+      { 
+        id: "home", 
+        label: "Home", 
+        href: "/partner", 
+        icon: Home 
+      },
+      { 
+        id: "history", 
+        label: "History", 
+        href: "/partner/history", 
+        icon: History, 
+        matchPrefix: true 
+      },
+      { 
+        id: "offers", 
+        label: "Offers", 
+        href: "/partner/offers", 
+        icon: Tag, 
+        matchPrefix: true 
+      },
     ],
   },
   model: {
     portalId: "model",
     wordmark: "IslandMonkey",
-    activeBadgeBg: "#e1e0ff",
-    activeBadgeText: "#4648d4",
+    activeBadgeBg: "#EE352333",
+    activeBadgeText: "#EE3523",
     navItems: [
       { id: "home", label: "Home", href: "/model", icon: Home },
       { id: "gigs", label: "Gigs", href: "/model/gigs", icon: Camera, matchPrefix: true },
