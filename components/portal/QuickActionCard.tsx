@@ -23,9 +23,9 @@ export function QuickActionCard({
   onClick,
 }: QuickActionCardProps) {
   const content = (
-    <Card className="p-0 border border-[#c6c6cd] bg-white rounded-lg shadow-sm hover:shadow-md hover:border-[#4648d4] transition-all cursor-pointer group text-center">
+    <Card className="p-0 border border-im-border bg-white rounded-lg shadow-sm hover:shadow-md hover:border-im-accent transition-all cursor-pointer group text-center">
       <CardContent className="flex flex-col items-center justify-center gap-3 p-4">
-        <div className="p-3 bg-[#e1e0ff] rounded-full text-[#4648d4] group-hover:scale-105 transition-transform">
+        <div className="p-3 bg-im-accent-light rounded-full text-im-accent group-hover:scale-105 transition-transform">
           <Icon className="w-6 h-6" />
         </div>
         <span className="text-[14px] font-semibold text-im-heading">

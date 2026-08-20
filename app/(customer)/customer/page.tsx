@@ -23,7 +23,7 @@ export default function CustomerHomePage() {
           <button
             onClick={() => setIsQRModalOpen(true)}
             type="button"
-            className="p-2 bg-[#E3EEFF] text-[#000000]  hover:bg-im-accent hover:text-white transition-all shadow-sm"
+            className="p-2 bg-[#E3EEFF] text-im-btn-black  hover:bg-im-accent hover:text-white transition-all shadow-sm"
             title="Open QR Code"
           >
             <QrCode className="w-5 h-5" />
@@ -67,18 +67,18 @@ export default function CustomerHomePage() {
       {/* Upcoming Sessions Section */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-[18px] font-semibold text-[#0b1c30]">
+          <h2 className="text-[18px] font-semibold text-im-heading">
             Upcoming Sessions
           </h2>
           <Link
             href="/customer/sessions"
-            className="text-[12px] font-semibold text-[#4648d4] hover:underline"
+            className="text-[12px] font-semibold text-im-accent hover:underline"
           >
             View All
           </Link>
         </div>
 
-        <div className="bg-white border border-[#c6c6cd] rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-white border border-im-border rounded-lg shadow-sm overflow-hidden">
           {MOCK_UPCOMING_SESSIONS.map((session, index) => (
             <SessionListItem
               key={session.id}
