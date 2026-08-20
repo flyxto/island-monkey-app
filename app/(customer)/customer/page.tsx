@@ -34,7 +34,6 @@ export default function CustomerHomePage() {
       <BalanceCard
         points={balance.pointsBalance}
         formattedPoints={balance.formattedPoints}
-        onQROpen={() => setIsQRModalOpen(true)}
       />
 
       {/* Info Row: 1 Point = 200 LKR Today */}
