@@ -28,7 +28,7 @@ export function QuickActionCard({
         <div className="p-3 bg-[#e1e0ff] rounded-full text-[#4648d4] group-hover:scale-105 transition-transform">
           <Icon className="w-6 h-6" />
         </div>
-        <span className="text-[14px] font-semibold text-[#0b1c30]">
+        <span className="text-[14px] font-semibold text-im-heading">
           {title}
         </span>
       </CardContent>

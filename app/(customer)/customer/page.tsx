@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { useCustomer } from "@/lib/portal/CustomerContext";
 import { BalanceCard } from "@/components/portal/BalanceCard";
@@ -14,39 +13,41 @@ export default function CustomerHomePage() {
   const { user, balance, isQRModalOpen, setIsQRModalOpen } = useCustomer();
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Greeting Row */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-[28px] font-semibold text-[#0b1c30] tracking-tight">
-          Good morning, {user.firstName}.
-        </h1>
-        <button
-          onClick={() => setIsQRModalOpen(true)}
-          type="button"
-          className="p-2.5 bg-[#e1e0ff] text-[#4648d4] rounded-full hover:bg-[#4648d4] hover:text-white transition-all shadow-sm"
-          title="Open QR Code"
-        >
-          <QrCode className="w-5 h-5" />
-        </button>
-      </div>
+    <div className="flex flex-col gap-6 pt-6 pb-10">
+      <div className="flex flex-col gap-3">
+        {/* Greeting Row */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-[28px] font-semibold text-im-heading tracking-tight">
+            Good morning, {user.firstName}.
+          </h1>
+          <button
+            onClick={() => setIsQRModalOpen(true)}
+            type="button"
+            className="p-2 bg-[#E3EEFF] text-[#000000]  hover:bg-im-accent hover:text-white transition-all shadow-sm"
+            title="Open QR Code"
+          >
+            <QrCode className="w-5 h-5" />
+          </button>
+        </div>
 
-      {/* Balance Card */}
-      <BalanceCard
-        points={balance.pointsBalance}
-        formattedPoints={balance.formattedPoints}
-      />
+        {/* Balance Card */}
+        <BalanceCard
+          points={balance.pointsBalance}
+          formattedPoints={balance.formattedPoints}
+        />
 
-      {/* Info Row: 1 Point = 200 LKR Today */}
-      <div className="flex items-center gap-2 p-3 bg-white border border-[#c6c6cd]/50 rounded-lg shadow-2xs">
-        <Info className="w-4 h-4 text-[#4648d4] shrink-0" />
-        <p className="text-[13px] leading-tight">
-          <strong className="font-semibold text-[#0b1c30]">
-            1 Point = {balance.conversionRateLKR} LKR Today
-          </strong>{" "}
-          <span className="text-[#9e9e9e]">
-            • Conversion rates are updated daily.
-          </span>
-        </p>
+        {/* Info Row: 1 Point = 200 LKR Today */}
+        <div className="flex items-center gap-2 p-3 rounded-lg ">
+          <Info className="w-5 h-5 text-im-accent shrink-0" />
+          <p className="text-[13px] leading-tight">
+            <strong className="font-semibold text-im-text-body">
+              1 Point = {balance.conversionRateLKR} LKR Today
+            </strong>{" "}
+            <span className="text-im-muted-light font-semibold">
+              • Conversion rates are updated daily.
+            </span>
+          </p>
+        </div>
       </div>
 
       {/* Quick Actions Row */}

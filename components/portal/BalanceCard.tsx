@@ -25,8 +25,8 @@ export function BalanceCard({
   return (
     <Card className="relative overflow-hidden bg-[#EE3523] text-white rounded-xl shadow-[0px_4px_12px_0px_#0F172A0D] border border-white/10 p-0">
       {/* Primary blurred glow shapes (Top-Right & Bottom-Left) */}
-      <div className="absolute -top-6 -right-6 w-36 h-36 bg-white/25 rounded-full blur-2xl pointer-events-none" />
-      <div className="absolute -bottom-6 -left-6 w-28 h-28 bg-white/25 rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute -top-6 -right-6 w-28 h-28 bg-white/50 rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute -bottom-6 -left-6 w-22 h-22 bg-white/40 rounded-full blur-2xl pointer-events-none" />
 
       {/* Mirrored secondary glow shapes for Model Portal (Top-Left & Bottom-Right) */}
       {variant === "double-glow" && (
@@ -38,7 +38,7 @@ export function BalanceCard({
 
       <CardContent className="relative z-10 flex flex-col gap-1 p-6">
         <div className="flex items-center justify-between">
-          <span className="text-[14px] font-medium text-white/70 tracking-wide uppercase">
+          <span className="text-[14px] font-medium text-[#BEC6E0] tracking-wide uppercase">
             Available Balance
           </span>
         </div>
