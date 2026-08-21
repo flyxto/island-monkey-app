@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Camera } from "lucide-react";
 
 export interface SessionListItemProps {
@@ -31,10 +30,10 @@ export function SessionListItem({
           </div>
 
           <div className="flex flex-col">
-            <span className="text-[15px] font-semibold text-[#0b1c30]">
+            <span className="text-[15px] font-semibold text-im-heading">
               {title}
             </span>
-            <span className="text-[13px] text-[#9e9e9e]">{timestamp}</span>
+            <span className="text-[13px] text-im-body">{timestamp}</span>
           </div>
         </div>
 

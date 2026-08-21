@@ -7,7 +7,7 @@ import { QuickActionCard } from "@/components/portal/QuickActionCard";
 import { SessionListItem } from "@/components/portal/SessionListItem";
 import { QRModal } from "@/components/portal/QRModal";
 import { MOCK_UPCOMING_SESSIONS } from "@/lib/mock-data/customer-portal";
-import { QrCode, Info, History, Store } from "lucide-react";
+import { QrCode, Info, History, Store, Handshake } from "lucide-react";
 
 export default function CustomerHomePage() {
   const { user, balance, isQRModalOpen, setIsQRModalOpen } = useCustomer();
@@ -39,8 +39,8 @@ export default function CustomerHomePage() {
         {/* Info Row: 1 Point = 200 LKR Today */}
         <div className="flex items-center gap-2 p-3 rounded-lg ">
           <Info className="w-5 h-5 text-im-accent shrink-0" />
-          <p className="text-[13px] leading-tight">
-            <strong className="font-semibold text-im-text-body">
+          <p className="text-[14px] leading-tight">
+            <strong className="font-bold text-im-muted">
               1 Point = {balance.conversionRateLKR} LKR Today
             </strong>{" "}
             <span className="text-im-muted-light font-semibold">
@@ -59,7 +59,7 @@ export default function CustomerHomePage() {
         />
         <QuickActionCard
           title="Find Partners"
-          icon={Store}
+          icon={Handshake}
           onClick={() => setIsQRModalOpen(true)}
         />
       </div>

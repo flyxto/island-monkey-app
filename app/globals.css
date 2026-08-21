@@ -10,8 +10,8 @@
   --im-bg-gradient-start: #f8f9ff;
   --im-bg-gradient-end: #ffffff;
   --im-text-heading: #0B1C30;
-  --im-text-body: #616161;
-  --im-text-muted: #9e9e9e;
+  --im-text-body: #45464D;
+  --im-text-muted: #616161;
   --im-text-muted-light: #bababa;
 
   --im-accent: #4648d4;
@@ -65,8 +65,8 @@
 
   /* Tailwind extension colors */
   --color-im-heading: #0b1c30;
-  --color-im-body: #45464d;
-  --color-im-muted: #9e9e9e;
+  --color-im-body: #45464D;
+  --color-im-muted: #616161;
   --color-im-muted-light: #bababa;
   --color-im-accent: #4648d4;
   --color-im-accent-light: #e1e0ff;
