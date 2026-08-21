@@ -7,14 +7,14 @@ import { QuickActionCard } from "@/components/portal/QuickActionCard";
 import { SessionListItem } from "@/components/portal/SessionListItem";
 import { QRModal } from "@/components/portal/QRModal";
 import { MOCK_UPCOMING_SESSIONS } from "@/lib/mock-data/customer-portal";
-import { QrCode, Info, History, Store, Handshake } from "lucide-react";
+import { QrCode, Info, History, Handshake } from "lucide-react";
 
 export default function CustomerHomePage() {
   const { user, balance, isQRModalOpen, setIsQRModalOpen } = useCustomer();
 
   return (
-    <div className="flex flex-col gap-6 pt-6 pb-10">
-      <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-8 pt-8 pb-11.5">
+      <div className="flex flex-col gap-4">
         {/* Greeting Row */}
         <div className="flex items-center justify-between">
           <h1 className="text-[28px] font-semibold text-im-heading tracking-tight">
@@ -65,7 +65,7 @@ export default function CustomerHomePage() {
       </div>
 
       {/* Upcoming Sessions Section */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 pt-2">
         <div className="flex items-center justify-between">
           <h2 className="text-[18px] font-semibold text-im-heading">
             Upcoming Sessions
@@ -78,7 +78,7 @@ export default function CustomerHomePage() {
           </Link>
         </div>
 
-        <div className="bg-white border border-im-border rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-white border border-[#C6C6CD4D]/30 rounded-lg shadow-sm overflow-hidden">
           {MOCK_UPCOMING_SESSIONS.map((session, index) => (
             <SessionListItem
               key={session.id}

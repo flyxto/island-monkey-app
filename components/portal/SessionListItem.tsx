@@ -25,7 +25,7 @@ export function SessionListItem({
       <div className="flex items-center justify-between py-3 px-4 hover:bg-slate-50/50 transition-colors">
         <div className="flex items-center gap-3">
           {/* Circular Thumbnail */}
-          <div className="w-10 h-10 rounded-full bg-[#d3e4fe] flex items-center justify-center text-[#4648d4] shrink-0 border border-[#c6c6cd]/40">
+          <div className="w-10 h-10 rounded-full bg-im-hero flex items-center justify-center text-im-accent shrink-0">
             <Camera className="w-5 h-5" />
           </div>
 
@@ -38,12 +38,12 @@ export function SessionListItem({
         </div>
 
         {/* Right-aligned Studio Tag */}
-        <span className="px-2.5 py-1 bg-[#e1e0ff] text-[#4648d4] text-[12px] font-semibold rounded-full shrink-0">
+        <span className="px-2.5 py-1 bg-im-accent-light text-im-accent text-[12px] font-semibold rounded-full shrink-0">
           {studioTag}
         </span>
       </div>
 
-      {showDivider && <div className="h-[1px] bg-[#rgba(198,198,205,0.3)] bg-[#c6c6cd]/30 mx-4" />}
+      {showDivider && <div className="h-px bg-im-border/30 mx-4" />}
     </div>
   );
 }
