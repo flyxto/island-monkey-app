@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { SessionListItem } from "@/components/portal/SessionListItem";
 import { MOCK_UPCOMING_SESSIONS } from "@/lib/mock-data/customer-portal";
 import { Camera } from "lucide-react";
@@ -32,23 +32,23 @@ export default function SessionsPage() {
     <div className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-[28px] font-semibold text-[#0b1c30] tracking-tight">
+        <h1 className="text-[28px] font-semibold text-im-heading tracking-tight">
           My Sessions
         </h1>
-        <div className="p-2 bg-[#e1e0ff] text-[#4648d4] rounded-full">
+        <div className="p-2 bg-im-accent-light text-im-accent rounded-full">
           <Camera className="w-5 h-5" />
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex bg-white border border-[#c6c6cd] rounded-xl p-1 shadow-2xs">
+      <div className="flex bg-white border border-im-border rounded-xl p-1 shadow-2xs">
         <button
           type="button"
           onClick={() => setActiveTab("upcoming")}
           className={`flex-1 py-2 text-[14px] font-medium rounded-lg transition-all ${
             activeTab === "upcoming"
-              ? "bg-[#4648d4] text-white shadow-sm font-semibold"
-              : "text-[#9e9e9e] hover:text-[#0b1c30]"
+              ? "bg-im-accent text-white shadow-sm font-semibold"
+              : "text-[#9e9e9e] hover:text-im-heading"
           }`}
         >
           Upcoming ({MOCK_UPCOMING_SESSIONS.length})
@@ -58,8 +58,8 @@ export default function SessionsPage() {
           onClick={() => setActiveTab("past")}
           className={`flex-1 py-2 text-[14px] font-medium rounded-lg transition-all ${
             activeTab === "past"
-              ? "bg-[#4648d4] text-white shadow-sm font-semibold"
-              : "text-[#9e9e9e] hover:text-[#0b1c30]"
+              ? "bg-im-accent text-white shadow-sm font-semibold"
+              : "text-[#9e9e9e] hover:text-im-heading"
           }`}
         >
           Past ({pastSessions.length})
@@ -67,7 +67,7 @@ export default function SessionsPage() {
       </div>
 
       {/* Sessions Card */}
-      <div className="bg-white border border-[#c6c6cd] rounded-xl shadow-sm overflow-hidden flex flex-col">
+      <div className="bg-white border border-im-border rounded-xl shadow-sm overflow-hidden flex flex-col">
         {displayedSessions.map((session, index) => (
           <SessionListItem
             key={session.id}
