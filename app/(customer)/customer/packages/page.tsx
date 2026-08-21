@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useCustomer } from "@/lib/portal/CustomerContext";
 import { PackageCard } from "@/components/portal/PackageCard";
 import { Input } from "@/components/ui/input";
@@ -17,9 +17,9 @@ export default function PackagesListPage() {
   );
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8 pt-8 pb-11.5">
       {/* Greeting Header */}
-      <h1 className="text-[28px] font-semibold text-[#0b1c30] tracking-tight">
+      <h1 className="text-[28px] font-semibold text-im-heading tracking-tight">
         Good morning, {user.firstName}.
       </h1>
 
@@ -31,12 +31,12 @@ export default function PackagesListPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search Packages..."
-            className="w-full h-11 pl-4 pr-10 bg-white border border-[#c6c6cd] rounded-full text-[15px] text-[#0b1c30] placeholder-[#9e9e9e] focus-visible:ring-[#4648d4] focus-visible:border-[#4648d4] transition-all shadow-none"
+            className="w-full h-11 pl-4 pr-10 bg-white border border-im-border rounded-full text-[15px] text-im-heading placeholder:text-im-placeholder focus-visible:ring-im-accent focus-visible:border-im-accent transition-all shadow-none"
           />
         </div>
         <button
           type="button"
-          className="w-11 h-11 bg-[#4648d4] text-white rounded-full flex items-center justify-center shrink-0 shadow-sm hover:bg-[#4648d4]/90 transition-colors"
+          className="w-11 h-11 bg-im-accent text-white rounded-full flex items-center justify-center shrink-0 shadow-sm hover:bg-im-accent/90 transition-colors"
           aria-label="Search"
         >
           <Search className="w-5 h-5" />
@@ -54,7 +54,7 @@ export default function PackagesListPage() {
             />
           ))
         ) : (
-          <div className="p-8 text-center bg-white border border-[#c6c6cd] rounded-lg">
+          <div className="p-8 text-center bg-white border border-im-border rounded-lg">
             <p className="text-[#9e9e9e] text-[15px]">
               No packages found matching &quot;{searchQuery}&quot;.
             </p>

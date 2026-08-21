@@ -17,7 +17,7 @@
   --im-accent: #4648d4;
   --im-accent-light: #e1e0ff;
 
-  --im-btn-primary-bg: #000000;
+  --im-btn-primary-bg: #EE3523;
   --im-btn-primary-text: #ffffff;
 
   --im-card-border: #c6c6cd;
@@ -70,7 +70,7 @@
   --color-im-muted-light: #bababa;
   --color-im-accent: #4648d4;
   --color-im-accent-light: #e1e0ff;
-  --color-im-btn-black: #000000;
+  --color-im-btn-primary: #EE3523;
   --color-im-border: #c6c6cd;
   --color-im-hero: #d3e4fe;
   --font-heading: var(--font-sans);
@@ -119,19 +119,19 @@ body {
 }
 
 /* Utilities for Island Monkey design system */
-.im-btn-black {
-  background-color: #000000;
+.im-btn-primary {
+  background-color: var(--color-im-btn-primary);
   color: #ffffff;
   border-radius: 2px;
   font-weight: 500;
   transition: opacity 0.15s ease;
 }
 
-.im-btn-black:hover {
+.im-btn-primary:hover {
   opacity: 0.9;
 }
 
-.im-btn-black:active {
+.im-btn-primary:active {
   opacity: 0.8;
 }
 

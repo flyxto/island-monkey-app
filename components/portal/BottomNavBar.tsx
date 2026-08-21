@@ -49,7 +49,7 @@ export function BottomNavBar({
             <Icon className="w-6 h-6 mb-1" />
             <span
               className={`text-[12px] ${
-                active ? "font-semibold text-[#EE3523]" : "font-normal text-im-body"
+                active ? "font-semibold text-im-btn-primary" : "font-normal text-im-body"
               }`}
             >
               {item.label}
