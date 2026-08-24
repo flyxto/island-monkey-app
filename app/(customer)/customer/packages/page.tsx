@@ -24,7 +24,7 @@ export default function PackagesListPage() {
       </h1>
 
       {/* Search Bar using shadcn Input */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5 -mt-4">
         <div className="relative flex-1">
           <Input
             type="text"
@@ -36,7 +36,7 @@ export default function PackagesListPage() {
         </div>
         <button
           type="button"
-          className="w-11 h-11 bg-im-accent text-white rounded-full flex items-center justify-center shrink-0 shadow-sm hover:bg-im-accent/90 transition-colors"
+          className="w-11 h-11 bg-im-accent-light text-im-accent rounded-full flex items-center justify-center shrink-0 shadow-sm hover:bg-im-accent/90 hover:text-im-accent-light transition-colors"
           aria-label="Search"
         >
           <Search className="w-5 h-5" />
@@ -44,7 +44,7 @@ export default function PackagesListPage() {
       </div>
 
       {/* Packages List */}
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-8">
         {filteredPackages.length > 0 ? (
           filteredPackages.map((pkg) => (
             <PackageCard

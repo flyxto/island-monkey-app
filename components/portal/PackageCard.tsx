@@ -34,7 +34,7 @@ export function PackageCard({
   const targetHref = detailHref || `/customer/packages/${packageItem.id}`;
 
   return (
-    <Card className="w-full bg-white border border-im-border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col p-0 gap-0">
+    <Card className="w-full bg-white border border-im-border rounded-lg overflow-hidden hover:shadow-md transition-shadow flex flex-col p-0 gap-0">
       {/* Top Image Block */}
       <div className="relative h-32 bg-im-hero flex items-center justify-center overflow-hidden">
         <div className="flex flex-col items-center justify-center text-im-accent/60">
@@ -57,18 +57,18 @@ export function PackageCard({
       </div>
 
       {/* Body Section (24px padding using CardContent) */}
-      <CardContent className="p-6 flex flex-col gap-4 flex-1 justify-between">
-        <div className="flex flex-col gap-2">
+      <CardContent className="p-6 flex flex-col flex-1 justify-between">
+        <div className="flex flex-col">
           <h3 className="text-[24px] font-medium text-im-heading leading-tight">
             {packageItem.name}
           </h3>
-          <p className="text-[16px] text-im-body leading-normal line-clamp-2">
+          <p className="text-[16px] text-im-body pt-1 pb-4 leading-normal">
             {packageItem.description}
           </p>
         </div>
 
         {/* Bottom Row */}
-        <div className="flex items-center justify-between pt-2 border-t border-im-border/30 mt-2">
+        <div className="flex items-center justify-between pt-2">
           <Link
             href={targetHref}
             onClick={() => onSelect?.(packageItem)}
