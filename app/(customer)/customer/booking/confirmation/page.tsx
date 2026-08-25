@@ -18,7 +18,7 @@ export default function BookingConfirmationPage({
   const bookingTime = resolvedParams.time || "2:00 PM";
 
   return (
-    <div className="flex flex-col gap-6 py-4">
+    <div className="flex flex-col gap-8 py-8">
       {/* Success Banner */}
       <div className="bg-white border border-im-border rounded-xl p-6 shadow-md flex flex-col items-center text-center gap-4">
         <div className="w-16 h-16 bg-im-accent-light rounded-full flex items-center justify-center text-im-accent">
@@ -37,15 +37,15 @@ export default function BookingConfirmationPage({
           </p>
         </div>
 
-        <div className="w-full pt-4 border-t border-im-border/40 flex flex-col gap-3 text-left">
-          <div className="flex items-center justify-between text-[15px]">
+        <div className="w-full pt-4 border-t border-im-border/40 flex flex-col gap-4 text-left">
+          <div className="flex flex-col items-start justify-between text-[15px]">
             <span className="text-[#9e9e9e]">Package</span>
             <span className="font-semibold text-im-heading">
               {selectedPackage.name}
             </span>
           </div>
 
-          <div className="flex items-center justify-between text-[15px]">
+          <div className="flex flex-col items-start justify-between text-[15px]">
             <span className="text-[#9e9e9e]">Date & Time</span>
             <span className="font-semibold text-im-heading flex items-center gap-1.5">
               <Calendar className="w-4 h-4 text-im-accent" />
@@ -53,14 +53,14 @@ export default function BookingConfirmationPage({
             </span>
           </div>
 
-          <div className="flex items-center justify-between text-[15px]">
+          <div className="flex flex-col items-start justify-between w-full text-[15px]">
             <span className="text-[#9e9e9e]">Studio & Crew</span>
             <span className="font-semibold text-im-heading">
               {selectedPackage.metaLine}
             </span>
           </div>
 
-          <div className="flex items-center justify-between text-[16px] pt-2 border-t border-im-border/30">
+          <div className="flex items-center justify-between text-[20px] pt-2 border-t border-im-border/30">
             <span className="font-bold text-im-heading">Total Amount</span>
             <span className="font-bold text-[20px] text-im-accent">
               {formattedPrice}
@@ -84,7 +84,7 @@ export default function BookingConfirmationPage({
       <div className="flex flex-col gap-3">
         <Link
           href="/customer"
-          className="w-full py-3.5 bg-black text-white text-[16px] font-medium rounded-xs hover:bg-black/90 transition-all text-center"
+          className="w-full py-3.5 bg-im-btn-primary text-white text-[16px] font-medium rounded-xs hover:bg-im-btn-primary/90 transition-all text-center"
         >
           Return to Home
         </Link>
