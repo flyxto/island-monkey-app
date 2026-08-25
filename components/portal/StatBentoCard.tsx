@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { User, Activity, CheckCircle2 } from "lucide-react";
+import { User, ChartNoAxesCombined, Heading1} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 export interface StatBentoCardProps {
@@ -28,30 +28,31 @@ export function StatBentoCard({
   customerSubtext = "65466565436",
 }: StatBentoCardProps) {
   return (
-    <Card className="relative overflow-hidden bg-[#eff4ff] text-[#000000] rounded-xl shadow-md border border-[#c6c6cd]/50 p-0">
-      {/* Indigo-tinted soft blurred glow shapes */}
-      <div className="absolute -top-6 -right-6 w-32 h-32 bg-[#4648d4]/15 rounded-full blur-2xl pointer-events-none" />
-      <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-[#4648d4]/20 rounded-full blur-2xl pointer-events-none" />
+    <Card className="relative overflow-hidden bg-[#eff4ff] text-[#000000] rounded-xl border border-im-border/20 p-0">
+      {/* Orange-tinted soft blurred glow shapes */}
+      <div className="absolute -top-6 -right-6 w-32 h-32 bg-im-btn-primary/15 rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-im-btn-primary/20 rounded-full blur-2xl pointer-events-none" />
 
       <CardContent className="relative z-10 flex flex-col gap-3 p-6">
         {mode === "summary" ? (
           <>
+            <h1 className="text-[14px] font-medium text-im-body tracking-wide">
+              DAILY SUMMARY
+            </h1>
             {/* Large Stat Number & Points label */}
             <div className="flex items-baseline gap-2">
-              <span className="text-[44px] sm:text-[48px] font-semibold text-[#000000] leading-none tracking-tight">
+              <span className="text-[48px] sm:text-[48px] font-semibold text-[#000000] leading-none tracking-tight">
                 {typeof pointsNumber === "number" ? pointsNumber.toLocaleString() : pointsNumber}
               </span>
-              <span className="text-[18px] font-semibold text-[#000000]">
+              <span className="text-[18px] font-semibold text-im-body">
                 Points
               </span>
             </div>
 
             {/* Subline with Icon */}
-            <div className="flex items-center gap-2 pt-1 text-[#45464d] text-[14px]">
-              <div className="p-1 bg-[#4648d4]/10 text-[#4648d4] rounded-full">
-                <Activity className="w-4 h-4" />
-              </div>
-              <span className="font-medium">
+            <div className="flex items-center gap-2 pt-1 text-im-body text-[16px]">
+              <ChartNoAxesCombined className="w-4 h-4 text-im-btn-primary" />
+              <span className="font-normal">
                 {transactionsCount} Transactions Processed
               </span>
             </div>
@@ -60,7 +61,7 @@ export function StatBentoCard({
           <>
             {/* Customer Name */}
             <div className="flex flex-col gap-1">
-              <span className="text-[12px] font-semibold uppercase tracking-wider text-[#4648d4]">
+              <span className="text-[12px] font-semibold uppercase tracking-wider text-im-accent">
                 Customer Identity
               </span>
               <span className="text-[36px] sm:text-[44px] font-semibold text-[#000000] leading-none tracking-tight">
@@ -69,8 +70,8 @@ export function StatBentoCard({
             </div>
 
             {/* Customer Phone / User ID subline */}
-            <div className="flex items-center gap-2 pt-1 text-[#45464d] text-[14px]">
-              <div className="p-1 bg-[#4648d4]/10 text-[#4648d4] rounded-full">
+            <div className="flex items-center gap-2 pt-1 text-im-body text-[14px]">
+              <div className="p-1 bg-im-accent/10 text-im-accent rounded-full">
                 <User className="w-4 h-4" />
               </div>
               <span className="font-medium tracking-wide">

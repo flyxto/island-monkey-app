@@ -52,7 +52,7 @@ export const PORTAL_CONFIGS: Record<string, PortalNavConfig> = {
   },
   partner: {
     portalId: "partner",
-    wordmark: "Pepper St.",
+    wordmark: "IslandMonkey",
     activeBadgeBg: "#EE352333",
     activeBadgeText: "#EE3523",
     navItems: [
@@ -84,9 +84,26 @@ export const PORTAL_CONFIGS: Record<string, PortalNavConfig> = {
     activeBadgeBg: "#EE352333",
     activeBadgeText: "#EE3523",
     navItems: [
-      { id: "home", label: "Home", href: "/model", icon: Home },
-      { id: "gigs", label: "Gigs", href: "/model/gigs", icon: Camera, matchPrefix: true },
-      { id: "bookings", label: "Bookings", href: "/model/bookings", icon: Calendar, matchPrefix: true },
+      { 
+        id: "home", 
+        label: "Home", 
+        href: "/model", 
+        icon: Home 
+      },
+      { 
+        id: "gigs", 
+        label: "Gigs", 
+        href: "/model/gigs", 
+        icon: Camera, 
+        matchPrefix: true 
+      },
+      { 
+        id: "bookings", 
+        label: "Bookings", 
+        href: "/model/bookings", 
+        icon: Calendar, 
+        matchPrefix: true 
+      },
     ],
   },
 };
