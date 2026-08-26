@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export default function PartnerHomePage() {
   return (
-    <div className="flex flex-col gap-8 pt-8 pb-11.5">
+    <div className="flex flex-col gap-6 pt-8 pb-8">
       {/* Store Name Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-[28px] font-semibold text-[#000000] tracking-tight">
@@ -34,14 +34,14 @@ export default function PartnerHomePage() {
       />
 
       {/* Recent Activity Section */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h2 className="text-[18px] font-bold text-[#000000]">
             Recent Activity
           </h2>
           <Link
             href="/partner/history"
-            className="text-[12px] font-semibold text-im-accent hover:underline"
+            className="text-[14px] font-semibold text-im-accent hover:underline"
           >
             View All
           </Link>
@@ -60,17 +60,17 @@ export default function PartnerHomePage() {
                     </div>
 
                     <div className="flex flex-col">
-                      <span className="text-[15px] font-semibold text-black">
+                      <span className="text-[14px] font-medium text-black">
                         {tx.itemName}
                       </span>
-                      <span className="text-[13px] text-im-body">
+                      <span className="text-[12px] font-normal text-im-body">
                         {tx.timestamp} • User ID: {tx.userId}
                       </span>
                     </div>
                   </div>
 
                   {/* Deducted Amount Right-aligned */}
-                  <span className="text-[14px] font-bold text-im-accent shrink-0">
+                  <span className="text-[14px] font-medium text-im-accent shrink-0">
                     -{tx.pointsDeducted} pts
                   </span>
                 </div>
