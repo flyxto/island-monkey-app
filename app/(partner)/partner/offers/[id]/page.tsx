@@ -1,9 +1,8 @@
 "use client";
 
-import React, { use, useState } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
 import { MOCK_PARTNER_OFFERS, PartnerOffer } from "@/lib/mock-data/partner-portal";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tag, Pencil, ChevronLeft, CheckCircle2, Sparkles } from "lucide-react";
 
@@ -30,10 +29,10 @@ export default function SingleOfferDetailPage({
   };
 
   return (
-    <div className="flex flex-col gap-6 -mt-8 -mx-4 pb-12">
+    <div className="flex flex-col gap-8 -mt-8 -mx-4 pb-12">
       {/* Large Hero Image Block */}
-      <div className="relative h-[228px] bg-[#d3e4fe] flex items-center justify-center overflow-hidden">
-        <div className="flex flex-col items-center justify-center text-[#4648d4]/70">
+      <div className="relative h-90 bg-im-hero flex items-center justify-center overflow-hidden">
+        <div className="flex flex-col items-center justify-center text-im-accent/70">
           <Tag className="w-16 h-16 opacity-80" />
           <span className="text-[14px] font-medium mt-1">Merchant Store Offer</span>
         </div>
@@ -41,22 +40,22 @@ export default function SingleOfferDetailPage({
         {/* Back Button */}
         <Link
           href="/partner/offers"
-          className="absolute top-4 left-4 p-2 bg-white/80 backdrop-blur-sm rounded-full text-[#000000] hover:bg-white transition-colors z-20 shadow-sm"
+          className="absolute top-10 left-4 p-2 bg-white/80 backdrop-blur-sm rounded-full text-im-heading hover:bg-white transition-colors z-20 shadow-sm"
           aria-label="Back to offers"
         >
           <ChevronLeft className="w-5 h-5" />
         </Link>
 
         {/* Bottom Fade Overlay */}
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#f8f9ff] to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-[#f8f9ff] to-transparent pointer-events-none" />
       </div>
 
-      <div className="px-4 flex flex-col gap-6 -mt-16 z-10">
+      <div className="px-4 flex flex-col gap-8 -mt-4 z-11">
         {/* Main Offer Card */}
-        <Card className="bg-white rounded-xl border border-[#c6c6cd] shadow-lg p-0">
-          <CardContent className="p-6 flex flex-col gap-4">
+        <div className="rounded-xl p-0">
+          <div className="p-1 flex flex-col gap-4">
             {/* Title Row with Edit Pencil Button */}
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center justify-between gap-3">
               <h1 className="text-[20px] font-semibold text-[#000000] leading-tight">
                 {offer.name}
               </h1>
@@ -65,11 +64,11 @@ export default function SingleOfferDetailPage({
               <button
                 type="button"
                 onClick={() => setIsEditing(!isEditing)}
-                className="p-2 bg-slate-100 hover:bg-[#e1e0ff] text-[#45464d] hover:text-[#4648d4] rounded-lg transition-colors shrink-0"
+                className="p-2 bg-slate-100 hover:bg-im-accent-light text-im-body hover:text-im-accent rounded-lg transition-colors shrink-0"
                 aria-label="Edit Offer"
                 title="Edit Offer"
               >
-                <Pencil className="w-4 h-4" />
+                <Pencil className="w-5 h-5" />
               </button>
             </div>
 
@@ -85,30 +84,30 @@ export default function SingleOfferDetailPage({
             )}
 
             {/* Description */}
-            <p className="text-[16px] text-[#45464d] leading-relaxed">
+            <p className="text-[16px] text-im-body leading-relaxed">
               {offer.description}
             </p>
 
             {/* Points Value Card */}
-            <div className="p-4 bg-[#eff4ff] border border-[#4648d4]/30 rounded-xl flex items-center justify-between">
-              <span className="text-[15px] font-semibold text-[#45464d]">
-                Points Value
+            <div className="mt-4 pt-4 px-5.25 pb-4 bg-white border border-[#E8E8E8] rounded-xl flex items-center justify-between">
+              <span className="text-[24px] font-semibold text-im-body">
+                Points
               </span>
-              <span className="text-[24px] font-bold text-[#4648d4]">
-                {formattedPointsCost} Points
+              <span className="text-[48px] font-bold text-im-accent">
+                {formattedPointsCost}
               </span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Full-width Black "Add Discount" Button (4px radius) */}
         <Button
           type="button"
           onClick={handleAddDiscount}
-          className={`w-full h-12 text-[16px] font-medium text-white rounded-[4px] transition-all shadow-md flex items-center justify-center gap-2 ${
+          className={`w-full h-12 text-[16px] font-medium text-white rounded-lg transition-all shadow-md flex items-center justify-center gap-2 ${
             isDiscountAdded
               ? "bg-emerald-600 hover:bg-emerald-700"
-              : "bg-black hover:bg-black/90 active:bg-black/80"
+              : "bg-im-btn-primary hover:bg-im-btn-primary/90 active:bg-im-btn-primary/80"
           }`}
         >
           {isDiscountAdded ? (

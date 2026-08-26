@@ -55,7 +55,7 @@ export default function PartnerHistoryPage() {
         {/* Transactions List */}
         {filteredTxs.length > 0 ? (
           filteredTxs.map((tx, index) => (
-            <Card key={tx.id} className="rounded-xl overflow-hidden p-0">
+            <Card key={tx.id} className="w-full bg-white border border-im-border rounded-xl p-0 shadow-2xs hover:shadow-md transition-shadow overflow-hidden">
               <CardContent className="p-0 flex flex-col">      
                 <div className="flex items-center justify-between py-3.5 px-4 hover:bg-slate-100/60 transition-colors">
                   <div className="flex items-center gap-3">
@@ -89,7 +89,7 @@ export default function PartnerHistoryPage() {
             </Card>
           ))
           ) : (
-              <div className="p-8 text-center bg-white">
+              <div className="p-8 text-center bg-white border border-im-border rounded-xl">
                 <p className="text-[#9e9e9e] text-[15px]">
                   No transactions found matching &quot;{searchQuery}&quot;.
                 </p>
