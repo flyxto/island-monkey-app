@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use } from "react";
+import { use } from "react";
 import Link from "next/link";
 import { StatBentoCard } from "@/components/portal/StatBentoCard";
 import { TransactionForm } from "@/components/portal/TransactionForm";
@@ -24,18 +24,18 @@ export default function CustomerDetailsPage({
   const prefilledDiscount = resolvedSearchParams.discount || "450";
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 pt-8 pb-8">
       {/* Header with Back button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Link
             href="/partner/scan"
-            className="p-2 bg-white border border-[#c6c6cd] text-[#000000] rounded-full hover:bg-slate-50 transition-colors shadow-2xs"
+            className="p-2 bg-white border border-im-border text-black rounded-full hover:bg-slate-50 transition-colors shadow-2xs"
             aria-label="Back to scan"
           >
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <h1 className="text-[24px] font-semibold text-[#000000] tracking-tight">
+          <h1 className="text-[24px] font-semibold text-black tracking-tight">
             Customer Verified
           </h1>
         </div>
@@ -52,20 +52,20 @@ export default function CustomerDetailsPage({
       />
 
       {/* Points Balance Status */}
-      <Card className="bg-white border border-[#c6c6cd] rounded-xl p-0 shadow-2xs">
+      <Card className="bg-white border border-im-border rounded-xl p-0 shadow-2xs">
         <CardContent className="p-4 flex items-center justify-between">
-          <span className="text-[14px] text-[#45464d] font-medium">
+          <span className="text-[14px] text-im-body font-medium">
             Available Balance
           </span>
-          <span className="text-[18px] font-bold text-[#4648d4]">
+          <span className="text-[18px] font-bold text-im-accent">
             {customer.formattedBalance} Points
           </span>
         </CardContent>
       </Card>
 
       {/* Reused Transaction Form */}
-      <div className="bg-white border border-[#c6c6cd] rounded-xl p-5 shadow-sm flex flex-col gap-3">
-        <h2 className="text-[16px] font-bold text-[#000000]">
+      <div className="bg-white border border-im-border rounded-xl p-5 shadow-sm flex flex-col gap-3">
+        <h2 className="text-[16px] font-bold text-black">
           Process Points Deduction
         </h2>
         <TransactionForm

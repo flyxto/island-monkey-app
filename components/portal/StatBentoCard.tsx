@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-import { User, ChartNoAxesCombined, Heading1} from "lucide-react";
+import { User, ChartNoAxesCombined} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 export interface StatBentoCardProps {
@@ -28,7 +27,7 @@ export function StatBentoCard({
   customerSubtext = "65466565436",
 }: StatBentoCardProps) {
   return (
-    <Card className="relative overflow-hidden bg-[#eff4ff] text-[#000000] rounded-xl border border-im-border/20 p-0">
+    <Card className="relative overflow-hidden bg-[#eff4ff] text-black rounded-xl border border-im-border/20 p-0">
       {/* Orange-tinted soft blurred glow shapes */}
       <div className="absolute -top-6 -right-6 w-32 h-32 bg-im-btn-primary/15 rounded-full blur-2xl pointer-events-none" />
       <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-im-btn-primary/20 rounded-full blur-2xl pointer-events-none" />
@@ -41,7 +40,7 @@ export function StatBentoCard({
             </h1>
             {/* Large Stat Number & Points label */}
             <div className="flex items-baseline gap-2">
-              <span className="text-[48px] sm:text-[48px] font-semibold text-[#000000] leading-none tracking-tight">
+              <span className="text-[48px] sm:text-[48px] font-semibold text-black leading-none tracking-tight">
                 {typeof pointsNumber === "number" ? pointsNumber.toLocaleString() : pointsNumber}
               </span>
               <span className="text-[18px] font-semibold text-im-body">
@@ -61,18 +60,18 @@ export function StatBentoCard({
           <>
             {/* Customer Name */}
             <div className="flex flex-col gap-1">
-              <span className="text-[12px] font-semibold uppercase tracking-wider text-im-accent">
+              <span className="text-[12px] font-semibold uppercase tracking-wider text-im-btn-primary">
                 Customer Identity
               </span>
-              <span className="text-[36px] sm:text-[44px] font-semibold text-[#000000] leading-none tracking-tight">
+              <span className="text-[48px] sm:text-[48px] font-semibold text-black leading-none tracking-tight">
                 {customerName}
               </span>
             </div>
 
             {/* Customer Phone / User ID subline */}
-            <div className="flex items-center gap-2 pt-1 text-im-body text-[14px]">
-              <div className="p-1 bg-im-accent/10 text-im-accent rounded-full">
-                <User className="w-4 h-4" />
+            <div className="flex items-center gap-2 pt-1 text-[#9195B1] text-[16px]">
+              <div className="p-1 text-im-btn-primary rounded-full">
+                <User className="w-4.5 h-4.5 fill-current stroke-1" />
               </div>
               <span className="font-medium tracking-wide">
                 {customerSubtext}
