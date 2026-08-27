@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Clock, Check, X } from "lucide-react";
 
 export type StatusType = "pending" | "accepted" | "live" | "rejected" | "completed";
@@ -70,7 +69,7 @@ export function StatusBadge({ status, customLabel, className = "" }: StatusBadge
 
   return (
     <span
-      className={`inline-flex items-center gap-1 px-3 py-1 border rounded-full text-[12px] font-semibold tracking-wide ${style.bg} ${style.border} ${style.text} ${className}`}
+      className={`inline-flex items-center gap-1 px-2 py-1 border rounded-full text-[10px] font-semibold tracking-wide ${style.bg} ${style.border} ${style.text} ${className}`}
     >
       {Icon && <Icon className="w-3.5 h-3.5 shrink-0" />}
       <span>{customLabel || style.label}</span>
