@@ -48,12 +48,12 @@ export function PortalLayout({ config, rightAction, children }: PortalLayoutProp
   return (
     <div className="min-h-screen bg-slate-100 flex justify-center items-center py-0 sm:py-6">
       {/* Mobile-first Viewport Container (Centered on desktop) */}
-      <div className="w-full max-w-[430px] min-h-screen sm:min-h-[880px] sm:h-[880px] bg-gradient-to-b from-[#f8f9ff] to-[#ffffff] relative flex flex-col shadow-2xl sm:rounded-[32px] overflow-hidden border border-[#c6c6cd]/40">
+      <div className="w-full max-w-107.5 min-h-screen sm:min-h-220 sm:h-220 bg-linear-to-b from-[#f8f9ff] to-[#ffffff] relative flex flex-col shadow-2xl sm:rounded-[32px] overflow-hidden border border-im-border/40">
         {/* Fixed Top App Bar */}
         <TopAppBar wordmark={config.wordmark} rightAction={resolvedRightAction} />
 
         {/* Scrollable Main Content Area */}
-        <main className="flex-1 pt-[64px] pb-[80px] overflow-y-auto px-4 py-8 flex flex-col gap-8">
+        <main className="flex-1 pt-16 pb-20 overflow-y-auto px-4 py-8 flex flex-col gap-8">
           {children}
         </main>
 
