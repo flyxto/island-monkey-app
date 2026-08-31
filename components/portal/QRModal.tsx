@@ -3,6 +3,7 @@
 import { X, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { QRCode } from "react-qr-code";
 
 export interface QRModalProps {
   isOpen: boolean;
@@ -27,9 +28,15 @@ export function QRModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-90 bg-white rounded-2xl p-6 shadow-2xl flex flex-col items-center gap-5 border border-im-border/40 relative">
-        {/* Close Button */}
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300">
+      {/* Backdrop click to dismiss */}
+      <div className="fixed inset-0" onClick={onClose} />
+
+      {/* Bottom Sheet Card */}
+      <div className="relative z-10 w-full max-w-full bg-white rounded-t-[28px] p-6 pb-8 shadow-2xl flex flex-col items-center gap-5 border-t border-im-border/40 animate-in slide-in-from-bottom duration-300 ease-out">
+        
+        {/* Pull Indicator Pill */}
+        <div className="w-12 h-1.5 bg-slate-200 rounded-full -mt-2 mb-1" />
         <button
           onClick={onClose}
           type="button"
@@ -45,51 +52,23 @@ export function QRModal({
             <ShieldCheck className="w-3.5 h-3.5" /> Customer Verification
           </Badge>
           <h3 className="text-[20px] font-bold text-im-heading">{userFullName}</h3>
-          <p className="text-[13px] text-[#9e9e9e]">
+          <p className="text-[14px] text-im-body">
             Balance: <span className="font-semibold text-im-accent">{pointsBalance} Points</span>
           </p>
         </div>
 
         {/* QR Code Container */}
-        <div className="p-4 bg-white border-2 border-dashed border-im-accent/30 rounded-xl shadow-inner flex flex-col items-center justify-center">
-          {/* Stylized QR Code SVG */}
-          <div className="w-45 h-45 bg-slate-950 p-3 rounded-lg flex items-center justify-center relative">
-            <div className="w-full h-full bg-white p-2 rounded flex flex-col justify-between">
-              {/* Grid pattern simulating high-res QR code */}
-              <div className="grid grid-cols-5 gap-1 w-full h-full">
-                <div className="bg-black rounded-sm" />
-                <div className="bg-black rounded-sm" />
-                <div className="bg-white" />
-                <div className="bg-black rounded-sm" />
-                <div className="bg-black rounded-sm" />
-
-                <div className="bg-black rounded-sm" />
-                <div className="bg-white" />
-                <div className="bg-black rounded-sm" />
-                <div className="bg-white" />
-                <div className="bg-black rounded-sm" />
-
-                <div className="bg-white" />
-                <div className="bg-black rounded-sm" />
-                <div className="bg-black rounded-sm" />
-                <div className="bg-black rounded-sm" />
-                <div className="bg-white" />
-
-                <div className="bg-black rounded-sm" />
-                <div className="bg-white" />
-                <div className="bg-black rounded-sm" />
-                <div className="bg-white" />
-                <div className="bg-black rounded-sm" />
-
-                <div className="bg-black rounded-sm" />
-                <div className="bg-black rounded-sm" />
-                <div className="bg-white" />
-                <div className="bg-black rounded-sm" />
-                <div className="bg-black rounded-sm" />
-              </div>
-            </div>
-          </div>
-          <span className="text-[10px] font-mono text-[#9e9e9e] mt-2 tracking-widest">
+        <div className="p-5 bg-white border-2 border-dashed border-im-accent/30 rounded-xl shadow-inner flex flex-col items-center justify-center">
+          <QRCode
+            value={qrValue || "https://example.com"}
+            size={200}
+            style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+            viewBox="0 0 276 276"
+            fgColor="#09090b"
+            bgColor="#EE352333"
+            level="M"
+          />
+          <span className="text-[10px] font-mono text-im-body mt-2 tracking-widest">
             {qrValue}
           </span>
         </div>
@@ -98,14 +77,6 @@ export function QRModal({
         <p className="text-[13px] text-im-body text-center leading-snug px-2">
           Present this QR code at partner stores to pay or verify identity.
         </p>
-
-        {/* Dismiss CTA using shadcn Button */}
-        <Button
-          onClick={onClose}
-          className="w-full py-2.5 bg-black text-white text-[14px] font-medium rounded-XS hover:bg-black/90 transition-colors h-auto"
-        >
-          Close
-        </Button>
       </div>
     </div>
   );
