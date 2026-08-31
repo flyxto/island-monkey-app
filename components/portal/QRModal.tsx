@@ -2,7 +2,6 @@
 
 import { X, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { QRCode } from "react-qr-code";
 
 export interface QRModalProps {
