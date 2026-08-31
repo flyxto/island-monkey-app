@@ -2,10 +2,9 @@
 
 import React from "react";
 import { Bell } from "lucide-react";
-
 import Link from "next/link";
 
-export interface TopAppBarRightAction {
+export interface TopAppBarAction {
   icon: React.ComponentType<{ className?: string }>;
   href?: string;
   onClick?: () => void;
@@ -16,7 +15,7 @@ export interface TopAppBarRightAction {
 export interface TopAppBarProps {
   wordmark: string;
   onNotificationClick?: () => void;
-  rightAction?: TopAppBarRightAction;
+  actions?: TopAppBarAction[];
 }
 
 /**
@@ -28,62 +27,66 @@ export interface TopAppBarProps {
 export function TopAppBar({
   wordmark,
   onNotificationClick,
-  rightAction,
+  actions,
 }: TopAppBarProps) {
-  const renderRightAction = () => {
-    if (rightAction) {
-      const Icon = rightAction.icon;
-      const content = (
-        <span className="relative p-2 rounded-full text-im-body hover:bg-gray-100 transition-colors inline-flex items-center justify-center">
-          <Icon className="w-6 h-6" />
-          {rightAction.badgeDot && (
-            <span className="absolute top-2 right-2 w-2 h-2 bg-im-accent rounded-full ring-2 ring-white" />
-          )}
-        </span>
-      );
+  const renderActionItem = (action: TopAppBarAction, idx: number) => {
+    const Icon = action?.icon;
 
-      if (rightAction.href) {
-        return (
-          <Link href={rightAction.href} aria-label={rightAction.ariaLabel || "Action"}>
-            {content}
-          </Link>
-        );
-      }
+    const content = (
+      <span className="relative p-2 rounded-full text-im-body hover:bg-gray-100 transition-colors inline-flex items-center justify-center">
+        <Icon className="w-6 h-6" />
+          {action.badgeDot && (
+          <span className="absolute top-2 right-2 w-2 h-2 bg-im-accent rounded-full ring-2 ring-white" />
+        )}
+      </span>
+    );
 
+    if (action.href) {
       return (
-        <button
-          onClick={rightAction.onClick}
-          type="button"
-          aria-label={rightAction.ariaLabel || "Action"}
-          className="focus:outline-none"
-        >
+        <Link key={idx} href={action.href} aria-label={action.ariaLabel || "Action"}>
           {content}
-        </button>
+        </Link>
       );
     }
 
-    // Default: Customer Portal Bell Notification
     return (
       <button
-        onClick={onNotificationClick}
+        key={idx}
+        onClick={action.onClick}
         type="button"
-        className="relative p-2 rounded-full text-im-body hover:bg-gray-100 transition-colors focus:outline-none"
-        aria-label="Notifications"
+        aria-label={action.ariaLabel || "Action"}
+        className="focus:outline-none"
       >
-        <Bell className="w-6 h-6" />
-        <span className="absolute top-2 right-2 w-2 h-2 bg-im-accent rounded-full ring-2 ring-white" />
+        {content}
       </button>
     );
   };
 
+  // Default: Customer Portal Bell Notification
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-white border-b border-im-border flex items-center justify-between px-4 max-w-107.5 mx-auto">
+    <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-white border-b border-im-border flex items-center justify-between px-4 max-w-[430px] mx-auto">
       <div className="flex items-center">
         <span className="text-[24px] font-bold text-black tracking-tight">
           {wordmark}
         </span>
       </div>
-      {renderRightAction()}
+
+      <div className="flex items-center gap-1">
+        {actions && actions.length > 0 ? (
+          actions.map((act, idx) => renderActionItem(act, idx))
+        ) : (
+          /* Fallback Notification Bell */
+          <button
+            onClick={onNotificationClick}
+            type="button"
+            className="relative p-2 rounded-full text-im-body hover:bg-im-accent-light transition-colors focus:outline-none cursor-pointer"
+            aria-label="Notifications"
+          >
+            <Bell className="w-6 h-6" />
+            <span className="absolute top-2 right-2 w-2 h-2 bg-im-accent rounded-full ring-2 ring-white" />
+          </button>
+        )}
+      </div>
     </header>
   );
 }

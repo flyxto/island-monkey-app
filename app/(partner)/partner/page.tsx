@@ -17,13 +17,6 @@ export default function PartnerHomePage() {
         <h1 className="text-[28px] font-semibold text-[#000000] tracking-tight">
           {MOCK_STORE_PROFILE.storeName}
         </h1>
-        <Link
-          href="/partner/scan"
-          className="p-2 bg-[#E3EEFF] text-im-btn-black  hover:bg-im-accent hover:text-white transition-all shadow-sm"
-          title="Scan QR Code"
-        >
-          <ScanLine className="w-5 h-5" />
-        </Link>
       </div>
 
       {/* Daily Summary Bento Card */}

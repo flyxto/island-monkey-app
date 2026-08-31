@@ -7,7 +7,7 @@ import { QuickActionCard } from "@/components/portal/QuickActionCard";
 import { SessionListItem } from "@/components/portal/SessionListItem";
 import { QRModal } from "@/components/portal/QRModal";
 import { MOCK_UPCOMING_SESSIONS } from "@/lib/mock-data/customer-portal";
-import { QrCode, Info, History, Handshake } from "lucide-react";
+import { Info, History, Handshake } from "lucide-react";
 
 export default function CustomerHomePage() {
   const { user, balance, isQRModalOpen, setIsQRModalOpen } = useCustomer();
@@ -20,14 +20,6 @@ export default function CustomerHomePage() {
           <h1 className="text-[28px] font-semibold text-im-heading tracking-tight">
             Good morning, {user.firstName}.
           </h1>
-          <button
-            onClick={() => setIsQRModalOpen(true)}
-            type="button"
-            className="p-2 bg-[#E3EEFF] text-im-btn-black  hover:bg-im-accent hover:text-white transition-all shadow-sm"
-            title="Open QR Code"
-          >
-            <QrCode className="w-5 h-5" />
-          </button>
         </div>
 
         {/* Balance Card */}
