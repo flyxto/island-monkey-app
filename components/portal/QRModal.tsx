@@ -64,7 +64,7 @@ export function QRModal({
             style={{ height: "auto", maxWidth: "100%", width: "100%" }}
             viewBox="0 0 276 276"
             fgColor="#09090b"
-            bgColor="#EE352333"
+            bgColor="#f8fafc"
             level="M"
           />
           <span className="text-[10px] font-mono text-im-body mt-2 tracking-widest">

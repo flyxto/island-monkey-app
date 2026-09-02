@@ -29,7 +29,7 @@ export function BottomNavBar({
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 h-20 bg-white border-t border-im-border flex items-center justify-around px-2 max-w-107.5 mx-auto">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 h-20 bg-white border-t border-im-border flex items-center px-2 max-w-107.5 mx-auto">
       {navItems.map((item) => {
         const active = isItemActive(item);
         const Icon = item.icon;
@@ -38,22 +38,24 @@ export function BottomNavBar({
           <Link
             key={item.id}
             href={item.href}
-            className={`flex flex-col items-center justify-center transition-all duration-200 ${
-              active ? "py-1 px-4 rounded-xl" : "py-1 px-3 text-im-body"
-            }`}
-            style={{
-              backgroundColor: active ? activeBadgeBg : "transparent",
-              color: active ? activeBadgeText : "#45464D",
-            }}
+            className="flex-1 flex flex-col items-center justify-center h-full py-1"
           >
-            <Icon className="w-6 h-6 mb-1" />
-            <span
-              className={`text-[12px] ${
-                active ? "font-semibold text-im-btn-primary" : "font-normal text-im-body"
-              }`}
+            <div
+              className="flex flex-col items-center justify-center px-4 py-1.5 rounded-xl transition-colors duration-200"
+              style={{
+                backgroundColor: active ? activeBadgeBg : "transparent",
+                color: active ? activeBadgeText : "#45464D",
+              }}
             >
-              {item.label}
-            </span>
+              <Icon className="w-6 h-6 mb-1 shrink-0" />
+              <span
+                className={`text-[12px] leading-tight select-none whitespace-nowrap ${
+                  active ? "font-semibold text-slate-900" : "font-normal text-im-body"
+                }`}
+              >
+                {item.label}
+              </span>
+            </div>
           </Link>
         );
       })}

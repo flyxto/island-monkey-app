@@ -89,18 +89,18 @@ export default function PackageDetailPage({
 
         {/* Stat Chips */}
         <div className="flex items-center gap-3 pt-2">
-          <div className="flex flex-col flex-1 items-center justify-center gap-2 p-3 bg-im-accent-light border border-[#B7C7FF] rounded-lg text-im-accent font-medium text-[20px]">
+          <div className="flex flex-col flex-1 items-center justify-center gap-2 p-3 bg-im-accent-light border border-orange-200/80 rounded-lg text-im-accent font-medium text-[20px]">
             <Clock className="w-7 h-7 fill-current stroke-im-accent-light stroke-1.5" />
             <p>{pkg.durationHours}</p>
           </div>
-          <div className="flex flex-col flex-1 items-center justify-center gap-2 p-3 bg-im-accent-light border border-[#B7C7FF] rounded-lg text-im-accent font-medium text-[20px]">
+          <div className="flex flex-col flex-1 items-center justify-center gap-2 p-3 bg-im-accent-light border border-orange-200/80 rounded-lg text-im-accent font-medium text-[20px]">
             <Building2 className="w-7 h-7 " />
             <p>{pkg.studioName}</p>
           </div>
         </div>
 
         {/* Highlighted Feature Strip */}
-        <div className="p-4 bg-[#f8f9ff] border border-im-border/60 rounded-xl flex flex-initial items-center gap-4.5 shadow-2xs">
+        <div className="p-4 bg-[#faf6f0] border border-im-border/60 rounded-xl flex flex-initial items-center gap-4.5 shadow-2xs">
           <div className="p-2.5 bg-im-accent-light rounded-lg text-im-accent">
             <Aperture className="w-7 h-7 fill-current stroke-im-accent-light stroke-1" />
           </div>
@@ -131,7 +131,7 @@ export default function PackageDetailPage({
                       : ""
                   }`}
                 >
-                  <CheckCircle2 className="w-6 h-6 text-im-accent shrink-0 bg-[#E5EEFF] rounded-full" />
+                  <CheckCircle2 className="w-6 h-6 text-im-accent shrink-0 bg-im-accent-light rounded-full" />
                   <span className="text-[15px] font-medium text-im-heading">
                     {item}
                   </span>

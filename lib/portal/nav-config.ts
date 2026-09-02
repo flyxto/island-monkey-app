@@ -25,8 +25,8 @@ export const PORTAL_CONFIGS: Record<string, PortalNavConfig> = {
   customer: {
     portalId: "customer",
     wordmark: "IslandMonkey",
-    activeBadgeBg: "#EE352333",
-    activeBadgeText: "#EE3523",
+    activeBadgeBg: "#f1f5f9",
+    activeBadgeText: "#0f172a",
     navItems: [
       {
         id: "home",
@@ -53,8 +53,8 @@ export const PORTAL_CONFIGS: Record<string, PortalNavConfig> = {
   partner: {
     portalId: "partner",
     wordmark: "IslandMonkey",
-    activeBadgeBg: "#EE352333",
-    activeBadgeText: "#EE3523",
+    activeBadgeBg: "#f1f5f9",
+    activeBadgeText: "#0f172a",
     navItems: [
       { 
         id: "home", 
@@ -81,8 +81,8 @@ export const PORTAL_CONFIGS: Record<string, PortalNavConfig> = {
   model: {
     portalId: "model",
     wordmark: "IslandMonkey",
-    activeBadgeBg: "#EE352333",
-    activeBadgeText: "#EE3523",
+    activeBadgeBg: "#f1f5f9",
+    activeBadgeText: "#0f172a",
     navItems: [
       { 
         id: "home", 

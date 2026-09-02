@@ -80,7 +80,7 @@ export function TransactionForm({
         className={`w-full h-12 mt-2 text-[15px] font-medium text-white rounded-lg transition-all flex items-center justify-center gap-2 ${
           isSuccess
             ? "bg-emerald-600 hover:bg-emerald-700"
-            : "bg-im-btn-primary hover:bg-im-btn-primary-hover active:bg-im-btn-primary-active"
+            : "bg-im-btn-primary hover:bg-im-btn-primary/90 active:bg-im-btn-primary/80"
         }`}
       >
         {isSuccess ? (
