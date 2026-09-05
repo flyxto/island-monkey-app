@@ -13,7 +13,7 @@ export default function BookingConfirmationPage({
   const resolvedParams = use(searchParams);
   const { selectedPackage } = useCustomer();
 
-  const formattedPrice = `LKR ${selectedPackage.priceLKR.toLocaleString()}`;
+  const formattedPrice = selectedPackage ? `LKR ${(selectedPackage.priceLkr ?? 0).toLocaleString()}` : "—";
   const bookingDate = resolvedParams.date || "2026-06-18";
   const bookingTime = resolvedParams.time || "2:00 PM";
 
@@ -41,7 +41,7 @@ export default function BookingConfirmationPage({
           <div className="flex flex-col items-start justify-between text-[15px]">
             <span className="text-[#9e9e9e]">Package</span>
             <span className="font-semibold text-im-heading">
-              {selectedPackage.name}
+              {selectedPackage?.name ?? "Studio Package"}
             </span>
           </div>
 
@@ -56,7 +56,7 @@ export default function BookingConfirmationPage({
           <div className="flex flex-col items-start justify-between w-full text-[15px]">
             <span className="text-[#9e9e9e]">Studio & Crew</span>
             <span className="font-semibold text-im-heading">
-              {selectedPackage.metaLine}
+              {selectedPackage?.metaLine ?? selectedPackage?.studioName}
             </span>
           </div>
 

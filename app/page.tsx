@@ -1,14 +1,19 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
-/**
- * Root Route Handler:
- * TEMPORARY PLACEHOLDER ROUTER: Currently redirects directly to /customer as the Customer Portal
- * is the first reference implementation.
- * 
- * TODO (Multi-Portal Auth): When Partner and Model portals are added, replace this static redirect
- * with role-based auth middleware/landing page routing (e.g., routing customers to /customer,
- * partners to /partner, and talent models to /model based on session role).
- */
-export default function RootPage() {
-  redirect("/customer");
+const ROLE_PORTALS: Record<string, string> = {
+  customer: "/customer",
+  partner: "/partner",
+  model: "/model",
+};
+
+export default async function RootPage() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("accessToken")?.value;
+  const role = cookieStore.get("userRole")?.value;
+
+  if (!token) redirect("/login");
+
+  const portal = ROLE_PORTALS[role || ""] || "/customer";
+  redirect(portal);
 }

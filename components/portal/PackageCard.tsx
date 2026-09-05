@@ -2,17 +2,31 @@
 
 import React from "react";
 import Link from "next/link";
-import { PackageItem } from "@/lib/mock-data/customer-portal";
 import { Camera } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
 import { StatusBadge, StatusType } from "./StatusBadge";
 
+// Accept both live-API (priceLkr) and legacy (priceLKR) field names
+export type PackageCardItem = {
+  id: string;
+  name: string;
+  description: string;
+  priceLkr?: number;
+  priceLKR?: number;
+  isBestSeller?: boolean;
+  durationHours: string | number;
+  studioName: string;
+  photographersCount?: number;
+  metaLine?: string;
+  highlightFeature?: { title: string; subtitle: string };
+  whatsIncluded?: string[];
+};
+
 export interface PackageCardProps {
-  packageItem: PackageItem;
-  onSelect?: (pkg: PackageItem) => void;
-  priceSuffix?: string; // e.g. "/hr"
+  packageItem: PackageCardItem;
+  onSelect?: (pkg: PackageCardItem) => void;
+  priceSuffix?: string;
   detailHref?: string;
   statusBadge?: StatusType;
 }
@@ -30,7 +44,8 @@ export function PackageCard({
   detailHref,
   statusBadge,
 }: PackageCardProps) {
-  const formattedPrice = `LKR ${packageItem.priceLKR.toLocaleString()}${priceSuffix}`;
+  const price = packageItem.priceLkr ?? packageItem.priceLKR ?? 0;
+  const formattedPrice = `LKR ${price.toLocaleString()}${priceSuffix}`;
   const targetHref = detailHref || `/customer/packages/${packageItem.id}`;
 
   return (

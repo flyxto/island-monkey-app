@@ -3,6 +3,7 @@
 import React from "react";
 import { PortalLayout } from "@/components/portal/PortalLayout";
 import { PORTAL_CONFIGS } from "@/lib/portal/nav-config";
+import { ModelProvider } from "@/lib/portal/ModelContext";
 
 export default function ModelPortalLayout({
   children,
@@ -10,8 +11,10 @@ export default function ModelPortalLayout({
   children: React.ReactNode;
 }) {
   return (
-    <PortalLayout config={PORTAL_CONFIGS.model}>
-      {children}
-    </PortalLayout>
+    <ModelProvider>
+      <PortalLayout config={PORTAL_CONFIGS.model}>
+        {children}
+      </PortalLayout>
+    </ModelProvider>
   );
 }

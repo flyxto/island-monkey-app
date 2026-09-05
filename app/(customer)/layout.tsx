@@ -19,8 +19,8 @@ function CustomerPortalContent({
         <QRModal
           isOpen={isQRModalOpen}
           onClose={() => setIsQRModalOpen(false)}
-          userFullName={`${user.firstName} ${user.lastName}`}
-          qrValue={user.qrCodeValue}
+          userFullName={`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'Guest'}
+          qrValue={user?.qrCodeValue ?? ''}
           pointsBalance={balance.formattedPoints}
         />
       </PortalLayout>

@@ -1,18 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { OfferListItem } from "@/components/portal/OfferListItem";
-import { MOCK_PARTNER_OFFERS } from "@/lib/mock-data/partner-portal";
+import { getOffers } from "@/lib/api/partner";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, Loader2, AlertCircle } from "lucide-react";
+
+interface Offer {
+  id: string;
+  name: string;
+  description: string;
+  pointsCost: number;
+  imageUrl?: string;
+}
 
 export default function OffersListPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [offers, setOffers] = useState<Offer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredOffers = MOCK_PARTNER_OFFERS.filter(
+  useEffect(() => {
+    getOffers()
+      .then((data) => setOffers(Array.isArray(data) ? data : []))
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = offers.filter(
     (offer) =>
       offer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      offer.description.toLowerCase().includes(searchQuery.toLowerCase())
+      offer.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -23,7 +41,7 @@ export default function OffersListPage() {
           Store Offers
         </h1>
         <span className="px-3 py-1 bg-im-accent-light text-im-accent text-[12px] font-semibold rounded-full">
-          {MOCK_PARTNER_OFFERS.length} Active Offers
+          {offers.length} Active
         </span>
       </div>
 
@@ -35,7 +53,7 @@ export default function OffersListPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search items..."
-            className="w-full h-11 pl-4.5 pr-6.25 pb-2.25 pt-2.25 bg-white border border-im-border rounded-full text-[16px] text-[#000000] placeholder-[#6B7280] focus-visible:ring-im-accent focus-visible:border-im-accent shadow-none"
+            className="w-full h-11 pl-4.5 bg-white border border-im-border rounded-full text-[16px] text-[#000000] placeholder-[#6B7280] focus-visible:ring-im-accent shadow-none"
           />
         </div>
         <button
@@ -49,14 +67,23 @@ export default function OffersListPage() {
 
       {/* Offers List */}
       <div className="flex flex-col gap-3">
-        {filteredOffers.length > 0 ? (
-          filteredOffers.map((offer) => (
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-5 h-5 animate-spin text-im-accent" />
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center gap-2 py-12 text-red-500">
+            <AlertCircle className="w-4 h-4" />
+            <span className="text-sm">{error}</span>
+          </div>
+        ) : filtered.length > 0 ? (
+          filtered.map((offer) => (
             <OfferListItem key={offer.id} offer={offer} />
           ))
         ) : (
           <div className="p-8 text-center bg-white border border-im-border rounded-xl">
             <p className="text-[#9e9e9e] text-[15px]">
-              No offers found matching &quot;{searchQuery}&quot;.
+              {searchQuery ? `No offers matching "${searchQuery}".` : "No offers yet."}
             </p>
           </div>
         )}

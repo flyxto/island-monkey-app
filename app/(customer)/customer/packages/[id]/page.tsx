@@ -3,8 +3,7 @@
 import { use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCustomer } from "@/lib/portal/CustomerContext";
-import { MOCK_PACKAGES, PackageItem } from "@/lib/mock-data/customer-portal";
+import { useCustomer, PackageItem } from "@/lib/portal/CustomerContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,12 +25,12 @@ export default function PackageDetailPage({
   const router = useRouter();
   const { packages, setSelectedPackage } = useCustomer();
 
-  const pkg: PackageItem =
-    packages.find((p) => p.id === resolvedParams.id) ||
-    MOCK_PACKAGES.find((p) => p.isBestSeller) ||
-    MOCK_PACKAGES[0];
+  const pkg: PackageItem | undefined =
+    packages.find((p) => p.id === resolvedParams.id) || packages[0];
 
-  const formattedPrice = `LKR ${pkg.priceLKR.toLocaleString()}`;
+  const formattedPrice = pkg ? `LKR ${(pkg.priceLkr ?? 0).toLocaleString()}` : "—";
+
+  if (!pkg) return <div className="py-20 text-center text-im-muted">Package not found.</div>;
 
   const handleBookNow = () => {
     setSelectedPackage(pkg);
