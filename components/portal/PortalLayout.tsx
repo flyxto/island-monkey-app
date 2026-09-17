@@ -6,6 +6,7 @@ import { TopAppBar, TopAppBarAction } from "./TopAppBar";
 import { BottomNavBar } from "./BottomNavBar";
 import { ProgressiveBlur } from "./ProgressiveBlur";
 import { ModelHeader } from "./ModelHeader";
+import { PartnerHeader } from "./PartnerHeader";
 import { PortalNavConfig } from "@/lib/portal/nav-config";
 import { useCustomer } from "@/lib/portal/CustomerContext";
 import { QrCode, ScanLine, Bell} from "lucide-react";
@@ -39,7 +40,21 @@ export function PortalLayout({
   const isModelDetail = isModelGigDetail || isModelBookingDetail;
   const isModelProfile = pathname === "/model/profile";
   const showModelHeader = isModel && (isModelHome || isCompactModelHeader || isModelProfile);
-  const shouldHideTopBar = hideTopAppBar ?? (isModelHome || showModelHeader || isModelDetail || isModelProfile);
+
+  // Partner Portal Route Flags
+  const isPartner = config.portalId === "partner";
+  const isPartnerHome = pathname === "/partner";
+  const isPartnerOffers = pathname === "/partner/offers";
+  const isPartnerHistory = pathname === "/partner/history";
+  const isPartnerScan = pathname === "/partner/scan";
+  const isPartnerOfferDetail = pathname.startsWith("/partner/offers/") && pathname !== "/partner/offers";
+  const isPartnerCustomerDetail = pathname.startsWith("/partner/customer/");
+  const isPartnerDetail = isPartnerOfferDetail || isPartnerCustomerDetail;
+  const isPartnerProfile = pathname === "/partner/profile";
+  const isCompactPartnerHeader = isPartnerOffers || isPartnerHistory || isPartnerScan;
+  const showPartnerHeader = isPartner && (isPartnerHome || isCompactPartnerHeader || isPartnerProfile);
+
+  const shouldHideTopBar = hideTopAppBar ?? (isModelHome || showModelHeader || isModelDetail || isModelProfile || showPartnerHeader || isPartnerDetail || isPartnerProfile);
 
   // Safe consumer check for CustomerContext
   let isQRModalOpen = false;
@@ -98,21 +113,27 @@ export function PortalLayout({
 
   const resolvedAction = rightAction ? [rightAction] : resolveTopBarActions();
 
-  const isModelDarkLayout = isModel && (isModelHome || isCompactModelHeader);
+  const isDarkLayout =
+    (isModel && (isModelHome || isCompactModelHeader)) ||
+    (isPartner && (isPartnerHome || isCompactPartnerHeader));
 
   return (
     <div
       className={`w-full ${
-        isModelDarkLayout
+        isDarkLayout
           ? "fixed inset-0 w-full h-full overflow-hidden overscroll-none bg-[#000002] p-1 justify-between gap-3 sm:gap-4"
-          : isModelProfile
+          : isModelProfile || isPartnerProfile
           ? "min-h-svh bg-gradient-to-b from-[#FFEFE8] via-[#FAF6F3] to-[#F6F7F9] relative"
+          : isPartnerDetail
+          ? "fixed inset-0 w-full h-full overflow-hidden overscroll-none bg-[#000002] p-1"
           : "min-h-svh bg-linear-to-b from-[#f8f9ff] to-[#ffffff] relative"
       } flex flex-col`}
     >
-      {/* Model Persistent Header (Expanded on Home & Profile, Shrunk on Gigs & Bookings) */}
+      {/* Persistent Headers (Model & Partner Orange Cards) */}
       {showModelHeader ? (
         <ModelHeader isCompact={isCompactModelHeader} isProfile={isModelProfile} />
+      ) : showPartnerHeader ? (
+        <PartnerHeader isCompact={isCompactPartnerHeader} isProfile={isPartnerProfile} />
       ) : (
         /* Fixed Top App Bar */
         !shouldHideTopBar && (
@@ -123,13 +144,13 @@ export function PortalLayout({
       {/* Main Content Area */}
       <main
         className={`flex-1 flex flex-col w-full min-h-0 ${
-          isModelHome
+          isModelHome || isPartnerHome
             ? "pt-0 pb-0 overflow-hidden h-full overscroll-none touch-none justify-between"
-            : isCompactModelHeader
+            : isCompactModelHeader || isCompactPartnerHeader
             ? "pt-0 pb-0 overflow-hidden h-full"
-            : isModelDetail
+            : isModelDetail || isPartnerDetail
             ? "pt-0 pb-0 overflow-hidden h-full"
-            : isModelProfile
+            : isModelProfile || isPartnerProfile
             ? "pt-3.5 px-4 pb-32 gap-5 overflow-y-auto"
             : shouldHideTopBar
             ? "pt-0 pb-32 overflow-y-auto"
@@ -140,16 +161,16 @@ export function PortalLayout({
       </main>
 
       {/* Progressive Blur from top to bottom at page bottom */}
-      {!isModelDetail && (
+      {!isModelDetail && !isPartnerDetail && (
         <ProgressiveBlur
           height="h-28 sm:h-32"
-          showGradient={!isModelDarkLayout && !isModelProfile}
+          showGradient={!isDarkLayout && !isModelProfile && !isPartnerProfile}
           gradientColor="from-transparent via-white/40 to-white/90"
         />
       )}
 
       {/* Fixed Bottom Navigation Bar */}
-      {!isModelDetail && (
+      {!isModelDetail && !isPartnerDetail && (
         <BottomNavBar
           navItems={config.navItems}
           currentPath={pathname}

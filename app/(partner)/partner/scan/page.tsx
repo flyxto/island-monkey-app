@@ -2,30 +2,36 @@
 
 import { ScannerViewfinder } from "@/components/portal/ScannerViewfinder";
 import { TransactionForm } from "@/components/portal/TransactionForm";
-import { MOCK_STORE_PROFILE } from "@/lib/mock-data/partner-portal";
 
 export default function QRScanPage() {
   return (
-    <div className="flex flex-col gap-6 pt-8 pb-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-[28px] font-semibold text-[#000000] tracking-tight">
-          {MOCK_STORE_PROFILE.storeName}
-        </h1>
-        <span className="px-3 py-1 bg-im-accent-light text-im-accent text-[12px] font-semibold rounded-full">
-          QR Scanner Mode
+    <div className="flex-1 flex flex-col w-full overflow-hidden justify-between gap-3 sm:gap-4 min-h-0">
+      {/* Upper Status Row between top header and bottom card */}
+      <div className="px-3 pt-1 pb-0.5 flex items-center justify-between shrink-0">
+        <span className="text-[14px] font-medium text-white/90 tracking-tight">
+          Customer QR Scanner
+        </span>
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-[11px] font-medium rounded-full">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          Camera Active
         </span>
       </div>
 
-      {/* QR Scanner Block */}
-      <ScannerViewfinder targetCustomerId="cust_8829" />
+      {/* Bottom Card Container: Light curved panel with notch */}
+      <div className="flex-1 min-h-0 bg-[#DCE0E2] rounded-t-[36px] rounded-b px-4 pt-3 pb-32 flex flex-col gap-4 overflow-y-auto">
+        {/* Drag Notch Indicator */}
+        <div className="w-10 h-1 bg-slate-400/50 rounded-full mx-auto my-0.5 shrink-0" />
 
-      {/* Transaction Form Section */}
-      <div className="bg-[#F8F9FF] border border-im-border rounded-xl p-5 flex flex-col gap-3">
-        <h2 className="text-[16px] font-bold text-[#000000]">
-          Point Deduction Details
-        </h2>
-        <TransactionForm initialAmount="450" initialDescription="Blue Denim Jacket" />
+        {/* Viewfinder Section */}
+        <ScannerViewfinder targetCustomerId="cust_8829" />
+
+        {/* Deduction Form Bento Card */}
+        <div className="bg-white rounded-[24px] p-4 sm:p-5 border border-black/5 shadow-xs flex flex-col gap-3">
+          <h2 className="text-[15px] font-medium text-slate-900 tracking-tight">
+            Manual Deduction Entry
+          </h2>
+          <TransactionForm initialAmount="450" initialDescription="Blue Denim Jacket" />
+        </div>
       </div>
     </div>
   );

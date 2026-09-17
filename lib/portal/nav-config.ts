@@ -76,6 +76,13 @@ export const PORTAL_CONFIGS: Record<string, PortalNavConfig> = {
         icon: Tag, 
         matchPrefix: true 
       },
+      { 
+        id: "profile", 
+        label: "Profile", 
+        href: "/partner/profile", 
+        icon: User, 
+        matchPrefix: true 
+      },
     ],
   },
   model: {

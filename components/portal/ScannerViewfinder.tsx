@@ -42,12 +42,12 @@ export function ScannerViewfinder({
           <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-white/50 rounded-br-sm" />
 
           {/* Animated Sweeping Line (CSS keyframe motion) */}
-          <div className="w-full h-0.5 bg-linear-to-r from-transparent via-im-accent to-transparent shadow-[0_0_12px_#4648d4] animate-pulse my-auto" />
+          <div className="w-full h-0.5 bg-linear-to-r from-transparent via-[#FF6433] to-transparent shadow-[0_0_14px_#FF6433] animate-pulse my-auto" />
         </div>
 
         {/* Caption Pill at Bottom */}
-        <div className="absolute bottom-3 z-20 px-4 py-2 bg-black/60 backdrop-blur-none border border-white/10 rounded-full text-white text-[14px] font-medium tracking-wide">
-          Align QR code within frame
+        <div className="absolute bottom-3 z-20 px-4 py-1.5 bg-black/60 backdrop-blur-xs border border-white/15 rounded-full text-white text-[13px] font-medium tracking-wide">
+          Align customer QR code within frame
         </div>
       </div>
 
@@ -55,9 +55,9 @@ export function ScannerViewfinder({
       <Button
         type="button"
         onClick={handleSimulateScan}
-        className="w-full py-3 bg-im-accent-light text-im-accent hover:bg-im-accent hover:text-white transition-all text-[14px] font-semibold rounded-lg flex items-center justify-center gap-2 border border-im-accent/30 h-auto"
+        className="w-full py-3 bg-orange-50 hover:bg-orange-100 text-[#FF6433] border border-orange-200/80 rounded-full transition-all text-[14px] font-medium flex items-center justify-center gap-2 shadow-2xs h-auto cursor-pointer"
       >
-        <span>Simulate QR Scan (John Doe #8829)</span>
+        <span>Simulate Customer Scan (John Doe #8829)</span>
         <ArrowRight className="w-4 h-4" />
       </Button>
     </div>

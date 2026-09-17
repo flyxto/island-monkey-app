@@ -3,6 +3,17 @@ export interface StoreProfile {
   storeName: string;
   dailyPointsProcessed: number;
   transactionsProcessedCount: number;
+  rating?: number;
+  totalPointsProcessed?: string;
+  category?: string;
+  location?: string;
+  phone?: string;
+  email?: string;
+  instagram?: string;
+  openingHours?: string;
+  businessRegNumber?: string;
+  posTerminalId?: string;
+  about?: string;
 }
 
 export interface PartnerTransaction {
@@ -35,6 +46,17 @@ export const MOCK_STORE_PROFILE: StoreProfile = {
   storeName: "Pepper St.",
   dailyPointsProcessed: 1240,
   transactionsProcessedCount: 28,
+  rating: 4.9,
+  totalPointsProcessed: "248.5k",
+  category: "Apparel & Lifestyle Boutique",
+  location: "42 Ward Place, Colombo 07, Sri Lanka",
+  phone: "+94 11 268 4500",
+  email: "hello@pepperst.lk",
+  instagram: "@pepperst.official",
+  openingHours: "Mon - Sun: 10:00 AM - 8:00 PM",
+  businessRegNumber: "PV-109482",
+  posTerminalId: "IM-POS-7741",
+  about: "Curated contemporary apparel, ethical linen wear, and island lifestyle accessories. Official Island Monkey retail redemption partner.",
 };
 
 export const MOCK_PARTNER_TRANSACTIONS: PartnerTransaction[] = [

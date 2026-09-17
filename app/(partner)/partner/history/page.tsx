@@ -3,13 +3,8 @@
 import { useState } from "react";
 import { MOCK_PARTNER_TRANSACTIONS } from "@/lib/mock-data/partner-portal";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { History, ShoppingBag, Search } from "lucide-react";
+import { ShoppingBag, Search } from "lucide-react";
 
-/**
- * Functional Extension Page:
- * Created to fulfill the bottom nav item "History" and the "View All" link from Home.
- */
 export default function PartnerHistoryPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -20,81 +15,83 @@ export default function PartnerHistoryPage() {
   );
 
   return (
-    <div className="flex flex-col gap-8 pt-8 pb-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-[28px] font-semibold text-black tracking-tight">
-          Transaction History
-        </h1>
-        <div className="p-2 bg-im-accent-light text-im-accent rounded-full">
-          <History className="w-5 h-5" />
-        </div>
-      </div>
-
-      {/* Search Input */}
-      <div className="flex items-center gap-2.5">
+    <div className="flex-1 flex flex-col w-full overflow-hidden justify-between gap-3 sm:gap-4 min-h-0">
+      {/* Search Bar Row between top header and bottom card */}
+      <div className="px-3 pt-1 pb-0.5 flex items-center gap-2.5 shrink-0">
         <div className="relative flex-1">
           <Input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search item or User ID..."
-            className="w-full h-11 pl-4.5 pr-6.25 pb-2.25 pt-2.25 bg-white border border-im-border rounded-full text-[16px] text-[#000000] placeholder-[#6B7280] focus-visible:ring-im-accent focus-visible:border-im-accent shadow-none"
+            className="w-full h-11 py-2 px-4 bg-[#1a1a1e] border border-white/10 rounded-xl text-[14px] font-medium text-white placeholder-white/40 focus-visible:ring-im-accent focus-visible:border-im-accent shadow-none"
           />
         </div>
         <button
           type="button"
-          className="w-11 h-11 bg-im-accent-light text-im-accent rounded-full flex items-center justify-center shrink-0 shadow-sm hover:bg-im-accent/90 hover:text-im-accent-light transition-colors"
-          aria-label="Search"
+          className="w-12 h-11 bg-[#26262c] hover:bg-[#32323a] text-white border border-white/15 rounded-xl flex items-center justify-center shrink-0 shadow-xs transition-colors cursor-pointer"
+          aria-label="Search Transactions"
         >
-          <Search className="w-6 h-6" />
+          <Search className="w-5 h-5 text-white" />
         </button>
       </div>
 
-      <div className="flex flex-col gap-3">
-        {/* Transactions List */}
-        {filteredTxs.length > 0 ? (
-          filteredTxs.map((tx, index) => (
-            <Card key={tx.id} className="w-full bg-white border border-im-border rounded-xl p-0 shadow-2xs hover:shadow-md transition-shadow overflow-hidden">
-              <CardContent className="p-0 flex flex-col">      
-                <div className="flex items-center justify-between py-3.5 px-4 hover:bg-slate-100/60 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-im-accent-light flex items-center justify-center text-im-accent shrink-0 border border-im-border/40">
-                      <ShoppingBag className="w-5 h-5" />
-                    </div>
+      {/* Bottom Card Container: Light curved panel with notch */}
+      <div className="flex-1 min-h-0 bg-[#DCE0E2] rounded-t-[36px] rounded-b px-4 pt-3 pb-32 flex flex-col gap-3.5 overflow-y-auto">
+        {/* Drag Notch Indicator */}
+        <div className="w-10 h-1 bg-slate-400/50 rounded-full mx-auto my-0.5 shrink-0" />
 
-                    <div className="flex flex-col">
-                      <span className="text-[15px] font-semibold text-[#000000]">
-                        {tx.itemName}
-                      </span>
-                      <span className="text-[13px] text-im-body">
-                        {tx.timestamp} • User ID: {tx.userId}
-                      </span>
-                    </div>
+        {/* Header: Title and Count */}
+        <div className="flex items-center justify-between px-1 shrink-0">
+          <h1 className="text-[16px] font-medium text-slate-900 tracking-tight">
+            Transaction History
+          </h1>
+          <span className="px-2.5 py-1 bg-black/10 text-slate-700 text-[12px] font-medium rounded-full">
+            {filteredTxs.length} Transactions
+          </span>
+        </div>
+
+        {/* Transactions List */}
+        <div className="flex flex-col gap-2.5">
+          {filteredTxs.length > 0 ? (
+            filteredTxs.map((tx) => (
+              <div
+                key={tx.id}
+                className="bg-white rounded-2xl p-3.5 border border-black/5 shadow-2xs hover:shadow-xs transition-shadow flex items-center justify-between gap-3"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200/50 flex items-center justify-center text-[#FF6433] shrink-0">
+                    <ShoppingBag className="w-5 h-5 stroke-[1.8]" />
                   </div>
 
-                  <div className="flex flex-col items-end">
-                    <span className="text-[14px] font-bold text-im-accent">
-                      -{tx.pointsDeducted} pts
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[14px] font-medium text-slate-900 truncate">
+                      {tx.itemName}
                     </span>
-                    <span className="text-[11px] text-[#9e9e9e]">
-                      LKR {tx.amountLKR.toLocaleString()}
+                    <span className="text-[12px] font-medium text-slate-400 mt-0.5">
+                      {tx.timestamp} • User {tx.userId}
                     </span>
                   </div>
                 </div>
-                  {index < filteredTxs.length - 1 && (
-                    <div className="h-px bg-im-border/30 mx-4" />
-                  )}                  
-              </CardContent>
-            </Card>
-          ))
-          ) : (
-              <div className="p-8 text-center bg-white border border-im-border rounded-xl">
-                <p className="text-[#9e9e9e] text-[15px]">
-                  No transactions found matching &quot;{searchQuery}&quot;.
-                </p>
+
+                <div className="flex flex-col items-end shrink-0">
+                  <span className="text-[13px] font-medium text-[#FF6433]">
+                    -{tx.pointsDeducted} pts
+                  </span>
+                  <span className="text-[11px] font-medium text-slate-400">
+                    LKR {tx.amountLKR.toLocaleString()}
+                  </span>
+                </div>
               </div>
-            )}
+            ))
+          ) : (
+            <div className="p-8 text-center bg-white border border-black/5 rounded-2xl shadow-2xs">
+              <p className="text-slate-400 text-[14px] font-medium">
+                No transactions found matching &quot;{searchQuery}&quot;.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
