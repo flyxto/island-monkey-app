@@ -53,7 +53,7 @@ export default function OffersListPage() {
         </div>
 
         {/* Offers List */}
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-3.5">
           {filteredOffers.length > 0 ? (
             filteredOffers.map((offer) => (
               <OfferListItem key={offer.id} offer={offer} />

@@ -61,38 +61,64 @@ export default function PartnerHomePage() {
           </Link>
         </div>
 
-        {/* Scrollable Transactions List */}
-        <div className="flex-1 min-h-0 overflow-y-auto pr-0.5 flex flex-col gap-2.5">
-          {recentTransactions.map((tx) => (
-            <div
-              key={tx.id}
-              className="bg-white rounded-2xl p-3.5 border border-black/5 shadow-xs flex items-center justify-between gap-3"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200/50 flex items-center justify-center text-[#FF6433] shrink-0">
-                  <ShoppingBag className="w-5 h-5 stroke-[1.8]" />
+        {/* Scrollable Transactions List - Matching Recent Booking List Item UI */}
+        <div className="flex-1 min-h-0 overflow-y-auto pr-0.5 flex flex-col gap-2 pb-4">
+          {recentTransactions.map((tx, idx) => {
+            const isYesterday = tx.timestamp.toLowerCase().includes("yesterday");
+            const month = "Oct";
+            const day = isYesterday ? "23" : "24";
+
+            return (
+              <Link
+                key={tx.id}
+                href="/partner/history"
+                className="bg-white rounded-2xl p-3 shadow-xs border border-black/5 flex items-center gap-3.5 hover:shadow-sm transition-all shrink-0"
+              >
+                {/* Date Column with subtle vertical line */}
+                <div className="flex flex-col items-center justify-center w-7 shrink-0">
+                  <span className="text-[11px] font-medium text-slate-400 uppercase tracking-tight">
+                    {month}
+                  </span>
+                  <span className="text-[18px] font-medium text-slate-800 leading-none mt-0.5">
+                    {day}
+                  </span>
                 </div>
 
-                <div className="flex flex-col min-w-0">
+                <div className="w-px h-7 bg-slate-200/80 shrink-0" />
+
+                {/* Thumbnail */}
+                <div
+                  className={`w-11 h-11 rounded-xl shrink-0 flex items-center justify-center shadow-xs overflow-hidden ${
+                    idx % 2 === 0
+                      ? "bg-linear-to-br from-amber-500 via-orange-500 to-[#E84A23] text-white"
+                      : "bg-linear-to-br from-teal-500 via-emerald-500 to-emerald-600 text-white"
+                  }`}
+                >
+                  <ShoppingBag className="w-5 h-5 text-white/95" />
+                </div>
+
+                {/* Title & Details (Item Name, Timestamp & Customer User ID) */}
+                <div className="flex flex-col min-w-0 flex-1">
                   <span className="text-[14px] font-medium text-slate-900 truncate">
                     {tx.itemName}
                   </span>
-                  <span className="text-[11px] font-medium text-slate-400 mt-0.5">
+                  <span className="text-[12px] font-medium text-slate-400 truncate mt-0.5">
                     {tx.timestamp} • User {tx.userId}
                   </span>
                 </div>
-              </div>
 
-              <div className="flex flex-col items-end shrink-0">
-                <span className="text-[13px] font-medium text-[#FF6433]">
-                  -{tx.pointsDeducted} pts
-                </span>
-                <span className="text-[11px] font-medium text-slate-400">
-                  LKR {tx.amountLKR.toLocaleString()}
-                </span>
-              </div>
-            </div>
-          ))}
+                {/* Points Deducted & Amount in LKR */}
+                <div className="flex flex-col items-end shrink-0 pl-1">
+                  <span className="text-[13px] font-medium text-[#FF6433]">
+                    -{tx.pointsDeducted} pts
+                  </span>
+                  <span className="text-[11px] font-medium text-slate-400 mt-0.5">
+                    LKR {tx.amountLKR.toLocaleString()}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </div>
