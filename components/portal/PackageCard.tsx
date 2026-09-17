@@ -49,7 +49,7 @@ export function PackageCard({
           </div>
         ) : (
           packageItem.isBestSeller && (
-            <Badge className="absolute top-3 left-3 bg-im-accent-light text-im-accent text-[12px] font-semibold px-3 py-1 rounded-full shadow-sm hover:bg-im-accent-light border-none">
+            <Badge className="absolute top-3 left-3 bg-im-accent-light text-im-accent text-[12px] font-medium px-3 py-1 rounded-full shadow-sm hover:bg-im-accent-light border-none">
               Best Seller
             </Badge>
           )
