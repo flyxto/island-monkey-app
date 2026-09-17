@@ -8,25 +8,43 @@ import {
   MOCK_MODEL_PROFILE,
   MOCK_BOOKINGS,
 } from "@/lib/mock-data/model-portal";
-import { Info, History, Camera, Eye } from "lucide-react";
+import { Info, History, Camera, Eye, Bell } from "lucide-react";
 import { CardContent } from "@/components/ui/card";
 
 export default function ModelHomePage() {
   const upcomingSampleBookings = MOCK_BOOKINGS.slice(0, 3);
 
   return (
-    <div className="flex flex-col gap-8 pt-8 pb-11.5">
-      <div className="flex flex-col gap-4">
+    <div className="flex flex-col pb-11.5">
+      {/* Hero Section with TopAppBar contents, Greeting & BalanceCard */}
+      <div className="bg-[#FF6644] px-5 pt-6 pb-6 rounded-b-[32px] border-b border-black/5 shadow-md flex flex-col gap-5 text-white">
+        {/* Top App Bar Content */}
+        <div className="flex items-center justify-between">
+          <span className="text-[24px] font-bold text-white tracking-tight">
+            IslandMonkey
+          </span>
+
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1 bg-white/20 text-white text-[12px] font-semibold rounded-full border border-white/30 backdrop-blur-xs">
+              Talent Portal
+            </span>
+            <button
+              type="button"
+              aria-label="Notifications"
+              className="relative p-2 rounded-full text-white hover:bg-white/10 transition-colors focus:outline-none cursor-pointer"
+            >
+              <Bell className="w-6 h-6 text-white" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-amber-300 rounded-full ring-2 ring-[#FF6644]" />
+            </button>
+          </div>
+        </div>
+
         {/* Greeting Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-[28px] font-semibold text-im-heading tracking-tight">
+          <h1 className="text-[28px] font-semibold text-white tracking-tight">
             Hi, {MOCK_MODEL_PROFILE.firstName}.
           </h1>
-          <span className="px-3.5 py-1.5 bg-im-accent-light text-im-accent text-[12px] font-semibold rounded-full">
-            Talent Portal
-          </span>
         </div>
-      
 
         {/* Extended Balance Card with double-glow variant */}
         <BalanceCard
@@ -34,7 +52,10 @@ export default function ModelHomePage() {
           formattedPoints={MOCK_MODEL_PROFILE.formattedPoints}
           variant="double-glow"
         />
+      </div>
 
+      {/* Main Content Body */}
+      <div className="px-4 py-6 flex flex-col gap-8">
         {/* Info Row: 1 Point = 200 LKR Today */}
         <div className="flex items-center gap-2 p-3 rounded-lg">
           <Info className="w-5 h-5 text-im-accent shrink-0" />
@@ -47,7 +68,6 @@ export default function ModelHomePage() {
             </span>
           </p>
         </div>
-      </div>
 
       {/* Quick Actions Row ("Find Gigs" updated for model relevance) */}
       <div className="flex items-center gap-3">
@@ -124,5 +144,6 @@ export default function ModelHomePage() {
         </div>
       </div>
     </div>
+  </div>
   );
 }

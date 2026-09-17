@@ -29,36 +29,32 @@ export function BottomNavBar({
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 h-20 bg-white border-t border-im-border flex items-center px-2 max-w-107.5 mx-auto">
-      {navItems.map((item) => {
-        const active = isItemActive(item);
-        const Icon = item.icon;
+    <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center items-center pointer-events-none px-4 max-w-107.5 mx-auto">
+      <nav className="pointer-events-auto inline-flex items-center gap-1.5 p-1.5 bg-white/60 backdrop-blur-2xl border border-white/80 shadow-[0_12px_32px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,0.9)] rounded-full ring-1 ring-black/5">
+        {navItems.map((item) => {
+          const active = isItemActive(item);
+          const Icon = item.icon;
 
-        return (
-          <Link
-            key={item.id}
-            href={item.href}
-            className="flex-1 flex flex-col items-center justify-center h-full py-1"
-          >
-            <div
-              className="flex flex-col items-center justify-center px-4 py-1.5 rounded-xl transition-colors duration-200"
-              style={{
-                backgroundColor: active ? activeBadgeBg : "transparent",
-                color: active ? activeBadgeText : "#45464D",
-              }}
+          return (
+            <Link
+              key={item.id}
+              href={item.href}
+              className={`flex items-center justify-center transition-all duration-300 ease-out select-none ${
+                active
+                  ? "bg-white text-black shadow-[0_2px_8px_rgba(0,0,0,0.08)] px-5 py-2.5 rounded-full gap-2 font-semibold"
+                  : "text-neutral-500 hover:text-black hover:bg-white/40 px-3.5 py-2.5 rounded-full"
+              }`}
             >
-              <Icon className="w-6 h-6 mb-1 shrink-0" />
-              <span
-                className={`text-[12px] leading-tight select-none whitespace-nowrap ${
-                  active ? "font-semibold text-slate-900" : "font-normal text-im-body"
-                }`}
-              >
-                {item.label}
-              </span>
-            </div>
-          </Link>
-        );
-      })}
-    </nav>
+              <Icon className={`w-5 h-5 shrink-0 ${active ? "text-black stroke-[2.2]" : "stroke-[1.8]"}`} />
+              {active && (
+                <span className="text-[13px] font-semibold text-black tracking-tight leading-none whitespace-nowrap">
+                  {item.label}
+                </span>
+              )}
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
   );
 }
