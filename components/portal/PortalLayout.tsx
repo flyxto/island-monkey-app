@@ -35,8 +35,10 @@ export function PortalLayout({
   const isModelBookings = pathname === "/model/bookings";
   const isCompactModelHeader = isModelGigs || isModelBookings;
   const isModelGigDetail = pathname.startsWith("/model/gigs/") && pathname !== "/model/gigs";
+  const isModelBookingDetail = pathname.startsWith("/model/bookings/") && pathname !== "/model/bookings";
+  const isModelDetail = isModelGigDetail || isModelBookingDetail;
   const showModelHeader = isModel && (isModelHome || isCompactModelHeader);
-  const shouldHideTopBar = hideTopAppBar ?? (isModelHome || showModelHeader || isModelGigDetail);
+  const shouldHideTopBar = hideTopAppBar ?? (isModelHome || showModelHeader || isModelDetail);
 
   // Safe consumer check for CustomerContext
   let isQRModalOpen = false;
@@ -122,7 +124,7 @@ export function PortalLayout({
             ? "pt-0 pb-0 overflow-hidden h-full overscroll-none touch-none justify-between"
             : isCompactModelHeader
             ? "pt-0 pb-0 overflow-hidden h-full"
-            : isModelGigDetail
+            : isModelDetail
             ? "pt-0 pb-0 overflow-hidden h-full"
             : shouldHideTopBar
             ? "pt-0 pb-32 overflow-y-auto"
@@ -133,7 +135,7 @@ export function PortalLayout({
       </main>
 
       {/* Progressive Blur from top to bottom at page bottom */}
-      {!isModelGigDetail && (
+      {!isModelDetail && (
         <ProgressiveBlur
           height="h-28 sm:h-32"
           showGradient={!isModelDarkLayout}
@@ -142,7 +144,7 @@ export function PortalLayout({
       )}
 
       {/* Fixed Bottom Navigation Bar */}
-      {!isModelGigDetail && (
+      {!isModelDetail && (
         <BottomNavBar
           navItems={config.navItems}
           currentPath={pathname}
