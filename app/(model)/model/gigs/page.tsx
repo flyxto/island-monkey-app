@@ -138,7 +138,7 @@ export default function MyGigsPage() {
                       </div>
                     </div>
 
-                    {/* Action Row: Book Now Button (Opaque Glass Effect) */}
+                    {/* Action Row: View Package Button (Opaque Glass Effect) */}
                     <div className="pt-1">
                       <Link
                         href={`/model/gigs/${gig.id}`}
@@ -149,7 +149,7 @@ export default function MyGigsPage() {
 
                         {/* Button Label */}
                         <span className="relative z-10 text-slate-900 tracking-tight">
-                          Book Now
+                          View Package
                         </span>
                       </Link>
                     </div>

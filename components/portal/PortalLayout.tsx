@@ -31,9 +31,10 @@ export function PortalLayout({
   const pathname = usePathname() || "";
   const isModel = config.portalId === "model";
   const isModelHome = pathname === "/model";
-  const isModelGigs = pathname.startsWith("/model/gigs");
+  const isModelGigs = pathname === "/model/gigs";
+  const isModelGigDetail = pathname.startsWith("/model/gigs/") && pathname !== "/model/gigs";
   const showModelHeader = isModel && (isModelHome || isModelGigs);
-  const shouldHideTopBar = hideTopAppBar ?? (isModelHome || showModelHeader);
+  const shouldHideTopBar = hideTopAppBar ?? (isModelHome || showModelHeader || isModelGigDetail);
 
   // Safe consumer check for CustomerContext
   let isQRModalOpen = false;
@@ -119,6 +120,8 @@ export function PortalLayout({
             ? "pt-0 pb-0 overflow-hidden h-full overscroll-none touch-none justify-between"
             : isModelGigs
             ? "pt-0 pb-0 overflow-hidden h-full"
+            : isModelGigDetail
+            ? "pt-0 pb-0 overflow-hidden h-full"
             : shouldHideTopBar
             ? "pt-0 pb-32 overflow-y-auto"
             : "pt-16 px-4 py-8 pb-32 gap-8 overflow-y-auto"
@@ -128,19 +131,23 @@ export function PortalLayout({
       </main>
 
       {/* Progressive Blur from top to bottom at page bottom */}
-      <ProgressiveBlur
-        height="h-28 sm:h-32"
-        showGradient={!isModelDarkLayout}
-        gradientColor="from-transparent via-white/40 to-white/90"
-      />
+      {!isModelGigDetail && (
+        <ProgressiveBlur
+          height="h-28 sm:h-32"
+          showGradient={!isModelDarkLayout}
+          gradientColor="from-transparent via-white/40 to-white/90"
+        />
+      )}
 
       {/* Fixed Bottom Navigation Bar */}
-      <BottomNavBar
-        navItems={config.navItems}
-        currentPath={pathname}
-        activeBadgeBg={config.activeBadgeBg}
-        activeBadgeText={config.activeBadgeText}
-      />
+      {!isModelGigDetail && (
+        <BottomNavBar
+          navItems={config.navItems}
+          currentPath={pathname}
+          activeBadgeBg={config.activeBadgeBg}
+          activeBadgeText={config.activeBadgeText}
+        />
+      )}
     </div>
   );
 }

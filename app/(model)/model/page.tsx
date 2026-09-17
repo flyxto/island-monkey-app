@@ -9,30 +9,36 @@ export default function ModelHomePage() {
 
   return (
     <div className="flex-1 flex flex-col w-full overflow-hidden justify-between gap-3 sm:gap-4">
-      {/* Quick Actions Row: Send / Center Icon / Request layout matching reference image */}
+      {/* Quick Actions Row: White Glass Style matching Gigs Card */}
       <div className="px-3 pt-2 pb-0.5 flex items-center gap-2.5 shrink-0">
         <Link
           href="/model/bookings"
-          className="flex-1 bg-[#1a1a1e] hover:bg-[#25252b] border border-white/10 text-white py-3 px-4 rounded-xl flex items-center justify-between transition-colors group shadow-xs"
+          className="relative overflow-hidden flex-1 h-12 bg-gradient-to-b from-white via-[#F6F8FA] to-[#E3E7EC] border border-white rounded-2xl font-medium text-[13px] text-slate-900 px-4 flex items-center justify-between shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,1),inset_0_-2px_4px_rgba(0,0,0,0.08),0_8px_24px_rgba(0,0,0,0.15)] hover:brightness-105 active:scale-[0.985] transition-all group cursor-pointer"
         >
-          <span className="text-[13px] font-medium text-white">History</span>
-          <History className="w-4 h-4 text-white/60 group-hover:text-white transition-colors" />
+          {/* Upper Specular Glass Sheen */}
+          <div className="absolute inset-x-2 top-0.5 h-[46%] bg-gradient-to-b from-white/95 via-white/40 to-transparent rounded-t-2xl pointer-events-none" />
+          <span className="relative z-10 text-slate-900 tracking-tight">History</span>
+          <History className="relative z-10 w-4 h-4 text-slate-700 group-hover:text-slate-950 transition-colors" />
         </Link>
 
         <Link
           href="/model/bookings"
-          className="w-12 h-11 bg-[#26262c] hover:bg-[#32323a] border border-white/15 text-white rounded-xl flex items-center justify-center shrink-0 transition-colors shadow-xs"
+          className="relative overflow-hidden w-12 h-12 bg-gradient-to-b from-white via-[#F6F8FA] to-[#E3E7EC] border border-white rounded-2xl text-slate-900 flex items-center justify-center shrink-0 shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,1),inset_0_-2px_4px_rgba(0,0,0,0.08),0_8px_24px_rgba(0,0,0,0.15)] hover:brightness-105 active:scale-[0.985] transition-all cursor-pointer"
           title="Calendar Schedule"
         >
-          <Calendar className="w-4.5 h-4.5 text-white" />
+          {/* Upper Specular Glass Sheen */}
+          <div className="absolute inset-x-1.5 top-0.5 h-[46%] bg-gradient-to-b from-white/95 via-white/40 to-transparent rounded-t-2xl pointer-events-none" />
+          <Calendar className="relative z-10 w-4.5 h-4.5 text-slate-800" />
         </Link>
 
         <Link
           href="/model/gigs"
-          className="flex-1 bg-[#1a1a1e] hover:bg-[#25252b] border border-white/10 text-white py-3 px-4 rounded-xl flex items-center justify-between transition-colors group shadow-xs"
+          className="relative overflow-hidden flex-1 h-12 bg-gradient-to-b from-white via-[#F6F8FA] to-[#E3E7EC] border border-white rounded-2xl font-medium text-[13px] text-slate-900 px-4 flex items-center justify-between shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,1),inset_0_-2px_4px_rgba(0,0,0,0.08),0_8px_24px_rgba(0,0,0,0.15)] hover:brightness-105 active:scale-[0.985] transition-all group cursor-pointer"
         >
-          <span className="text-[13px] font-medium text-white">Find Gigs</span>
-          <Camera className="w-4 h-4 text-white/60 group-hover:text-white transition-colors" />
+          {/* Upper Specular Glass Sheen */}
+          <div className="absolute inset-x-2 top-0.5 h-[46%] bg-gradient-to-b from-white/95 via-white/40 to-transparent rounded-t-2xl pointer-events-none" />
+          <span className="relative z-10 text-slate-900 tracking-tight">Find Gigs</span>
+          <Camera className="relative z-10 w-4 h-4 text-slate-700 group-hover:text-slate-950 transition-colors" />
         </Link>
       </div>
 
