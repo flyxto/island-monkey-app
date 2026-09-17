@@ -5,8 +5,7 @@ import Link from "next/link";
 import { MOCK_BOOKINGS } from "@/lib/mock-data/model-portal";
 import { StatusBadge, StatusType } from "@/components/portal/StatusBadge";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { Search, Camera, Eye } from "lucide-react";
+import { Search, Calendar, Clock, MapPin, Eye, Camera } from "lucide-react";
 
 export default function MyBookingsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,108 +21,145 @@ export default function MyBookingsPage() {
   });
 
   return (
-    <div className="flex flex-col gap-6 pt-8 pb-8 ">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-[28px] font-medium text-im-heading tracking-tight">
-          My Bookings
-        </h1>
-        <span className="px-3 py-1 bg-im-accent-light text-im-accent text-[12px] font-medium rounded-full">
-          {MOCK_BOOKINGS.length} Total Bookings
-        </span>
-      </div>
-
-      {/* Search Bar */}
-      <div className="flex items-center gap-2">
+    <div className="flex-1 flex flex-col w-full overflow-hidden justify-between gap-3 sm:gap-4 min-h-0">
+      {/* Search Bar Row between top header and bottom card */}
+      <div className="px-3 pt-1 pb-0.5 flex items-center gap-2.5 shrink-0">
         <div className="relative flex-1">
           <Input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search Bookings..."
-            className="w-full h-11 pl-4 pr-10 bg-white border border-im-border rounded-full text-[15px] text-im-heading placeholder-[#9e9e9e] focus-visible:ring-im-accent focus-visible:border-im-accent shadow-none"
+            className="w-full h-11 py-2 px-4 bg-[#1a1a1e] border border-white/10 rounded-xl text-[14px] font-medium text-white placeholder-white/40 focus-visible:ring-im-accent focus-visible:border-im-accent shadow-none"
           />
         </div>
         <button
           type="button"
-          className="w-11 h-11 bg-im-accent-light text-im-accent rounded-full flex items-center justify-center shrink-0 shadow-sm hover:bg-im-accent/90 hover:text-im-accent-light transition-colors"
-          aria-label="Search"
+          className="w-12 h-11 bg-[#26262c] hover:bg-[#32323a] text-white border border-white/15 rounded-xl flex items-center justify-center shrink-0 shadow-xs transition-colors cursor-pointer"
+          aria-label="Search Bookings"
         >
-          <Search className="w-5 h-5" />
+          <Search className="w-5 h-5 text-white" />
         </button>
       </div>
 
-      {/* Status Filter Pills */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-        {(["all", "pending", "accepted", "rejected", "completed"] as const).map(
-          (filter) => (
-            <button
-              key={filter}
-              type="button"
-              onClick={() => setSelectedFilter(filter)}
-              className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all shrink-0 capitalize ${
-                selectedFilter === filter
-                  ? "bg-im-accent text-white shadow-xs"
-                  : "bg-white text-[#9e9e9e] border border-im-border hover:text-im-heading"
-              }`}
-            >
-              {filter}
-            </button>
-          )
-        )}
-      </div>
+      {/* Bottom Card Container: Light curved panel with notch */}
+      <div className="flex-1 min-h-0 bg-[#DCE0E2] rounded-t-[36px] rounded-b px-4 pt-3 flex flex-col gap-3.5 overflow-hidden">
+        {/* Pinned Top Section: Notch, Title, Status Filter Pills */}
+        <div className="flex flex-col gap-3 shrink-0">
+          {/* Drag Notch Indicator */}
+          <div className="w-10 h-1 bg-slate-400/50 rounded-full mx-auto my-0.5" />
 
-      {/* Bookings List Card */}
-      <Card className="bg-white border border-im-border rounded-xl overflow-hidden p-0">
-        <CardContent className="p-0 flex flex-col">
+          {/* Header: Title and Count */}
+          <div className="flex items-center justify-between px-1">
+            <h1 className="text-[16px] font-medium text-slate-900 tracking-tight">
+              My Bookings
+            </h1>
+            <span className="px-2.5 py-1 bg-black/10 text-slate-700 text-[12px] font-medium rounded-full">
+              {filteredBookings.length} Bookings
+            </span>
+          </div>
+
+          {/* Status Filter Pills (flex-wrap ensures no cut off on any screen) */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            {(
+              [
+                { key: "all", label: "All" },
+                { key: "pending", label: "Pending", dot: "bg-amber-500" },
+                { key: "accepted", label: "Accepted", dot: "bg-emerald-500" },
+                { key: "completed", label: "Completed", dot: "bg-slate-400" },
+                { key: "rejected", label: "Rejected", dot: "bg-rose-500" },
+              ] as const
+            ).map((item) => {
+              const isActive = selectedFilter === item.key;
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => setSelectedFilter(item.key)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium transition-all cursor-pointer ${
+                    isActive
+                      ? "bg-[#FF6433] text-white shadow-xs"
+                      : "bg-white/80 text-slate-700 hover:bg-white hover:text-slate-900 border border-slate-300/60"
+                  }`}
+                >
+                  {"dot" in item && item.dot && (
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                        isActive ? "bg-white" : item.dot
+                      }`}
+                    />
+                  )}
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Scrollable Bookings List */}
+        <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-3 pb-32">
           {filteredBookings.length > 0 ? (
-            filteredBookings.map((booking, index) => (
-              <div key={booking.id} className="flex flex-col w-full">
-                <div className="flex items-center justify-between gap-3 py-3.5 px-4 hover:bg-slate-50 transition-colors">
+            filteredBookings.map((booking) => (
+              <div
+                key={booking.id}
+                className="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/80 flex flex-col gap-3 transition-shadow hover:shadow-md"
+              >
+                {/* Top: Client Info + Status Badge */}
+                <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-im-hero flex items-center justify-center text-im-accent shrink-0 border border-im-border/40">
+                    <div className="w-11 h-11 rounded-xl bg-orange-500/10 text-[#FF6433] border border-[#FF6433]/20 flex items-center justify-center shrink-0">
                       <Camera className="w-5 h-5" />
                     </div>
-
                     <div className="flex flex-col min-w-0">
-                      <span className="text-[15px] font-medium text-im-heading truncate">
+                      <h2 className="text-[15px] font-medium text-slate-900 tracking-tight truncate">
                         {booking.clientName}
-                      </span>
-                      <span className="text-[13px] text-[#9e9e9e] text-wrap">
-                        {booking.dateTime} • {booking.duration}
-                      </span>
+                      </h2>
+                      <div className="flex items-center gap-1 text-[12px] font-medium text-slate-500 mt-0.5">
+                        <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span>{booking.dateTime}</span>
+                      </div>
                     </div>
                   </div>
 
-                  <StatusBadge status={booking.status} />
-
-                  {/* Right section: StatusBadge & Eye View Button */}
-                  <div className="flex items-center shrink-0">
-                    <Link
-                      href={`/model/bookings/${booking.id}`}
-                      className="flex items-center gap-1 py-1 px-2 text-[12px] bg-slate-100 hover:bg-im-accent-light text-im-body hover:text-im-accent rounded-lg transition-colors"
-                      title="View Booking"
-                    >
-                      <Eye className="w-4 h-4" />
-                      <p>View</p>
-                    </Link>
-                  </div>
+                  <StatusBadge status={booking.status} className="shrink-0" />
                 </div>
 
-                {index < filteredBookings.length - 1 && (
-                  <div className="h-px bg-im-border/30 mx-4" />
-                )}
+                {/* Middle: Duration, Location & Payment */}
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[12px] font-medium text-slate-600">
+                  <div className="flex items-center gap-1.5 truncate">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span className="truncate">{booking.location}</span>
+                    <span className="text-slate-300">•</span>
+                    <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span>{booking.duration}</span>
+                  </div>
+                  <span className="text-[13px] font-medium text-slate-900 shrink-0 pl-2">
+                    LKR {booking.paymentLKR.toLocaleString()}
+                  </span>
+                </div>
+
+                {/* Bottom: View Booking Button */}
+                <Link
+                  href={`/model/bookings/${booking.id}`}
+                  className="relative overflow-hidden w-full h-10 bg-gradient-to-b from-white via-[#F8FAFC] to-[#EDF2F7] border border-slate-200/90 rounded-full font-medium text-[13px] text-slate-900 flex items-center justify-center gap-1.5 shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,1),inset_0_-1.5px_3px_rgba(0,0,0,0.05),0_2px_6px_rgba(0,0,0,0.06)] hover:brightness-98 active:scale-[0.99] transition-all cursor-pointer"
+                >
+                  <div className="absolute inset-x-2 top-0.5 h-[46%] bg-gradient-to-b from-white/95 via-white/40 to-transparent rounded-t-full pointer-events-none" />
+                  <Eye className="w-4 h-4 text-slate-700 relative z-10" />
+                  <span className="relative z-10 tracking-tight">
+                    View Booking
+                  </span>
+                </Link>
               </div>
             ))
           ) : (
-            <div className="p-8 text-center bg-white">
-              <p className="text-[#9e9e9e] text-[15px]">
+            <div className="p-8 text-center bg-white border border-slate-200/60 rounded-2xl shadow-xs">
+              <p className="text-slate-500 text-[14px] font-medium">
                 No bookings found matching filter.
               </p>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -32,8 +32,10 @@ export function PortalLayout({
   const isModel = config.portalId === "model";
   const isModelHome = pathname === "/model";
   const isModelGigs = pathname === "/model/gigs";
+  const isModelBookings = pathname === "/model/bookings";
+  const isCompactModelHeader = isModelGigs || isModelBookings;
   const isModelGigDetail = pathname.startsWith("/model/gigs/") && pathname !== "/model/gigs";
-  const showModelHeader = isModel && (isModelHome || isModelGigs);
+  const showModelHeader = isModel && (isModelHome || isCompactModelHeader);
   const shouldHideTopBar = hideTopAppBar ?? (isModelHome || showModelHeader || isModelGigDetail);
 
   // Safe consumer check for CustomerContext
@@ -93,7 +95,7 @@ export function PortalLayout({
 
   const resolvedAction = rightAction ? [rightAction] : resolveTopBarActions();
 
-  const isModelDarkLayout = isModel && (isModelHome || isModelGigs);
+  const isModelDarkLayout = isModel && (isModelHome || isCompactModelHeader);
 
   return (
     <div
@@ -103,9 +105,9 @@ export function PortalLayout({
           : "min-h-svh bg-linear-to-b from-[#f8f9ff] to-[#ffffff] relative"
       } flex flex-col`}
     >
-      {/* Model Persistent Header (Expanded on Home, Shrunk on Gigs) */}
+      {/* Model Persistent Header (Expanded on Home, Shrunk on Gigs & Bookings) */}
       {showModelHeader ? (
-        <ModelHeader isCompact={isModelGigs} />
+        <ModelHeader isCompact={isCompactModelHeader} />
       ) : (
         /* Fixed Top App Bar */
         !shouldHideTopBar && (
@@ -118,7 +120,7 @@ export function PortalLayout({
         className={`flex-1 flex flex-col w-full min-h-0 ${
           isModelHome
             ? "pt-0 pb-0 overflow-hidden h-full overscroll-none touch-none justify-between"
-            : isModelGigs
+            : isCompactModelHeader
             ? "pt-0 pb-0 overflow-hidden h-full"
             : isModelGigDetail
             ? "pt-0 pb-0 overflow-hidden h-full"
