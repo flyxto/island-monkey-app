@@ -47,7 +47,7 @@ export default function SingleBookingDetailPage({
           >
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <h1 className="text-[24px] font-semibold text-im-heading tracking-tight">
+          <h1 className="text-[24px] font-medium text-im-heading tracking-tight">
             Booking Details
           </h1>
         </div>
@@ -65,7 +65,7 @@ export default function SingleBookingDetailPage({
           <span className="text-[12px] font-normal text-[#9e9e9e] uppercase tracking-wider">
             Client / Brand
           </span>
-          <h2 className="text-[24px] font-semibold text-im-heading">
+          <h2 className="text-[24px] font-medium text-im-heading">
             {booking.clientName}
           </h2>
         </div>
@@ -124,7 +124,7 @@ export default function SingleBookingDetailPage({
             <div className="p-3.5 bg-slate-50 border border-im-border/50 rounded-xl flex items-start gap-2.5 text-[14px] text-im-body">
               <FileText className="w-4 h-4 text-im-accent shrink-0 mt-0.5" />
               <div>
-                <strong className="font-semibold block text-im-heading">
+                <strong className="font-medium block text-im-heading">
                   Client Notes
                 </strong>
                 {booking.notes}
@@ -136,7 +136,7 @@ export default function SingleBookingDetailPage({
 
       <div className="flex justify-between px-1">
         <span className="text-[20px] font-medium text-im-body">Total Payment:</span>
-        <span className="font-semibold text-[20px] text-im-heading">
+        <span className="font-medium text-[20px] text-im-heading">
           {formattedPayment}
         </span>
       </div>

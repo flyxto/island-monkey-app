@@ -12,7 +12,7 @@ export default function ModelHomePage() {
   const [pointsWhole, pointsCents] = MOCK_MODEL_PROFILE.formattedPoints.split(".");
 
   return (
-    <div className="flex flex-col p-1 bg-[#000002] h-full overflow-hidden justify-between gap-5 sm:gap-6">
+    <div className="flex flex-col p-1 bg-[#000002] h-full w-full overflow-hidden justify-between gap-3 sm:gap-4 touch-none overscroll-none select-none">
       {/* Top Hero Container Card */}
       <div className="relative bg-linear-to-b from-[#E84A23] via-[#FF6A48] to-[#FF8C6E] px-5 pt-6 pb-8 rounded-t rounded-b-[32px] border border-black/5 shadow-md flex flex-col gap-5 text-white shrink-0">
         {/* Top App Bar Content: User Avatar, Name & Role, Notification Bell */}
@@ -105,7 +105,7 @@ export default function ModelHomePage() {
       </div>
 
       {/* Bottom Sheet Container: Light curved panel with notch, matching reference image */}
-      <div className="flex-1 min-h-0 bg-[#DCE0E2] rounded-t-[36px] rounded-b px-4 pt-3 pb-24 flex flex-col gap-3 overflow-hidden">
+      <div className="flex-1 min-h-0 bg-[#DCE0E2] rounded-t-[36px] rounded-b px-4 pt-3 pb-28 flex flex-col gap-3 overflow-hidden">
         {/* Drag Notch Indicator */}
         <div className="w-10 h-1 bg-slate-400/50 rounded-full mx-auto my-0.5 shrink-0" />
 

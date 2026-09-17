@@ -64,9 +64,9 @@ export function TopAppBar({
 
   // Default: Customer Portal Bell Notification
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-white border-b border-im-border flex items-center justify-between px-4 max-w-107.5 mx-auto">
+    <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-white border-b border-im-border flex items-center justify-between px-4 w-full">
       <div className="flex items-center">
-        <span className="text-[24px] font-bold text-black tracking-tight">
+        <span className="text-[24px] font-medium text-black tracking-tight">
           {wordmark}
         </span>
       </div>

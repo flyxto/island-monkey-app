@@ -25,10 +25,10 @@ export default function MyBookingsPage() {
     <div className="flex flex-col gap-6 pt-8 pb-8 ">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-[28px] font-semibold text-im-heading tracking-tight">
+        <h1 className="text-[28px] font-medium text-im-heading tracking-tight">
           My Bookings
         </h1>
-        <span className="px-3 py-1 bg-im-accent-light text-im-accent text-[12px] font-semibold rounded-full">
+        <span className="px-3 py-1 bg-im-accent-light text-im-accent text-[12px] font-medium rounded-full">
           {MOCK_BOOKINGS.length} Total Bookings
         </span>
       </div>
@@ -61,7 +61,7 @@ export default function MyBookingsPage() {
               key={filter}
               type="button"
               onClick={() => setSelectedFilter(filter)}
-              className={`px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all shrink-0 capitalize ${
+              className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all shrink-0 capitalize ${
                 selectedFilter === filter
                   ? "bg-im-accent text-white shadow-xs"
                   : "bg-white text-[#9e9e9e] border border-im-border hover:text-im-heading"
@@ -86,7 +86,7 @@ export default function MyBookingsPage() {
                     </div>
 
                     <div className="flex flex-col min-w-0">
-                      <span className="text-[15px] font-semibold text-im-heading truncate">
+                      <span className="text-[15px] font-medium text-im-heading truncate">
                         {booking.clientName}
                       </span>
                       <span className="text-[13px] text-[#9e9e9e] text-wrap">

@@ -4,6 +4,7 @@ import React from "react";
 import { usePathname } from "next/navigation";
 import { TopAppBar, TopAppBarAction } from "./TopAppBar";
 import { BottomNavBar } from "./BottomNavBar";
+import { ProgressiveBlur } from "./ProgressiveBlur";
 import { PortalNavConfig } from "@/lib/portal/nav-config";
 import { useCustomer } from "@/lib/portal/CustomerContext";
 import { QrCode, ScanLine, Bell} from "lucide-react";
@@ -29,6 +30,37 @@ export function PortalLayout({
   const pathname = usePathname() || "";
   const isModelHome = pathname === "/model";
   const shouldHideTopBar = hideTopAppBar ?? isModelHome;
+
+  // Track navigation direction for swipe animations between navbar tabs
+  const [prevPath, setPrevPath] = React.useState(pathname);
+  const [direction, setDirection] = React.useState<"right" | "left" | "none">("none");
+
+  if (prevPath !== pathname) {
+    const getIndex = (path: string) => {
+      return config.navItems.findIndex((item) => {
+        if (item.href === path) return true;
+        if (item.matchPrefix && item.href !== "/" && item.href !== "/model" && path.startsWith(item.href)) {
+          return true;
+        }
+        return false;
+      });
+    };
+
+    const prevIdx = getIndex(prevPath);
+    const currIdx = getIndex(pathname);
+
+    let newDir: "right" | "left" | "none" = "none";
+    if (currIdx !== -1 && prevIdx !== -1 && currIdx !== prevIdx) {
+      newDir = currIdx > prevIdx ? "right" : "left";
+    } else if (pathname.startsWith(prevPath) && pathname !== prevPath) {
+      newDir = "right";
+    } else if (prevPath.startsWith(pathname) && pathname !== prevPath) {
+      newDir = "left";
+    }
+
+    setPrevPath(pathname);
+    setDirection(newDir);
+  }
 
   // Safe consumer check for CustomerContext
   let isQRModalOpen = false;
@@ -88,41 +120,58 @@ export function PortalLayout({
   const resolvedAction = rightAction ? [rightAction] : resolveTopBarActions();
 
   return (
-    <div className="min-h-screen bg-slate-100 flex justify-center items-center py-0 sm:py-6">
-      {/* Mobile-first Viewport Container (Centered on desktop) */}
-      <div
-        className={`w-full max-w-107.5 ${
-          isModelHome
-            ? "h-screen sm:h-220 max-h-screen sm:max-h-220 bg-[#000002]"
-            : "min-h-screen sm:min-h-220 sm:h-220 bg-linear-to-b from-[#f8f9ff] to-[#ffffff]"
-        } relative flex flex-col shadow-2xl sm:rounded-[32px] overflow-hidden border border-im-border/40`}
-      >
-        {/* Fixed Top App Bar */}
-        {!shouldHideTopBar && (
-          <TopAppBar wordmark={config.wordmark} actions={resolvedAction} />
-        )}
+    <div
+      className={`w-full ${
+        isModelHome
+          ? "fixed inset-0 w-full h-full overflow-hidden overscroll-none touch-none bg-[#000002]"
+          : "min-h-svh bg-linear-to-b from-[#f8f9ff] to-[#ffffff] relative"
+      } flex flex-col`}
+    >
+      {/* Fixed Top App Bar */}
+      {!shouldHideTopBar && (
+        <TopAppBar wordmark={config.wordmark} actions={resolvedAction} />
+      )}
 
-        {/* Main Content Area */}
-        <main
-          className={`flex-1 flex flex-col ${
-            isModelHome
-              ? "pt-0 pb-0 overflow-hidden h-full"
-              : shouldHideTopBar
-              ? "pt-0 pb-28 overflow-y-auto"
-              : "pt-16 px-4 py-8 pb-28 gap-8 overflow-y-auto"
+      {/* Main Content Area */}
+      <main
+        className={`flex-1 flex flex-col w-full overflow-x-hidden ${
+          isModelHome
+            ? "pt-0 pb-0 overflow-hidden h-full overscroll-none touch-none"
+            : shouldHideTopBar
+            ? "pt-0 pb-32 overflow-y-auto"
+            : "pt-16 px-4 py-8 pb-32 gap-8 overflow-y-auto"
+        }`}
+      >
+        <div
+          key={pathname}
+          className={`w-full flex-1 flex flex-col ${
+            isModelHome ? "h-full" : ""
+          } ${
+            direction === "right"
+              ? "animate-page-swipe-right"
+              : direction === "left"
+              ? "animate-page-swipe-left"
+              : ""
           }`}
         >
           {children}
-        </main>
+        </div>
+      </main>
 
-        {/* Fixed Bottom Navigation Bar */}
-        <BottomNavBar
-          navItems={config.navItems}
-          currentPath={pathname}
-          activeBadgeBg={config.activeBadgeBg}
-          activeBadgeText={config.activeBadgeText}
-        />
-      </div>
+      {/* Progressive Blur from top to bottom at page bottom */}
+      <ProgressiveBlur
+        height="h-28 sm:h-32"
+        showGradient={!isModelHome}
+        gradientColor="from-transparent via-white/40 to-white/90"
+      />
+
+      {/* Fixed Bottom Navigation Bar */}
+      <BottomNavBar
+        navItems={config.navItems}
+        currentPath={pathname}
+        activeBadgeBg={config.activeBadgeBg}
+        activeBadgeText={config.activeBadgeText}
+      />
     </div>
   );
 }

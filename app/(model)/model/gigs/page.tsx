@@ -19,10 +19,10 @@ export default function MyGigsPage() {
     <div className="flex flex-col gap-8 pt-8 pb-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-[28px] font-semibold text-im-heading tracking-tight">
+        <h1 className="text-[28px] font-medium text-im-heading tracking-tight">
           My Gigs
         </h1>
-        <span className="px-3 py-1 bg-im-accent-light text-im-accent text-[12px] font-semibold rounded-full">
+        <span className="px-3 py-1 bg-im-accent-light text-im-accent text-[12px] font-medium rounded-full">
           {MOCK_GIGS.length} Available Gigs
         </span>
       </div>
