@@ -37,8 +37,9 @@ export function PortalLayout({
   const isModelGigDetail = pathname.startsWith("/model/gigs/") && pathname !== "/model/gigs";
   const isModelBookingDetail = pathname.startsWith("/model/bookings/") && pathname !== "/model/bookings";
   const isModelDetail = isModelGigDetail || isModelBookingDetail;
-  const showModelHeader = isModel && (isModelHome || isCompactModelHeader);
-  const shouldHideTopBar = hideTopAppBar ?? (isModelHome || showModelHeader || isModelDetail);
+  const isModelProfile = pathname === "/model/profile";
+  const showModelHeader = isModel && (isModelHome || isCompactModelHeader || isModelProfile);
+  const shouldHideTopBar = hideTopAppBar ?? (isModelHome || showModelHeader || isModelDetail || isModelProfile);
 
   // Safe consumer check for CustomerContext
   let isQRModalOpen = false;
@@ -104,12 +105,14 @@ export function PortalLayout({
       className={`w-full ${
         isModelDarkLayout
           ? "fixed inset-0 w-full h-full overflow-hidden overscroll-none bg-[#000002] p-1 justify-between gap-3 sm:gap-4"
+          : isModelProfile
+          ? "min-h-svh bg-gradient-to-b from-[#FFEFE8] via-[#FAF6F3] to-[#F6F7F9] relative"
           : "min-h-svh bg-linear-to-b from-[#f8f9ff] to-[#ffffff] relative"
       } flex flex-col`}
     >
-      {/* Model Persistent Header (Expanded on Home, Shrunk on Gigs & Bookings) */}
+      {/* Model Persistent Header (Expanded on Home & Profile, Shrunk on Gigs & Bookings) */}
       {showModelHeader ? (
-        <ModelHeader isCompact={isCompactModelHeader} />
+        <ModelHeader isCompact={isCompactModelHeader} isProfile={isModelProfile} />
       ) : (
         /* Fixed Top App Bar */
         !shouldHideTopBar && (
@@ -126,6 +129,8 @@ export function PortalLayout({
             ? "pt-0 pb-0 overflow-hidden h-full"
             : isModelDetail
             ? "pt-0 pb-0 overflow-hidden h-full"
+            : isModelProfile
+            ? "pt-3.5 px-4 pb-32 gap-5 overflow-y-auto"
             : shouldHideTopBar
             ? "pt-0 pb-32 overflow-y-auto"
             : "pt-16 px-4 py-8 pb-32 gap-8 overflow-y-auto"
@@ -138,7 +143,7 @@ export function PortalLayout({
       {!isModelDetail && (
         <ProgressiveBlur
           height="h-28 sm:h-32"
-          showGradient={!isModelDarkLayout}
+          showGradient={!isModelDarkLayout && !isModelProfile}
           gradientColor="from-transparent via-white/40 to-white/90"
         />
       )}
