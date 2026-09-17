@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   Aperture,
+  Loader2,
 } from "lucide-react";
 
 export default function PackageDetailPage({
@@ -24,12 +25,28 @@ export default function PackageDetailPage({
 }) {
   const resolvedParams = use(params);
   const router = useRouter();
-  const { packages, setSelectedPackage } = useCustomer();
+  const { packages, isLoadingPackages, setSelectedPackage } = useCustomer();
 
-  const pkg: PackageItem =
-    packages.find((p) => p.id === resolvedParams.id) ||
-    MOCK_PACKAGES.find((p) => p.isBestSeller) ||
-    MOCK_PACKAGES[0];
+  const pkg: PackageItem | undefined = packages.find((p) => p.id === resolvedParams.id);
+
+  if (isLoadingPackages) {
+    return (
+      <div className="flex justify-center items-center h-screen -mt-20">
+        <Loader2 className="h-8 w-8 animate-spin text-im-accent" />
+      </div>
+    );
+  }
+
+  if (!pkg) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen -mt-20 gap-4">
+        <p className="text-im-body">Package not found.</p>
+        <Link href="/customer/packages">
+          <Button variant="outline">Back to Packages</Button>
+        </Link>
+      </div>
+    );
+  }
 
   const formattedPrice = `LKR ${pkg.priceLKR.toLocaleString()}`;
 
