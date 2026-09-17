@@ -36,8 +36,8 @@ export default function ModelProfilePage() {
           {/* Avatar with status indicator */}
           <div className="relative -mt-12 mb-3">
             <div className="w-24 h-24 rounded-full bg-white p-1 shadow-md">
-              <div className="w-full h-full rounded-full bg-slate-100 flex items-center justify-center text-slate-700 font-bold text-2xl border border-slate-200 overflow-hidden">
-                <span className="text-im-accent font-semibold tracking-wider">
+              <div className="w-full h-full rounded-full bg-slate-100 flex items-center justify-center text-slate-700 font-medium text-2xl border border-slate-200 overflow-hidden">
+                <span className="text-im-accent font-medium tracking-wider">
                   {profile.firstName[0]}
                   {profile.lastName[0]}
                 </span>
@@ -54,7 +54,7 @@ export default function ModelProfilePage() {
 
           {/* Name & Handle */}
           <div className="flex items-center gap-1.5">
-            <h1 className="text-xl font-bold text-black tracking-tight">
+            <h1 className="text-xl font-medium text-black tracking-tight">
               {profile.firstName} {profile.lastName}
             </h1>
             <CheckCircle2 className="w-4.5 h-4.5 text-[#C85A17] shrink-0" />
@@ -69,7 +69,7 @@ export default function ModelProfilePage() {
             {profile.categories?.map((cat) => (
               <span
                 key={cat}
-                className="px-2.5 py-0.5 bg-im-accent-light text-im-accent text-[11px] font-semibold rounded-full border border-im-accent/15"
+                className="px-2.5 py-0.5 bg-im-accent-light text-im-accent text-[11px] font-medium rounded-full border border-im-accent/15"
               >
                 {cat}
               </span>
@@ -98,7 +98,7 @@ export default function ModelProfilePage() {
             <button
               type="button"
               onClick={() => setIsAvailable(!isAvailable)}
-              className={`text-[11px] font-semibold px-3 py-1 rounded-full transition-colors ${
+              className={`text-[11px] font-medium px-3 py-1 rounded-full transition-colors ${
                 isAvailable
                   ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                   : "bg-slate-100 text-slate-600 border border-slate-200"
@@ -116,9 +116,9 @@ export default function ModelProfilePage() {
         <div className="bg-white border border-im-border/30 rounded-xl p-3.5 flex flex-col gap-1 shadow-2xs">
           <div className="flex items-center gap-1.5 text-amber-500">
             <Star className="w-4 h-4 fill-amber-500" />
-            <span className="text-xs font-semibold text-slate-700">Rating</span>
+            <span className="text-xs font-medium text-slate-700">Rating</span>
           </div>
-          <span className="text-xl font-bold text-black tracking-tight">
+          <span className="text-xl font-medium text-black tracking-tight">
             {profile.rating}
             <span className="text-xs text-slate-400 font-normal"> / 5.0</span>
           </span>
@@ -129,9 +129,9 @@ export default function ModelProfilePage() {
         <div className="bg-white border border-im-border/30 rounded-xl p-3.5 flex flex-col gap-1 shadow-2xs">
           <div className="flex items-center gap-1.5 text-im-accent">
             <CalendarCheck className="w-4 h-4" />
-            <span className="text-xs font-semibold text-slate-700">Completed</span>
+            <span className="text-xs font-medium text-slate-700">Completed</span>
           </div>
-          <span className="text-xl font-bold text-black tracking-tight">
+          <span className="text-xl font-medium text-black tracking-tight">
             {profile.completedBookingsCount}
           </span>
           <span className="text-[11px] text-slate-500">Gigs fulfilled</span>
@@ -141,9 +141,9 @@ export default function ModelProfilePage() {
         <div className="bg-white border border-im-border/30 rounded-xl p-3.5 flex flex-col gap-1 shadow-2xs">
           <div className="flex items-center gap-1.5 text-slate-700">
             <Sparkles className="w-4 h-4 text-im-accent" />
-            <span className="text-xs font-semibold text-slate-700">Points</span>
+            <span className="text-xs font-medium text-slate-700">Points</span>
           </div>
-          <span className="text-xl font-bold text-black tracking-tight">
+          <span className="text-xl font-medium text-black tracking-tight">
             {profile.formattedPoints}
           </span>
           <span className="text-[11px] text-slate-500">Available to redeem</span>
@@ -153,9 +153,9 @@ export default function ModelProfilePage() {
         <div className="bg-white border border-im-border/30 rounded-xl p-3.5 flex flex-col gap-1 shadow-2xs">
           <div className="flex items-center gap-1.5 text-slate-700">
             <Shield className="w-4 h-4 text-slate-500" />
-            <span className="text-xs font-semibold text-slate-700">Agency</span>
+            <span className="text-xs font-medium text-slate-700">Agency</span>
           </div>
-          <span className="text-sm font-semibold text-black tracking-tight line-clamp-1">
+          <span className="text-sm font-medium text-black tracking-tight line-clamp-1">
             Island Monkey
           </span>
           <span className="text-[11px] text-emerald-600 font-medium">Verified Talent</span>
@@ -165,30 +165,30 @@ export default function ModelProfilePage() {
       {/* Model Specifications Card */}
       <Card className="bg-white border border-im-border/30 rounded-xl overflow-hidden shadow-2xs">
         <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-black flex items-center gap-2">
+          <h2 className="text-sm font-medium text-black flex items-center gap-2">
             <Sliders className="w-4 h-4 text-im-accent" />
             Physical Specifications
           </h2>
-          <span className="text-[11px] text-im-accent font-semibold hover:underline cursor-pointer">
+          <span className="text-[11px] text-im-accent font-medium hover:underline cursor-pointer">
             Edit Specs
           </span>
         </div>
         <CardContent className="p-4 grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
           <div>
             <span className="text-slate-400 font-medium block">Height</span>
-            <span className="text-slate-800 font-semibold">{profile.height}</span>
+            <span className="text-slate-800 font-medium">{profile.height}</span>
           </div>
           <div>
             <span className="text-slate-400 font-medium block">Measurements</span>
-            <span className="text-slate-800 font-semibold">{profile.measurements}</span>
+            <span className="text-slate-800 font-medium">{profile.measurements}</span>
           </div>
           <div>
             <span className="text-slate-400 font-medium block">Shoe Size</span>
-            <span className="text-slate-800 font-semibold">{profile.shoeSize}</span>
+            <span className="text-slate-800 font-medium">{profile.shoeSize}</span>
           </div>
           <div>
             <span className="text-slate-400 font-medium block">Eyes / Hair</span>
-            <span className="text-slate-800 font-semibold">
+            <span className="text-slate-800 font-medium">
               {profile.eyeColor} • {profile.hairColor}
             </span>
           </div>
@@ -198,7 +198,7 @@ export default function ModelProfilePage() {
       {/* Contact Information Card */}
       <Card className="bg-white border border-im-border/30 rounded-xl overflow-hidden shadow-2xs">
         <div className="px-4 py-3 border-b border-slate-100">
-          <h2 className="text-sm font-bold text-black flex items-center gap-2">
+          <h2 className="text-sm font-medium text-black flex items-center gap-2">
             <User className="w-4 h-4 text-im-accent" />
             Contact & Location
           </h2>
@@ -227,7 +227,7 @@ export default function ModelProfilePage() {
       <div className="flex flex-col gap-2">
         <button
           type="button"
-          className="w-full flex items-center justify-between p-3.5 bg-white border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-800 hover:bg-slate-50 transition-colors shadow-2xs"
+          className="w-full flex items-center justify-between p-3.5 bg-white border border-slate-200/80 rounded-xl text-xs font-medium text-slate-800 hover:bg-slate-50 transition-colors shadow-2xs"
         >
           <div className="flex items-center gap-3">
             <CreditCard className="w-4 h-4 text-slate-500" />
@@ -238,7 +238,7 @@ export default function ModelProfilePage() {
 
         <button
           type="button"
-          className="w-full flex items-center justify-between p-3.5 bg-white border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-800 hover:bg-slate-50 transition-colors shadow-2xs"
+          className="w-full flex items-center justify-between p-3.5 bg-white border border-slate-200/80 rounded-xl text-xs font-medium text-slate-800 hover:bg-slate-50 transition-colors shadow-2xs"
         >
           <div className="flex items-center gap-3">
             <Settings className="w-4 h-4 text-slate-500" />
@@ -250,7 +250,7 @@ export default function ModelProfilePage() {
         <button
           type="button"
           onClick={() => alert("Signed out.")}
-          className="w-full flex items-center justify-center gap-2 p-3.5 bg-red-50 text-red-600 border border-red-200/70 rounded-xl text-xs font-semibold hover:bg-red-100 transition-colors mt-2"
+          className="w-full flex items-center justify-center gap-2 p-3.5 bg-red-50 text-red-600 border border-red-200/70 rounded-xl text-xs font-medium hover:bg-red-100 transition-colors mt-2"
         >
           <LogOut className="w-4 h-4" />
           <span>Sign Out</span>

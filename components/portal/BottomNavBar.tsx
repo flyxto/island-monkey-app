@@ -55,7 +55,7 @@ export function BottomNavBar({
                 }`}
               />
               <span
-                className={`overflow-hidden whitespace-nowrap text-[13px] font-semibold text-black tracking-tight leading-none transition-all duration-300 ease-out ${
+                className={`overflow-hidden whitespace-nowrap text-[13px] font-medium text-black tracking-tight leading-none transition-all duration-300 ease-out ${
                   active
                     ? "max-w-28 opacity-100 ml-1.5"
                     : "max-w-0 opacity-0 ml-0 pointer-events-none"

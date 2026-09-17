@@ -90,16 +90,26 @@ export function PortalLayout({
   return (
     <div className="min-h-screen bg-slate-100 flex justify-center items-center py-0 sm:py-6">
       {/* Mobile-first Viewport Container (Centered on desktop) */}
-      <div className="w-full max-w-107.5 min-h-screen sm:min-h-220 sm:h-220 bg-linear-to-b from-[#f8f9ff] to-[#ffffff] relative flex flex-col shadow-2xl sm:rounded-[32px] overflow-hidden border border-im-border/40">
+      <div
+        className={`w-full max-w-107.5 ${
+          isModelHome
+            ? "h-screen sm:h-220 max-h-screen sm:max-h-220 bg-[#000002]"
+            : "min-h-screen sm:min-h-220 sm:h-220 bg-linear-to-b from-[#f8f9ff] to-[#ffffff]"
+        } relative flex flex-col shadow-2xl sm:rounded-[32px] overflow-hidden border border-im-border/40`}
+      >
         {/* Fixed Top App Bar */}
         {!shouldHideTopBar && (
           <TopAppBar wordmark={config.wordmark} actions={resolvedAction} />
         )}
 
-        {/* Scrollable Main Content Area */}
+        {/* Main Content Area */}
         <main
-          className={`flex-1 pb-28 overflow-y-auto flex flex-col ${
-            shouldHideTopBar ? "pt-0" : "pt-16 px-4 py-8 gap-8"
+          className={`flex-1 flex flex-col ${
+            isModelHome
+              ? "pt-0 pb-0 overflow-hidden h-full"
+              : shouldHideTopBar
+              ? "pt-0 pb-28 overflow-y-auto"
+              : "pt-16 px-4 py-8 pb-28 gap-8 overflow-y-auto"
           }`}
         >
           {children}

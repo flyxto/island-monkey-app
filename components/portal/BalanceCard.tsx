@@ -43,7 +43,7 @@ export function BalanceCard({
 
         <div className="flex flex-col">
           <span className="text-[48px] font-medium text-white">Points</span>
-          <span className="text-[48px] sm:text-[48px] font-semibold leading-none text-white tracking-tight">
+          <span className="text-[48px] sm:text-[48px] font-medium leading-none text-white tracking-tight">
             {formattedPoints}
           </span>
         </div>
