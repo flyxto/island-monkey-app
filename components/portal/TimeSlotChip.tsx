@@ -25,12 +25,12 @@ export function TimeSlotChip({
       type="button"
       disabled={isDisabled}
       onClick={() => onSelect(time)}
-      className={`px-4 py-2.5 rounded-lg text-[16px] font-medium border transition-all text-center flex-initial min-w-31 ${
+      className={`px-4 py-2.5 rounded-full text-[14px] font-medium border transition-all text-center flex-initial min-w-28 cursor-pointer ${
         isSelected
-          ? "bg-im-accent text-white border-im-accent shadow-sm font-semibold"
+          ? "bg-[#FF6433] text-white border-[#FF6433] shadow-md shadow-[#FF6433]/25 font-medium"
           : isDisabled
-          ? "bg-slate-100 text-im-muted-light border-im-border/50 cursor-not-allowed opacity-50"
-          : "bg-white text-im-heading border-im-border hover:border-im-accent hover:text-im-accent"
+          ? "bg-slate-100 text-slate-300 border-slate-200 cursor-not-allowed opacity-50"
+          : "bg-white text-slate-700 border-black/10 hover:border-[#FF6433] hover:text-[#FF6433]"
       }`}
     >
       {time}

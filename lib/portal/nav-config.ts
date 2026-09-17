@@ -48,6 +48,12 @@ export const PORTAL_CONFIGS: Record<string, PortalNavConfig> = {
         icon: Camera,
         matchPrefix: true,
       },
+      {
+        id: "profile",
+        label: "Profile",
+        href: "/customer/profile",
+        icon: User,
+      },
     ],
   },
   partner: {

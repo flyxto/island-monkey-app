@@ -24,24 +24,24 @@ export function DateCalendar({ selectedDate, onSelectDate }: DateCalendarProps) 
   const weekdays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
   return (
-    <Card className="w-full bg-white border border-im-border rounded-xl p-0">
-      <CardContent className="p-4 flex flex-col gap-4">
+    <Card className="w-full bg-white border border-black/5 rounded-[24px] p-0 shadow-xs">
+      <CardContent className="p-4 sm:p-5 flex flex-col gap-4">
         {/* Month Header */}
         <div className="flex items-center justify-between">
-          <Badge className="px-4 py-1.5 bg-im-accent-light text-im-accent text-[14px] font-semibold rounded-full hover:bg-im-accent hover:text-im-accent-light border-none">
+          <Badge className="px-4 py-1.5 bg-[#FFF0EB] text-[#FF6433] text-[13px] font-medium rounded-full hover:bg-[#FFE5DC] hover:text-[#FF6433] border-none">
             {monthName}
           </Badge>
-          <div className="flex items-center gap-1 text-[#9e9e9e]">
+          <div className="flex items-center gap-1 text-slate-400">
             <button
               type="button"
-              className="p-1 hover:text-im-heading transition-colors"
+              className="p-1 hover:text-slate-900 transition-colors"
               aria-label="Previous Month"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               type="button"
-              className="p-1 hover:text-im-heading transition-colors"
+              className="p-1 hover:text-slate-900 transition-colors"
               aria-label="Next Month"
             >
               <ChevronRight className="w-5 h-5" />
@@ -54,7 +54,7 @@ export function DateCalendar({ selectedDate, onSelectDate }: DateCalendarProps) 
           {weekdays.map((day) => (
             <span
               key={day}
-              className="text-[13px] font-medium text-[#9e9e9e] py-1"
+              className="text-[13px] font-medium text-slate-400 py-1"
             >
               {day}
             </span>
@@ -83,10 +83,10 @@ export function DateCalendar({ selectedDate, onSelectDate }: DateCalendarProps) 
                 onClick={() => onSelectDate(dateString)}
                 className={`h-9 w-9 mx-auto flex items-center justify-center text-[14px] font-medium rounded-full transition-all ${
                   isSelected
-                    ? "bg-im-accent text-white shadow-md font-semibold"
+                    ? "bg-[#FF6433] text-white shadow-md shadow-[#FF6433]/30 font-medium"
                     : isPast
-                    ? "text-im-muted-light cursor-not-allowed opacity-40"
-                    : "text-im-heading hover:bg-im-accent-light/50 hover:text-im-accent"
+                    ? "text-slate-300 cursor-not-allowed opacity-40"
+                    : "text-slate-700 hover:bg-[#FFF0EB] hover:text-[#FF6433]"
                 }`}
               >
                 {dayNum}

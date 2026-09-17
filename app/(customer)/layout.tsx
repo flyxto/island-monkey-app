@@ -12,6 +12,13 @@ function CustomerPortalContent({
   children: React.ReactNode;
 }) {
   const { user, balance, isQRModalOpen, setIsQRModalOpen } = useCustomer();
+
+  React.useEffect(() => {
+    const handleOpenQR = () => setIsQRModalOpen(true);
+    window.addEventListener("open-customer-qr-modal", handleOpenQR);
+    return () => window.removeEventListener("open-customer-qr-modal", handleOpenQR);
+  }, [setIsQRModalOpen]);
+
   return (
       <PortalLayout config={PORTAL_CONFIGS.customer}>
         {children}

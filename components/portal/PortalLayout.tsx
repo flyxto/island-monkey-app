@@ -7,6 +7,7 @@ import { BottomNavBar } from "./BottomNavBar";
 import { ProgressiveBlur } from "./ProgressiveBlur";
 import { ModelHeader } from "./ModelHeader";
 import { PartnerHeader } from "./PartnerHeader";
+import { CustomerHeader } from "./CustomerHeader";
 import { PortalNavConfig } from "@/lib/portal/nav-config";
 import { useCustomer } from "@/lib/portal/CustomerContext";
 import { QrCode, ScanLine, Bell} from "lucide-react";
@@ -54,7 +55,23 @@ export function PortalLayout({
   const isCompactPartnerHeader = isPartnerOffers || isPartnerHistory || isPartnerScan;
   const showPartnerHeader = isPartner && (isPartnerHome || isCompactPartnerHeader || isPartnerProfile);
 
-  const shouldHideTopBar = hideTopAppBar ?? (isModelHome || showModelHeader || isModelDetail || isModelProfile || showPartnerHeader || isPartnerDetail || isPartnerProfile);
+  // Customer Portal Route Flags
+  const isCustomer = config.portalId === "customer";
+  const isCustomerHome = pathname === "/customer";
+  const isCustomerPackages = pathname === "/customer/packages";
+  const isCustomerSessions = pathname === "/customer/sessions";
+  const isCustomerPackageDetail = pathname.startsWith("/customer/packages/") && pathname !== "/customer/packages";
+  const isCustomerBooking = pathname.startsWith("/customer/booking");
+  const isCustomerDetail = isCustomerPackageDetail;
+  const isCustomerProfile = pathname === "/customer/profile";
+  const isCompactCustomerHeader = isCustomerPackages || isCustomerSessions;
+  const showCustomerHeader = isCustomer && (isCustomerHome || isCompactCustomerHeader || isCustomerProfile);
+
+  const shouldHideTopBar = hideTopAppBar ?? (
+    isModelHome || showModelHeader || isModelDetail || isModelProfile ||
+    showPartnerHeader || isPartnerDetail || isPartnerProfile ||
+    showCustomerHeader || isCustomerDetail || isCustomerProfile || isCustomerBooking
+  );
 
   // Safe consumer check for CustomerContext
   let isQRModalOpen = false;
@@ -109,31 +126,34 @@ export function PortalLayout({
         ariaLabel: "Notifications",
       },
     ];
-  };;
+  };
 
   const resolvedAction = rightAction ? [rightAction] : resolveTopBarActions();
 
   const isDarkLayout =
     (isModel && (isModelHome || isCompactModelHeader)) ||
-    (isPartner && (isPartnerHome || isCompactPartnerHeader));
+    (isPartner && (isPartnerHome || isCompactPartnerHeader)) ||
+    (isCustomer && (isCustomerHome || isCompactCustomerHeader || isCustomerBooking));
 
   return (
     <div
       className={`w-full ${
         isDarkLayout
           ? "fixed inset-0 w-full h-full overflow-hidden overscroll-none bg-[#000002] p-1 justify-between gap-3 sm:gap-4"
-          : isModelProfile || isPartnerProfile
+          : isModelProfile || isPartnerProfile || isCustomerProfile
           ? "min-h-svh bg-gradient-to-b from-[#FFEFE8] via-[#FAF6F3] to-[#F6F7F9] relative"
-          : isPartnerDetail
+          : isPartnerDetail || isCustomerDetail
           ? "fixed inset-0 w-full h-full overflow-hidden overscroll-none bg-[#000002] p-1"
           : "min-h-svh bg-linear-to-b from-[#f8f9ff] to-[#ffffff] relative"
       } flex flex-col`}
     >
-      {/* Persistent Headers (Model & Partner Orange Cards) */}
+      {/* Persistent Headers (Model, Partner & Customer Orange Cards) */}
       {showModelHeader ? (
         <ModelHeader isCompact={isCompactModelHeader} isProfile={isModelProfile} />
       ) : showPartnerHeader ? (
         <PartnerHeader isCompact={isCompactPartnerHeader} isProfile={isPartnerProfile} />
+      ) : showCustomerHeader ? (
+        <CustomerHeader isCompact={isCompactCustomerHeader} isProfile={isCustomerProfile} />
       ) : (
         /* Fixed Top App Bar */
         !shouldHideTopBar && (
@@ -144,13 +164,13 @@ export function PortalLayout({
       {/* Main Content Area */}
       <main
         className={`flex-1 flex flex-col w-full min-h-0 ${
-          isModelHome || isPartnerHome
+          isModelHome || isPartnerHome || isCustomerHome || isCustomerBooking
             ? "pt-0 pb-0 overflow-hidden h-full overscroll-none touch-none justify-between"
-            : isCompactModelHeader || isCompactPartnerHeader
+            : isCompactModelHeader || isCompactPartnerHeader || isCompactCustomerHeader
             ? "pt-0 pb-0 overflow-hidden h-full"
-            : isModelDetail || isPartnerDetail
+            : isModelDetail || isPartnerDetail || isCustomerDetail
             ? "pt-0 pb-0 overflow-hidden h-full"
-            : isModelProfile || isPartnerProfile
+            : isModelProfile || isPartnerProfile || isCustomerProfile
             ? "pt-3.5 px-4 pb-32 gap-5 overflow-y-auto"
             : shouldHideTopBar
             ? "pt-0 pb-32 overflow-y-auto"
@@ -161,16 +181,16 @@ export function PortalLayout({
       </main>
 
       {/* Progressive Blur from top to bottom at page bottom */}
-      {!isModelDetail && !isPartnerDetail && (
+      {!isModelDetail && !isPartnerDetail && !isCustomerDetail && !isCustomerBooking && (
         <ProgressiveBlur
           height="h-28 sm:h-32"
-          showGradient={!isDarkLayout && !isModelProfile && !isPartnerProfile}
+          showGradient={!isDarkLayout && !isModelProfile && !isPartnerProfile && !isCustomerProfile}
           gradientColor="from-transparent via-white/40 to-white/90"
         />
       )}
 
       {/* Fixed Bottom Navigation Bar */}
-      {!isModelDetail && !isPartnerDetail && (
+      {!isModelDetail && !isPartnerDetail && !isCustomerDetail && !isCustomerBooking && (
         <BottomNavBar
           navItems={config.navItems}
           currentPath={pathname}
