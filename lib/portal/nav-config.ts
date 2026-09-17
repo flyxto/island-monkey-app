@@ -1,4 +1,4 @@
-import { Home, Package, Camera, Building2, UserCheck, History, Tag, Calendar } from "lucide-react";
+import { Home, Package, Camera, Building2, UserCheck, History, Tag, Calendar, User } from "lucide-react";
 import React from "react";
 
 export interface NavItemConfig {
@@ -102,6 +102,13 @@ export const PORTAL_CONFIGS: Record<string, PortalNavConfig> = {
         label: "Bookings", 
         href: "/model/bookings", 
         icon: Calendar, 
+        matchPrefix: true 
+      },
+      { 
+        id: "profile", 
+        label: "Profile", 
+        href: "/model/profile", 
+        icon: User, 
         matchPrefix: true 
       },
     ],

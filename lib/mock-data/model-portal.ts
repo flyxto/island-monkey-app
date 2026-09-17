@@ -6,6 +6,21 @@ export interface ModelProfile {
   lastName: string;
   pointsBalance: number;
   formattedPoints: string;
+  email?: string;
+  phone?: string;
+  handle?: string;
+  bio?: string;
+  height?: string;
+  measurements?: string;
+  shoeSize?: string;
+  eyeColor?: string;
+  hairColor?: string;
+  rating?: number;
+  completedBookingsCount?: number;
+  categories?: string[];
+  location?: string;
+  instagram?: string;
+  agency?: string;
 }
 
 export interface GigItem {
@@ -39,6 +54,21 @@ export const MOCK_MODEL_PROFILE: ModelProfile = {
   lastName: "Perera",
   pointsBalance: 75500,
   formattedPoints: "75,500.00",
+  email: "shalini.perera@islandmonkey.io",
+  phone: "+94 77 234 5678",
+  handle: "@shalini_perera",
+  bio: "Commercial & editorial fashion talent with 5+ years experience spanning high-fashion runways, lookbook shoots, and international apparel campaigns.",
+  height: "5' 9\" (175 cm)",
+  measurements: "33 - 24 - 35",
+  shoeSize: "39 EU / 8.5 US",
+  eyeColor: "Dark Brown",
+  hairColor: "Natural Black",
+  rating: 4.9,
+  completedBookingsCount: 28,
+  categories: ["Editorial", "Commercial", "Runway", "Swimwear"],
+  location: "Colombo, Sri Lanka",
+  instagram: "@shalini.modele",
+  agency: "Island Monkey Talent Agency",
 };
 
 export const MOCK_GIGS: GigItem[] = [
