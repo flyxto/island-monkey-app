@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { Bell, QrCode, CheckCircle2, Pencil, Info } from "lucide-react";
-import { MOCK_CUSTOMER_USER, MOCK_CUSTOMER_BALANCE } from "@/lib/mock-data/customer-portal";
+import { useCustomer } from "@/lib/portal/CustomerContext";
 
 export interface CustomerHeaderProps {
   isCompact?: boolean;
@@ -11,20 +11,24 @@ export interface CustomerHeaderProps {
 }
 
 export function CustomerHeader({ isCompact = false, isProfile = false }: CustomerHeaderProps) {
-  const [userData, setUserData] = useState(MOCK_CUSTOMER_USER);
-  const [balanceData] = useState(MOCK_CUSTOMER_BALANCE);
-  const [pointsWhole, pointsCents] = balanceData.formattedPoints.split(".");
+  const { user, balance, refreshCustomer } = useCustomer();
+
+  const firstName = user?.firstName || "Customer";
+  const lastName = user?.lastName || "";
+  const initials = user
+    ? `${firstName.charAt(0)}${lastName ? lastName.charAt(0) : ""}`.toUpperCase()
+    : "IM";
+  const formattedPoints = balance?.formattedPoints || "0.00";
+  const [pointsWhole, pointsCents] = formattedPoints.split(".");
+  const conversionRate = balance?.conversionRateLKR || 200;
 
   useEffect(() => {
-    const handleUserUpdate = (e: Event) => {
-      const customEvent = e as CustomEvent<Partial<typeof MOCK_CUSTOMER_USER>>;
-      if (customEvent.detail) {
-        setUserData((prev) => ({ ...prev, ...customEvent.detail }));
-      }
+    const handleUserUpdate = () => {
+      refreshCustomer();
     };
     window.addEventListener("customer-profile-updated", handleUserUpdate);
     return () => window.removeEventListener("customer-profile-updated", handleUserUpdate);
-  }, []);
+  }, [refreshCustomer]);
 
   const handleOpenEdit = () => {
     window.dispatchEvent(new CustomEvent("open-customer-edit-modal"));
@@ -33,8 +37,6 @@ export function CustomerHeader({ isCompact = false, isProfile = false }: Custome
   const handleOpenQR = () => {
     window.dispatchEvent(new CustomEvent("open-customer-qr-modal"));
   };
-
-  const initials = `${userData.firstName.charAt(0)}${userData.lastName.charAt(0)}`.toUpperCase();
 
   return (
     <header
@@ -115,7 +117,7 @@ export function CustomerHeader({ isCompact = false, isProfile = false }: Custome
                   isProfile ? "text-[20px] sm:text-[22px]" : "text-[17px]"
                 }`}
               >
-                {userData.firstName} {userData.lastName}
+                {firstName} {lastName}
               </span>
               <span className="text-[12px] font-medium text-white/80 block mt-0.5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]">
                 {isProfile ? "Island Monkey VIP Member" : "Studio Member"}
@@ -219,7 +221,7 @@ export function CustomerHeader({ isCompact = false, isProfile = false }: Custome
         }`}
       >
         <Info className="w-3.5 h-3.5 text-[#FF6433] shrink-0" />
-        <span>1 Point = 200 LKR Today</span>
+        <span>1 Point = {conversionRate} LKR Today</span>
       </div>
     </header>
   );

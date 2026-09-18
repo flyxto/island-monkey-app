@@ -4,13 +4,10 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   PackageItem,
-  MOCK_PACKAGES,
-  MOCK_CUSTOMER_USER,
-  MOCK_CUSTOMER_BALANCE,
   CustomerUser,
   BalanceInfo,
 } from "@/lib/mock-data/customer-portal";
-import { getPackages, getCustomerProfile } from "@/lib/api";
+import { getPackages, getCustomerProfile, logoutApi } from "@/lib/api";
 
 export interface CustomerContextType {
   user: CustomerUser | null;
@@ -22,6 +19,8 @@ export interface CustomerContextType {
   setSelectedPackage: (pkg: PackageItem) => void;
   isQRModalOpen: boolean;
   setIsQRModalOpen: (open: boolean) => void;
+  refreshCustomer: () => Promise<void>;
+  logout: () => void;
 }
 
 const CustomerContext = createContext<CustomerContextType | undefined>(undefined);
@@ -37,41 +36,41 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
   // Default selected package is null until fetched
   const [selectedPackage, setSelectedPackage] = useState<PackageItem | null>(null);
 
+  const fetchUser = React.useCallback(async () => {
+    try {
+      setIsLoadingUser(true);
+      const data = await getCustomerProfile();
+      setUser({
+        id: data.id,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phone: data.phone,
+        qrCodeValue: data.qrCodeValue,
+        memberId: data.memberId,
+        role: data.role,
+      });
+      setBalance({
+        pointsBalance: data.balance.pointsBalance,
+        formattedPoints: data.balance.formattedPoints,
+        conversionRateLKR: data.balance.conversionRateLKR,
+        lastUpdated: data.balance.lastUpdated,
+      });
+    } catch (error) {
+      console.error("Failed to fetch customer profile:", error);
+    } finally {
+      setIsLoadingUser(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
+    const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
     if (!token) {
       router.replace("/login");
       return;
     }
-
-    const fetchUser = async () => {
-      try {
-        setIsLoadingUser(true);
-        const data = await getCustomerProfile();
-        setUser({
-          id: data.id,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email,
-          phone: data.phone,
-          qrCodeValue: data.qrCodeValue,
-          memberId: data.memberId,
-          role: data.role,
-        });
-        setBalance({
-          pointsBalance: data.balance.pointsBalance,
-          formattedPoints: data.balance.formattedPoints,
-          conversionRateLKR: data.balance.conversionRateLKR,
-          lastUpdated: data.balance.lastUpdated,
-        });
-      } catch (error) {
-        console.error("Failed to fetch customer profile:", error);
-      } finally {
-        setIsLoadingUser(false);
-      }
-    };
     fetchUser();
-  }, [router]);
+  }, [router, fetchUser]);
 
   useEffect(() => {
     const fetchPackages = async () => {
@@ -83,7 +82,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
           id: apiPkg.id,
           name: apiPkg.name,
           description: apiPkg.description,
-          priceLKR: apiPkg.priceLkr,
+          priceLKR: Number(apiPkg.priceLkr),
           isBestSeller: apiPkg.isBestSeller,
           durationHours: apiPkg.durationHours,
           studioName: apiPkg.studioName,
@@ -99,7 +98,6 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
         
         setPackages(mappedPackages);
         
-        // Select best seller by default if available
         if (mappedPackages.length > 0) {
           setSelectedPackage(
             mappedPackages.find((p: PackageItem) => p.isBestSeller) || mappedPackages[0]
@@ -107,7 +105,6 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         console.error("Failed to fetch packages:", error);
-        // Fallback to empty array or mock packages as per user preference (using empty for real integration)
         setPackages([]);
       } finally {
         setIsLoadingPackages(false);
@@ -116,6 +113,14 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
     
     fetchPackages();
   }, []);
+
+  const logout = React.useCallback(() => {
+    logoutApi();
+    setUser(null);
+    setBalance(null);
+    router.replace("/login");
+  }, [router]);
+
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
 
   return (
@@ -126,10 +131,12 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
         isLoadingUser,
         packages,
         isLoadingPackages,
-        selectedPackage: selectedPackage || packages[0] || MOCK_PACKAGES[0],
+        selectedPackage: selectedPackage || packages[0] || null,
         setSelectedPackage: (pkg: PackageItem) => setSelectedPackage(pkg),
         isQRModalOpen,
         setIsQRModalOpen,
+        refreshCustomer: fetchUser,
+        logout,
       }}
     >
       {children}

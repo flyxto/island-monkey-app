@@ -1,21 +1,49 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useCustomer } from "@/lib/portal/CustomerContext";
-import { MOCK_UPCOMING_SESSIONS } from "@/lib/mock-data/customer-portal";
+import { getCustomerBookings } from "@/lib/api";
 import { QrCode, Package, Camera, ArrowRight, Loader2 } from "lucide-react";
 
 export default function CustomerHomePage() {
   const { user, balance, isLoadingUser, setIsQRModalOpen } = useCustomer();
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [isLoadingBookings, setIsLoadingBookings] = useState(true);
 
-  const parseSessionDate = (timestamp: string) => {
-    // e.g. "10:42 AM • Oct 24, 2026"
-    const parts = timestamp.split("•");
-    const dateStr = (parts[1] || "Oct 24, 2026").trim();
-    const dateParts = dateStr.split(" ");
-    const month = dateParts[0] || "Oct";
-    const day = (dateParts[1] || "24").replace(",", "");
-    return { month, day, time: (parts[0] || "10:00 AM").trim() };
+  useEffect(() => {
+    async function fetchBookings() {
+      try {
+        setIsLoadingBookings(true);
+        const data = await getCustomerBookings();
+        setBookings(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Failed to load customer sessions:", err);
+      } finally {
+        setIsLoadingBookings(false);
+      }
+    }
+    fetchBookings();
+  }, []);
+
+  const upcomingBookings = bookings.filter(
+    (b) => b.status === "Pending" || b.status === "Approved"
+  );
+
+  const parseSessionDate = (dateTimeStr: string) => {
+    try {
+      const d = new Date(dateTimeStr);
+      if (!isNaN(d.getTime())) {
+        return {
+          month: d.toLocaleDateString("en-US", { month: "short" }),
+          day: d.toLocaleDateString("en-US", { day: "numeric" }),
+          time: d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+        };
+      }
+    } catch {
+      // Fallback
+    }
+    return { month: "Oct", day: "24", time: "10:00 AM" };
   };
 
   if (isLoadingUser || !user || !balance) {
@@ -83,61 +111,82 @@ export default function CustomerHomePage() {
 
         {/* Scrollable Sessions List - Matching Recent Booking List Item UI */}
         <div className="flex-1 min-h-0 overflow-y-auto pr-0.5 flex flex-col gap-2.5 pb-3">
-          {MOCK_UPCOMING_SESSIONS.map((session, idx) => {
-            const { month, day, time } = parseSessionDate(session.timestamp);
+          {isLoadingBookings ? (
+            <div className="flex justify-center items-center py-10">
+              <Loader2 className="w-6 h-6 animate-spin text-[#FF6433]" />
+            </div>
+          ) : upcomingBookings.length > 0 ? (
+            upcomingBookings.map((session, idx) => {
+              const { month, day, time } = parseSessionDate(session.dateTime);
+              const title = session.package?.name || "Studio Session";
+              const studioTag = session.package?.studioName || session.studioRoom || "Studio";
 
-            return (
-              <Link
-                key={session.id}
-                href="/customer/sessions"
-                className="bg-white rounded-2xl p-3 shadow-xs border border-black/5 flex items-center gap-3.5 hover:shadow-sm transition-all shrink-0 cursor-pointer"
-              >
-                {/* Date Column with subtle vertical line */}
-                <div className="flex flex-col items-center justify-center w-7 shrink-0">
-                  <span className="text-[11px] font-medium text-slate-400 uppercase tracking-tight">
-                    {month}
-                  </span>
-                  <span className="text-[18px] font-medium text-slate-800 leading-none mt-0.5">
-                    {day}
-                  </span>
-                </div>
-
-                <div className="w-px h-7 bg-slate-200/80 shrink-0" />
-
-                {/* Thumbnail */}
-                <div
-                  className={`w-11 h-11 rounded-xl shrink-0 flex items-center justify-center shadow-xs overflow-hidden ${
-                    idx % 2 === 0
-                      ? "bg-linear-to-br from-amber-500 via-orange-500 to-[#E84A23] text-white"
-                      : "bg-linear-to-br from-teal-500 via-emerald-500 to-emerald-600 text-white"
-                  }`}
+              return (
+                <Link
+                  key={session.id}
+                  href="/customer/sessions"
+                  className="bg-white rounded-2xl p-3 shadow-xs border border-black/5 flex items-center gap-3.5 hover:shadow-sm transition-all shrink-0 cursor-pointer"
                 >
-                  <Camera className="w-5 h-5 text-white/95" />
-                </div>
+                  {/* Date Column with subtle vertical line */}
+                  <div className="flex flex-col items-center justify-center w-7 shrink-0">
+                    <span className="text-[11px] font-medium text-slate-400 uppercase tracking-tight">
+                      {month}
+                    </span>
+                    <span className="text-[18px] font-medium text-slate-800 leading-none mt-0.5">
+                      {day}
+                    </span>
+                  </div>
 
-                {/* Title & Details */}
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-[14px] font-medium text-slate-900 truncate">
-                    {session.title}
-                  </span>
-                  <span className="text-[12px] font-medium text-slate-400 truncate mt-0.5">
-                    {time} • {session.studioTag}
-                  </span>
-                </div>
+                  <div className="w-px h-7 bg-slate-200/80 shrink-0" />
 
-                {/* Studio Tag & Confirmed Badge */}
-                <div className="flex flex-col items-end shrink-0 pl-1">
-                  <span className="px-2.5 py-1 bg-orange-50 text-[#FF6433] border border-orange-200/60 rounded-full text-[11px] font-medium">
-                    {session.studioTag}
-                  </span>
-                  <span className="text-[11px] font-medium text-emerald-600 mt-1 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <span>Confirmed</span>
-                  </span>
-                </div>
+                  {/* Thumbnail */}
+                  <div
+                    className={`w-11 h-11 rounded-xl shrink-0 flex items-center justify-center shadow-xs overflow-hidden ${
+                      idx % 2 === 0
+                        ? "bg-linear-to-br from-amber-500 via-orange-500 to-[#E84A23] text-white"
+                        : "bg-linear-to-br from-teal-500 via-emerald-500 to-emerald-600 text-white"
+                    }`}
+                  >
+                    <Camera className="w-5 h-5 text-white/95" />
+                  </div>
+
+                  {/* Title & Details */}
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="text-[14px] font-medium text-slate-900 truncate">
+                      {title}
+                    </span>
+                    <span className="text-[12px] font-medium text-slate-400 truncate mt-0.5">
+                      {time} • {studioTag}
+                    </span>
+                  </div>
+
+                  {/* Studio Tag & Confirmed Badge */}
+                  <div className="flex flex-col items-end shrink-0 pl-1">
+                    <span className="px-2.5 py-1 bg-orange-50 text-[#FF6433] border border-orange-200/60 rounded-full text-[11px] font-medium">
+                      {studioTag}
+                    </span>
+                    <span className="text-[11px] font-medium text-emerald-600 mt-1 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <span>{session.status === "Approved" ? "Confirmed" : session.status}</span>
+                    </span>
+                  </div>
+                </Link>
+              );
+            })
+          ) : (
+            <div className="p-6 text-center bg-white border border-black/5 rounded-2xl shadow-2xs flex flex-col items-center gap-2.5">
+              <Camera className="w-8 h-8 text-slate-300" />
+              <p className="text-slate-500 text-[13px] font-medium">
+                No upcoming sessions scheduled yet.
+              </p>
+              <Link
+                href="/customer/packages"
+                className="px-4 py-2 bg-[#FF6433] hover:bg-[#E84A23] text-white text-[12px] font-medium rounded-full transition-colors shadow-xs"
+              >
+                Browse Packages
               </Link>
-            );
-          })}
+            </div>
+          )}
         </div>
       </div>
     </div>

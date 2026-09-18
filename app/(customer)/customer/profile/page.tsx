@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { MOCK_CUSTOMER_USER, MOCK_CUSTOMER_BALANCE } from "@/lib/mock-data/customer-portal";
+import { useCustomer } from "@/lib/portal/CustomerContext";
+import { getCustomerBookings } from "@/lib/api";
 import {
   Package,
   Calendar,
@@ -19,8 +20,8 @@ import {
 } from "lucide-react";
 
 export default function CustomerProfilePage() {
-  const [userData, setUserData] = useState(MOCK_CUSTOMER_USER);
-  const [phone, setPhone] = useState("+94 77 123 4567");
+  const { user, balance, logout, refreshCustomer } = useCustomer();
+  const [sessionsCount, setSessionsCount] = useState<number>(0);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPerksModalOpen, setIsPerksModalOpen] = useState(false);
@@ -29,11 +30,36 @@ export default function CustomerProfilePage() {
 
   // Form edit states
   const [formData, setFormData] = useState({
-    firstName: userData.firstName,
-    lastName: userData.lastName,
-    email: userData.email,
-    phone: "+94 77 123 4567",
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    phone: user?.phone || "+94 77 123 4567",
   });
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone || "+94 77 123 4567",
+      });
+    }
+  }, [user]);
+
+  useEffect(() => {
+    async function loadSessions() {
+      try {
+        const bookings = await getCustomerBookings();
+        if (Array.isArray(bookings)) {
+          setSessionsCount(bookings.length);
+        }
+      } catch (e) {
+        console.error("Failed to load sessions count:", e);
+      }
+    }
+    loadSessions();
+  }, []);
 
   // Listen for open edit modal trigger from top orange card
   useEffect(() => {
@@ -68,7 +94,7 @@ export default function CustomerProfilePage() {
         {/* Available Points */}
         <div className="bg-white rounded-[22px] py-3.5 px-2 flex flex-col items-center justify-center shadow-xs border border-black/5">
           <span className="text-[18px] font-medium text-[#FF6433] tracking-tight leading-none">
-            124.5k
+            {balance?.formattedPoints || "0.00"}
           </span>
           <span className="text-[12px] font-medium text-slate-400 mt-1.5">
             Points
@@ -78,7 +104,7 @@ export default function CustomerProfilePage() {
         {/* Sessions Booked */}
         <div className="bg-white rounded-[22px] py-3.5 px-2 flex flex-col items-center justify-center shadow-xs border border-black/5">
           <span className="text-[18px] font-medium text-slate-900 tracking-tight leading-none">
-            8
+            {sessionsCount}
           </span>
           <span className="text-[12px] font-medium text-slate-400 mt-1.5">
             Sessions
@@ -139,7 +165,7 @@ export default function CustomerProfilePage() {
                   My Booked Sessions
                 </span>
                 <span className="text-[11px] font-medium text-slate-400">
-                  2 upcoming studio shoots scheduled
+                  {sessionsCount} studio {sessionsCount === 1 ? "shoot" : "shoots"} recorded
                 </span>
               </div>
             </div>
@@ -474,13 +500,35 @@ export default function CustomerProfilePage() {
             </p>
 
             <div className="flex gap-2.5 pt-1">
-              <button
-                type="button"
-                onClick={() => setActiveInfoModal(null)}
-                className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[14px] font-medium rounded-full cursor-pointer transition-colors"
-              >
-                Close
-              </button>
+              {activeInfoModal === "Sign Out Confirmation" ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setActiveInfoModal(null)}
+                    className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[14px] font-medium rounded-full cursor-pointer transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveInfoModal(null);
+                      logout();
+                    }}
+                    className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white text-[14px] font-medium rounded-full cursor-pointer transition-colors"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setActiveInfoModal(null)}
+                  className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[14px] font-medium rounded-full cursor-pointer transition-colors"
+                >
+                  Close
+                </button>
+              )}
             </div>
           </div>
         </div>

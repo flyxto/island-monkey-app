@@ -1,10 +1,11 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCustomer } from "@/lib/portal/CustomerContext";
-import { MOCK_PACKAGES, PackageItem } from "@/lib/mock-data/customer-portal";
+import { PackageItem } from "@/lib/mock-data/customer-portal";
+import { getPackage } from "@/lib/api";
 import { ProgressiveBlur } from "@/components/portal/ProgressiveBlur";
 import {
   Camera,
@@ -36,10 +37,42 @@ export default function PackageDetailPage({
   const resolvedParams = use(params);
   const router = useRouter();
   const { packages, isLoadingPackages, setSelectedPackage } = useCustomer();
+  const [directPkg, setDirectPkg] = useState<PackageItem | null>(null);
+  const [isDirectLoading, setIsDirectLoading] = useState(false);
 
-  const pkg: PackageItem | undefined = packages.find((p) => p.id === resolvedParams.id);
+  const contextPkg = packages.find((p) => p.id === resolvedParams.id);
 
-  if (isLoadingPackages) {
+  useEffect(() => {
+    if (!contextPkg && !isLoadingPackages && resolvedParams.id) {
+      setIsDirectLoading(true);
+      getPackage(resolvedParams.id)
+        .then((apiPkg) => {
+          setDirectPkg({
+            id: apiPkg.id,
+            name: apiPkg.name,
+            description: apiPkg.description,
+            priceLKR: Number(apiPkg.priceLkr || apiPkg.priceLKR || 0),
+            isBestSeller: apiPkg.isBestSeller,
+            durationHours: apiPkg.durationHours,
+            studioName: apiPkg.studioName,
+            photographersCount: apiPkg.photographersCount,
+            metaLine: apiPkg.metaLine,
+            highlightFeature: {
+              title: apiPkg.highlightTitle,
+              subtitle: apiPkg.highlightSubtitle,
+            },
+            whatsIncluded: apiPkg.whatsIncluded || [],
+            imageUrl: apiPkg.imageUrl,
+          });
+        })
+        .catch(() => setDirectPkg(null))
+        .finally(() => setIsDirectLoading(false));
+    }
+  }, [contextPkg, isLoadingPackages, resolvedParams.id]);
+
+  const pkg = contextPkg || directPkg;
+
+  if (isLoadingPackages || isDirectLoading) {
     return (
       <div className="flex justify-center items-center h-screen -mt-20">
         <Loader2 className="h-8 w-8 animate-spin text-[#FF6433]" />
