@@ -10,6 +10,8 @@ export interface PartnerUser {
   email: string;
   phone?: string;
   avatarUrl?: string;
+  address?: string;
+  description?: string;
   createdAt: string;
   dailyPointsProcessed: number;
   transactionsProcessedCount: number;

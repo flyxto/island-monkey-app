@@ -74,9 +74,8 @@ export default function CustomerProfilePage() {
       firstName: formData.firstName,
       lastName: formData.lastName,
       email: formData.email,
+      phone: formData.phone,
     };
-    setUserData((prev) => ({ ...prev, ...updated }));
-    setPhone(formData.phone);
     window.dispatchEvent(new CustomEvent("customer-profile-updated", { detail: updated }));
     setIsEditModalOpen(false);
     setSaveToast(true);

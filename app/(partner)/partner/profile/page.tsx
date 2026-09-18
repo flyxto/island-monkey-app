@@ -32,7 +32,7 @@ export default function PartnerProfilePage() {
   // Form edit states
   const [formData, setFormData] = useState({
     storeName: partner?.storeName || store.storeName,
-    email: partner?.user?.email || (partner as any)?.email || store.email || "partner@pepperst.com",
+    email: partner?.email || store.email || "partner@pepperst.com",
     phone: partner?.phone || store.phone || "+94 11 268 4500",
     location: partner?.address || store.location || "42 Ward Place, Colombo 07, Sri Lanka",
     instagram: store.instagram || "@pepperst.official",
@@ -44,7 +44,7 @@ export default function PartnerProfilePage() {
       setFormData((prev) => ({
         ...prev,
         storeName: partner.storeName || prev.storeName,
-        email: partner.user?.email || (partner as any)?.email || prev.email,
+        email: partner.email || prev.email,
         phone: partner.phone || prev.phone,
         location: partner.address || prev.location,
         about: partner.description || prev.about,
