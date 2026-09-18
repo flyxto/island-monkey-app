@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,14 +15,31 @@ export interface DateCalendarProps {
  * Month header (indigo pill badge), Mo-Su weekday row, date grid with selected date highlight state (indigo circle).
  */
 export function DateCalendar({ selectedDate, onSelectDate }: DateCalendarProps) {
-  // Mock Month: June 2026
-  const year = 2026;
-  const monthName = "June 2026";
+  const [currentDate, setCurrentDate] = useState(() => {
+    return selectedDate ? new Date(selectedDate) : new Date();
+  });
 
-  const daysInMonth = 30; // June has 30 days
-  const firstDayOffset = 0; // Monday start for June 1, 2026
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const monthName = currentDate.toLocaleString("default", { month: "long", year: "numeric" });
+
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDayOfMonth = new Date(year, month, 1);
+  let firstDayOffset = firstDayOfMonth.getDay() - 1;
+  if (firstDayOffset < 0) firstDayOffset = 6; // Monday start
 
   const weekdays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const handlePrevMonth = () => {
+    setCurrentDate(new Date(year, month - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(new Date(year, month + 1, 1));
+  };
 
   return (
     <Card className="w-full bg-white border border-black/5 rounded-[24px] p-0 shadow-xs">
@@ -34,6 +52,7 @@ export function DateCalendar({ selectedDate, onSelectDate }: DateCalendarProps) 
           <div className="flex items-center gap-1 text-slate-400">
             <button
               type="button"
+              onClick={handlePrevMonth}
               className="p-1 hover:text-slate-900 transition-colors"
               aria-label="Previous Month"
             >
@@ -41,6 +60,7 @@ export function DateCalendar({ selectedDate, onSelectDate }: DateCalendarProps) 
             </button>
             <button
               type="button"
+              onClick={handleNextMonth}
               className="p-1 hover:text-slate-900 transition-colors"
               aria-label="Next Month"
             >
@@ -71,9 +91,13 @@ export function DateCalendar({ selectedDate, onSelectDate }: DateCalendarProps) 
           {/* Month dates */}
           {Array.from({ length: daysInMonth }).map((_, i) => {
             const dayNum = i + 1;
-            const dateString = `${year}-06-${dayNum < 10 ? `0${dayNum}` : dayNum}`;
+            const strMonth = String(month + 1).padStart(2, "0");
+            const strDay = String(dayNum).padStart(2, "0");
+            const dateString = `${year}-${strMonth}-${strDay}`;
             const isSelected = selectedDate === dateString;
-            const isPast = dayNum < 15; // Mark dates before June 15 as past for realistic demo
+            
+            const iterDate = new Date(year, month, dayNum);
+            const isPast = iterDate < today;
 
             return (
               <button

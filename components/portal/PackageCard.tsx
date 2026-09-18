@@ -2,8 +2,9 @@
 
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { PackageItem } from "@/lib/mock-data/customer-portal";
-import { Camera, ArrowRight, Clock, Building2, Users } from "lucide-react";
+import { Camera, ArrowRight, Clock, Building2, Users, Pencil } from "lucide-react";
 import { StatusBadge, StatusType } from "./StatusBadge";
 
 export interface PackageCardProps {
@@ -12,6 +13,7 @@ export interface PackageCardProps {
   priceSuffix?: string; // e.g. "/hr"
   detailHref?: string;
   statusBadge?: StatusType;
+  editHref?: string;
 }
 
 const PACKAGE_IMAGES: Record<string, string> = {
@@ -29,7 +31,9 @@ export function PackageCard({
   priceSuffix = "",
   detailHref,
   statusBadge,
+  editHref,
 }: PackageCardProps) {
+  const router = useRouter();
   const formattedPrice = `LKR ${packageItem.priceLKR.toLocaleString()}${priceSuffix}`;
   const targetHref = detailHref || `/customer/packages/${packageItem.id}`;
   const heroImage =
@@ -69,10 +73,26 @@ export function PackageCard({
             </span>
           )}
 
-          <span className="px-2.5 py-1 bg-black/40 backdrop-blur-md border border-white/20 text-white text-[11px] font-medium rounded-full flex items-center gap-1">
-            <Camera className="w-3 h-3" />
-            <span>{packageItem.studioName}</span>
-          </span>
+          <div className="flex items-center gap-1.5 pointer-events-auto">
+            {editHref && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  router.push(editHref);
+                }}
+                className="w-7 h-7 bg-white/90 hover:bg-white text-slate-800 rounded-full shadow-sm flex items-center justify-center transition-colors backdrop-blur-sm cursor-pointer"
+                aria-label="Edit Gig"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+            )}
+            <span className="px-2.5 py-1 bg-black/40 backdrop-blur-md border border-white/20 text-white text-[11px] font-medium rounded-full flex items-center gap-1">
+              <Camera className="w-3 h-3" />
+              <span>{packageItem.studioName}</span>
+            </span>
+          </div>
         </div>
       </div>
 

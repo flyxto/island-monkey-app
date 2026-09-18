@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useCustomer } from "@/lib/portal/CustomerContext";
 import { MOCK_UPCOMING_SESSIONS } from "@/lib/mock-data/customer-portal";
-import { QrCode, Package, Camera, ArrowRight } from "lucide-react";
+import { QrCode, Package, Camera, ArrowRight, Loader2 } from "lucide-react";
 
 export default function CustomerHomePage() {
-  const { setIsQRModalOpen } = useCustomer();
+  const { user, balance, isLoadingUser, setIsQRModalOpen } = useCustomer();
 
   const parseSessionDate = (timestamp: string) => {
     // e.g. "10:42 AM • Oct 24, 2026"
@@ -17,6 +17,14 @@ export default function CustomerHomePage() {
     const day = (dateParts[1] || "24").replace(",", "");
     return { month, day, time: (parts[0] || "10:00 AM").trim() };
   };
+
+  if (isLoadingUser || !user || !balance) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#FF6433]" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col w-full overflow-hidden justify-between gap-3 sm:gap-4">

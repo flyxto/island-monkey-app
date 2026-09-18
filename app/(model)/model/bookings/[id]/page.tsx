@@ -1,10 +1,10 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { MOCK_BOOKINGS, BookingItem } from "@/lib/mock-data/model-portal";
 import { StatusBadge } from "@/components/portal/StatusBadge";
 import { ProgressiveBlur } from "@/components/portal/ProgressiveBlur";
+import { getModelBooking, acceptModelBooking } from "@/lib/api";
 import {
   ChevronLeft,
   Calendar,
@@ -17,6 +17,7 @@ import {
   ChevronUp,
   ShieldCheck,
   Camera,
+  Loader2,
 } from "lucide-react";
 
 const BOOKING_HERO_IMAGES: Record<string, string> = {
@@ -33,34 +34,59 @@ export default function SingleBookingDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = use(params);
-  const booking: BookingItem =
-    MOCK_BOOKINGS.find((b) => b.id === resolvedParams.id) || MOCK_BOOKINGS[0];
-
-  const [currentStatus, setCurrentStatus] = useState<BookingItem["status"] | null>(null);
+  const [booking, setBooking] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAccepting, setIsAccepting] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
 
-  const activeStatus = currentStatus || booking.status;
-  const formattedPayment = `LKR ${booking.paymentLKR.toLocaleString()}`;
+  useEffect(() => {
+    async function fetchBooking() {
+      try {
+        const data = await getModelBooking(resolvedParams.id);
+        setBooking(data);
+      } catch (error) {
+        console.error("Failed to load booking details:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchBooking();
+  }, [resolvedParams.id]);
+
+  const activeStatus = (booking?.status || "pending").toLowerCase();
+  const paymentAmount = booking?.paymentLkr ?? booking?.paymentLKR ?? 0;
+  const formattedPayment = `LKR ${Number(paymentAmount).toLocaleString()}`;
 
   const heroImage =
-    BOOKING_HERO_IMAGES[booking.id] ||
-    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1000&auto=format&fit=crop&q=85";
+    booking && (BOOKING_HERO_IMAGES[booking.id] ||
+    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1000&auto=format&fit=crop&q=85");
 
-  const handleAccept = () => {
-    setActionFeedback("Accepted!");
-    setTimeout(() => {
-      setCurrentStatus("accepted");
+  const handleAccept = async () => {
+    try {
+      setIsAccepting(true);
+      setActionFeedback("Accepting...");
+      await acceptModelBooking(booking.id);
+      setBooking((prev: any) => ({ ...prev, status: "accepted" }));
+      setActionFeedback("Accepted!");
+      setTimeout(() => {
+        setActionFeedback(null);
+      }, 1500);
+    } catch (error: any) {
+      console.error("Failed to accept booking:", error);
+      alert(error.message || "Failed to accept booking");
       setActionFeedback(null);
-    }, 900);
+    } finally {
+      setIsAccepting(false);
+    }
   };
 
   const handleReject = () => {
     setActionFeedback("Declined");
+    setBooking((prev: any) => ({ ...prev, status: "rejected" }));
     setTimeout(() => {
-      setCurrentStatus("rejected");
       setActionFeedback(null);
-    }, 900);
+    }, 1500);
   };
 
   const sessionDeliverables = [
@@ -69,6 +95,28 @@ export default function SingleBookingDetailPage({
     "High-Resolution Photo Masters",
     "Verified Escrow Payment Protection",
   ];
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#FF6433]" />
+      </div>
+    );
+  }
+
+  if (!booking) {
+    return (
+      <div className="flex flex-col gap-4 items-center justify-center h-screen text-slate-500">
+        <p className="text-[15px]">Booking not found.</p>
+        <Link
+          href="/model/bookings"
+          className="px-5 py-2.5 bg-[#FF6433] text-white text-[13px] font-medium rounded-full shadow-xs hover:bg-[#E84A23] transition-colors"
+        >
+          Back to Bookings
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 w-full h-full h-svh max-h-svh flex flex-col justify-between overflow-hidden overscroll-none touch-none select-none">

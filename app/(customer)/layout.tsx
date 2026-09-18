@@ -23,13 +23,15 @@ function CustomerPortalContent({
       <PortalLayout config={PORTAL_CONFIGS.customer}>
         {children}
         {/* Global QR Modal accessible across all customer tabs */}
-        <QRModal
-          isOpen={isQRModalOpen}
-          onClose={() => setIsQRModalOpen(false)}
-          userFullName={`${user.firstName} ${user.lastName}`}
-          qrValue={user.qrCodeValue}
-          pointsBalance={balance.formattedPoints}
-        />
+        {user && balance && (
+          <QRModal
+            isOpen={isQRModalOpen}
+            onClose={() => setIsQRModalOpen(false)}
+            userFullName={`${user.firstName} ${user.lastName}`}
+            qrValue={user.qrCodeValue}
+            pointsBalance={balance.formattedPoints}
+          />
+        )}
       </PortalLayout>
   );
 }

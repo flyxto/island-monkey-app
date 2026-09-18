@@ -3,7 +3,7 @@
 import { use } from "react";
 import Link from "next/link";
 import { useCustomer } from "@/lib/portal/CustomerContext";
-import { Check, Calendar, Camera, Sparkles, ArrowRight } from "lucide-react";
+import { Check, Calendar, Sparkles, ArrowRight } from "lucide-react";
 
 export default function BookingConfirmationPage({
   searchParams,
@@ -13,7 +13,7 @@ export default function BookingConfirmationPage({
   const resolvedParams = use(searchParams);
   const { selectedPackage } = useCustomer();
 
-  const formattedPrice = `LKR ${selectedPackage.priceLKR.toLocaleString()}`;
+  const formattedPrice = `LKR ${selectedPackage?.priceLKR?.toLocaleString() || 0}`;
   const bookingDate = resolvedParams.date || "2026-06-18";
   const bookingTime = resolvedParams.time || "2:00 PM";
 
@@ -64,7 +64,7 @@ export default function BookingConfirmationPage({
             <div className="flex items-center justify-between text-[13px]">
               <span className="text-slate-400 font-medium">Package</span>
               <span className="font-medium text-slate-900 text-right">
-                {selectedPackage.name}
+                {selectedPackage?.name || "Studio Package"}
               </span>
             </div>
 
@@ -79,7 +79,7 @@ export default function BookingConfirmationPage({
             <div className="flex items-center justify-between text-[13px]">
               <span className="text-slate-400 font-medium">Studio & Crew</span>
               <span className="font-medium text-slate-700 text-right">
-                {selectedPackage.metaLine}
+                {selectedPackage?.metaLine || "Standard Session"}
               </span>
             </div>
 

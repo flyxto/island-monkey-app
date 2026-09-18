@@ -3,6 +3,9 @@ export interface CustomerUser {
   firstName: string;
   lastName: string;
   email: string;
+  phone?: string;
+  memberId?: string;
+  role?: string;
   qrCodeValue: string;
 }
 

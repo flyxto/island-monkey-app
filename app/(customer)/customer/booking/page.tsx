@@ -1,38 +1,115 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCustomer } from "@/lib/portal/CustomerContext";
 import { DateCalendar } from "@/components/portal/DateCalendar";
 import { TimeSlotChip } from "@/components/portal/TimeSlotChip";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Loader2 } from "lucide-react";
+import { getAvailableSlots, createBooking, initiatePayment } from "@/lib/api";
+
+declare global {
+  interface Window {
+    payhere: any;
+  }
+}
 
 export default function BookingPage() {
   const router = useRouter();
   const { selectedPackage } = useCustomer();
 
   // State for Date & Time selection
-  const [selectedDate, setSelectedDate] = useState("2026-06-18");
-  const [selectedTime, setSelectedTime] = useState("02:00 PM");
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  });
+  const [selectedTime, setSelectedTime] = useState("");
 
-  const formattedPrice = `LKR ${selectedPackage.priceLKR.toLocaleString()}`;
+  const formattedPrice = `LKR ${selectedPackage?.priceLKR?.toLocaleString() || 0}`;
 
-  const timeSlots = [
-    { time: "10:00 AM", disabled: false },
-    { time: "02:00 PM", disabled: false },
-    { time: "06:00 PM", disabled: false },
-    { time: "08:00 PM", disabled: true },
-  ];
+  const [timeSlots, setTimeSlots] = useState<{time: string, disabled: boolean}[]>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+  const [isBooking, setIsBooking] = useState(false);
 
-  const handleProceed = () => {
-    // Encapsulate booking query state into URL
-    const queryParams = new URLSearchParams({
-      packageId: selectedPackage.id,
-      date: selectedDate,
-      time: selectedTime,
-    });
-    router.push(`/customer/booking/confirmation?${queryParams.toString()}`);
+  useEffect(() => {
+    async function fetchSlots() {
+      try {
+        if (!selectedPackage) return;
+        setIsLoadingSlots(true);
+        const slots = await getAvailableSlots(selectedDate, selectedPackage.studioName);
+        const formattedSlots = slots.map((s: any) => ({
+          time: s.time,
+          disabled: !s.available
+        }));
+        setTimeSlots(formattedSlots);
+        
+        // Auto-select first available slot if current is disabled or none selected
+        if (formattedSlots.length > 0) {
+          const available = formattedSlots.filter((s: { time: string, disabled: boolean }) => !s.disabled);
+          if (available.length > 0) {
+            setSelectedTime(available[0].time);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch slots:", error);
+      } finally {
+        setIsLoadingSlots(false);
+      }
+    }
+    
+    fetchSlots();
+  }, [selectedDate, selectedPackage?.studioName]);
+
+  const handleProceed = async () => {
+    try {
+      setIsBooking(true);
+      if (!selectedPackage) throw new Error("No package selected");
+      
+      // 1. Create the booking in backend
+      const booking = await createBooking({
+        packageId: selectedPackage.id,
+        date: selectedDate,
+        time: selectedTime,
+        studioRoom: selectedPackage.studioName,
+        notes: "Booked via Island Monkey App",
+      });
+      
+      // 2. Fetch PayHere checkout payload using the booking ID
+      const paymentData = await initiatePayment(booking.id);
+      
+      // 3. Setup PayHere callbacks
+      window.payhere.onCompleted = function onCompleted(orderId: string) {
+        // Navigate to confirmation page
+        const queryParams = new URLSearchParams({
+          packageId: selectedPackage?.id || "",
+          date: selectedDate,
+          time: selectedTime,
+          orderId, // Optionally pass orderId
+        });
+        router.push(`/customer/booking/confirmation?${queryParams.toString()}`);
+      };
+
+      window.payhere.onDismissed = function onDismissed() {
+        console.log("Payment dismissed");
+        alert("Payment was cancelled. You can try again.");
+        setIsBooking(false); // Reset loading state if they dismiss the modal
+      };
+
+      window.payhere.onError = function onError(error: string) {
+        console.error("Payment error:", error);
+        alert("Payment error: " + error);
+        setIsBooking(false);
+      };
+
+      // 4. Trigger the checkout popup
+      window.payhere.startPayment(paymentData.payload);
+
+    } catch (error: any) {
+      console.error("Booking failed:", error);
+      alert(error.message || "Booking failed. Please try again.");
+      setIsBooking(false);
+    }
   };
 
   return (
@@ -40,7 +117,7 @@ export default function BookingPage() {
       {/* Upper Navigation Row in Dark Frame */}
       <div className="px-3 pt-2 pb-0.5 flex items-center justify-between shrink-0">
         <Link
-          href={`/customer/packages/${selectedPackage.id}`}
+          href={`/customer/packages/${selectedPackage?.id || ""}`}
           className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-xs flex items-center justify-center text-white transition-all cursor-pointer"
           aria-label="Back to package detail"
         >
@@ -52,7 +129,7 @@ export default function BookingPage() {
             Book Studio Session
           </span>
           <span className="text-[11px] font-medium text-white/60 truncate max-w-44">
-            {selectedPackage.name}
+            {selectedPackage?.name || "Package"}
           </span>
         </div>
 
@@ -73,16 +150,16 @@ export default function BookingPage() {
               Package Selected
             </span>
             <span className="text-[12px] font-medium text-slate-400">
-              {selectedPackage.durationHours}
+              {selectedPackage?.durationHours}
             </span>
           </div>
 
           <div className="flex flex-col gap-0.5">
             <h1 className="text-[18px] font-medium text-slate-900 tracking-tight">
-              {selectedPackage.name}
+              {selectedPackage?.name}
             </h1>
             <p className="text-[13px] font-medium text-slate-500">
-              {selectedPackage.metaLine}
+              {selectedPackage?.metaLine}
             </p>
           </div>
         </div>
@@ -104,16 +181,24 @@ export default function BookingPage() {
             Select a Time Slot
           </h2>
 
-          <div className="flex w-full flex-wrap items-center gap-2.5">
-            {timeSlots.map((slot) => (
-              <TimeSlotChip
-                key={slot.time}
-                time={slot.time}
-                isSelected={selectedTime === slot.time}
-                isDisabled={slot.disabled}
-                onSelect={setSelectedTime}
-              />
-            ))}
+          <div className="flex w-full flex-wrap items-center gap-2.5 min-h-[44px]">
+            {isLoadingSlots ? (
+              <div className="flex w-full items-center justify-center p-4">
+                <Loader2 className="w-6 h-6 animate-spin text-im-accent" />
+              </div>
+            ) : timeSlots.length > 0 ? (
+              timeSlots.map((slot) => (
+                <TimeSlotChip
+                  key={slot.time}
+                  time={slot.time}
+                  isSelected={selectedTime === slot.time}
+                  isDisabled={slot.disabled}
+                  onSelect={setSelectedTime}
+                />
+              ))
+            ) : (
+              <p className="text-im-muted text-[14px]">No slots available for this date.</p>
+            )}
           </div>
         </div>
 
@@ -129,9 +214,11 @@ export default function BookingPage() {
           <button
             type="button"
             onClick={handleProceed}
-            className="flex-1 py-3.5 px-6 bg-linear-to-b from-[#FF7A45] via-[#FF6433] to-[#E84A23] hover:from-[#FF8A55] hover:to-[#EA5A33] text-white text-[14px] font-medium rounded-full transition-all shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,0.4),0_8px_20px_rgba(232,74,35,0.25)] active:scale-[0.98] cursor-pointer text-center"
+            disabled={isBooking || !selectedTime}
+            className="flex-1 py-3.5 px-6 bg-linear-to-b from-[#FF7A45] via-[#FF6433] to-[#E84A23] hover:from-[#FF8A55] hover:to-[#EA5A33] text-white text-[14px] font-medium rounded-full transition-all shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,0.4),0_8px_20px_rgba(232,74,35,0.25)] active:scale-[0.98] cursor-pointer text-center disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            Proceed to Confirm
+            {isBooking && <Loader2 className="w-4 h-4 animate-spin text-white" />}
+            <span>Proceed to Confirm</span>
           </button>
         </div>
       </div>

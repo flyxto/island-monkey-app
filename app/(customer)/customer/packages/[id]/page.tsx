@@ -16,6 +16,7 @@ import {
   Clock,
   Building2,
   Users,
+  Loader2,
 } from "lucide-react";
 
 const PACKAGE_IMAGES: Record<string, string> = {
@@ -34,12 +35,31 @@ export default function PackageDetailPage({
 }) {
   const resolvedParams = use(params);
   const router = useRouter();
-  const { packages, setSelectedPackage } = useCustomer();
+  const { packages, isLoadingPackages, setSelectedPackage } = useCustomer();
 
-  const pkg: PackageItem =
-    packages.find((p) => p.id === resolvedParams.id) ||
-    MOCK_PACKAGES.find((p) => p.isBestSeller) ||
-    MOCK_PACKAGES[0];
+  const pkg: PackageItem | undefined = packages.find((p) => p.id === resolvedParams.id);
+
+  if (isLoadingPackages) {
+    return (
+      <div className="flex justify-center items-center h-screen -mt-20">
+        <Loader2 className="h-8 w-8 animate-spin text-[#FF6433]" />
+      </div>
+    );
+  }
+
+  if (!pkg) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen -mt-20 gap-4">
+        <p className="text-slate-500 text-[15px]">Package not found.</p>
+        <Link
+          href="/customer/packages"
+          className="px-5 py-2.5 bg-[#FF6433] text-white text-[13px] font-medium rounded-full shadow-xs hover:bg-[#E84A23] transition-colors"
+        >
+          Back to Packages
+        </Link>
+      </div>
+    );
+  }
 
   const formattedPrice = `LKR ${pkg.priceLKR.toLocaleString()}`;
   const [selectedVariant, setSelectedVariant] = useState(0);

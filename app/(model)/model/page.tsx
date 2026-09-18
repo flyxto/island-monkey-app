@@ -2,10 +2,36 @@
 
 import Link from "next/link";
 import { MOCK_BOOKINGS } from "@/lib/mock-data/model-portal";
-import { History, Camera, Calendar, ArrowRight, Check, Clock } from "lucide-react";
+import { useModel } from "@/lib/portal/ModelContext";
+import { Info, History, Camera, Calendar, ArrowRight, Loader2, Check, Clock } from "lucide-react";
 
 export default function ModelHomePage() {
+  const { user, balance, isLoadingUser, error } = useModel();
   const upcomingSampleBookings = MOCK_BOOKINGS.slice(0, 2);
+
+  if (error) {
+    return (
+      <div className="flex h-[50vh] flex-col items-center justify-center gap-4 text-center">
+        <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center">
+          <Info className="w-6 h-6" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-im-heading">Profile Not Found</h2>
+          <p className="text-im-muted text-sm mt-1 max-w-sm">
+            {error}. You may have registered as a model, but a complete model profile hasn't been set up yet. Please contact support to set up your profile.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoadingUser || !user || !balance) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <div className="w-8 h-8 animate-spin rounded-full border-4 border-im-accent border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col w-full overflow-hidden justify-between gap-3 sm:gap-4">

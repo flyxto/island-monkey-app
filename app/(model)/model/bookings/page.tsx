@@ -1,17 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { MOCK_BOOKINGS } from "@/lib/mock-data/model-portal";
 import { StatusBadge, StatusType } from "@/components/portal/StatusBadge";
 import { Input } from "@/components/ui/input";
-import { Search, Calendar, Clock, MapPin, Eye, Camera } from "lucide-react";
+import { Search, Calendar, Clock, MapPin, Eye, Camera, Loader2 } from "lucide-react";
+import { getModelBookings } from "@/lib/api";
 
 export default function MyBookingsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<"all" | StatusType>("all");
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredBookings = MOCK_BOOKINGS.filter((booking) => {
+  useEffect(() => {
+    async function fetchBookings() {
+      try {
+        const data = await getModelBookings();
+        setBookings(data);
+      } catch (error) {
+        console.error("Failed to load model bookings:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchBookings();
+  }, []);
+
+  const filteredBookings = bookings.filter((booking) => {
     const matchesSearch =
       booking.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       booking.location.toLowerCase().includes(searchQuery.toLowerCase());
@@ -98,7 +114,11 @@ export default function MyBookingsPage() {
 
         {/* Scrollable Bookings List */}
         <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-3 pb-32">
-          {filteredBookings.length > 0 ? (
+          {isLoading ? (
+            <div className="p-12 flex justify-center text-[#FF6433]">
+              <Loader2 className="w-8 h-8 animate-spin" />
+            </div>
+          ) : filteredBookings.length > 0 ? (
             filteredBookings.map((booking) => (
               <div
                 key={booking.id}
@@ -116,7 +136,11 @@ export default function MyBookingsPage() {
                       </h2>
                       <div className="flex items-center gap-1 text-[12px] font-medium text-slate-500 mt-0.5">
                         <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>{booking.dateTime}</span>
+                        <span>
+                          {booking.dateTime?.includes("-") || booking.dateTime?.includes("T")
+                            ? new Date(booking.dateTime).toLocaleDateString()
+                            : booking.dateTime}
+                        </span>
                       </div>
                     </div>
                   </div>

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { MOCK_GIGS } from "@/lib/mock-data/model-portal";
 import { Input } from "@/components/ui/input";
-import { Search, Star, Check } from "lucide-react";
+import { Search, Star, Check, Plus, Pencil, Loader2 } from "lucide-react";
+import { getGigs } from "@/lib/api";
 
 const GIG_IMAGES = [
   "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=900&auto=format&fit=crop&q=85",
@@ -15,8 +15,27 @@ const GIG_IMAGES = [
 
 export default function MyGigsPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [gigs, setGigs] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredGigs = MOCK_GIGS.filter(
+  useEffect(() => {
+    async function fetchGigs() {
+      try {
+        setIsLoading(true);
+        // Backend models/me doesn't return detailed gigs out of the box in the /models endpoint
+        // Wait, the /gigs endpoint returns all gigs, but with userId filter for models
+        const data = await getGigs();
+        setGigs(data);
+      } catch (error) {
+        console.error("Failed to fetch gigs:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchGigs();
+  }, []);
+
+  const filteredGigs = gigs.filter(
     (gig) =>
       gig.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       gig.description.toLowerCase().includes(searchQuery.toLowerCase())
@@ -54,15 +73,33 @@ export default function MyGigsPage() {
           <h1 className="text-[16px] font-medium text-slate-900 tracking-tight">
             My Gigs
           </h1>
-          <span className="px-2.5 py-1 bg-black/10 text-slate-700 text-[12px] font-medium rounded-full">
-            {filteredGigs.length} Available Gigs
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 bg-black/10 text-slate-700 text-[12px] font-medium rounded-full">
+              {filteredGigs.length} Available Gigs
+            </span>
+            <Link
+              href="/model/gigs/create"
+              className="flex items-center gap-1.5 px-3 py-1 bg-[#FF6433] hover:bg-[#E84A23] text-white rounded-full text-[12px] font-medium transition-colors shadow-xs cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>New Gig</span>
+            </Link>
+          </div>
         </div>
 
         {/* Gig Cards List */}
         <div className="flex flex-col gap-5">
-          {filteredGigs.length > 0 ? (
+          {isLoading ? (
+            <div className="p-12 flex justify-center">
+              <Loader2 className="w-8 h-8 text-[#FF6433] animate-spin" />
+            </div>
+          ) : filteredGigs.length > 0 ? (
             filteredGigs.map((gig, index) => {
+              const hourlyRate = gig.hourlyRateLkr || gig.hourlyRateLKR || gig.priceLKR || 0;
+              const rateDisplay = hourlyRate >= 1000 
+                ? `LKR ${Math.round(hourlyRate / 1000)}k/hr` 
+                : `LKR ${hourlyRate}/hr`;
+
               return (
                 <div
                   key={gig.id}
@@ -71,8 +108,8 @@ export default function MyGigsPage() {
                   {/* Full Background Image */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={GIG_IMAGES[index % GIG_IMAGES.length]}
-                    alt={gig.title}
+                    src={gig.imageUrl || GIG_IMAGES[index % GIG_IMAGES.length]}
+                    alt={gig.title || "Gig"}
                     className="absolute inset-0 w-full h-full object-cover object-center"
                   />
 
@@ -84,7 +121,7 @@ export default function MyGigsPage() {
                     {/* Title + Verified Badge */}
                     <div className="flex items-center gap-1.5">
                       <h2 className="text-[20px] font-medium text-white tracking-tight leading-tight">
-                        {gig.title}
+                        {gig.title || gig.name}
                       </h2>
                       <span className="w-5 h-5 rounded-full bg-[#1D9BF0] flex items-center justify-center text-white shrink-0 shadow-xs">
                         <Check className="w-3 h-3 stroke-[3]" />
@@ -117,7 +154,7 @@ export default function MyGigsPage() {
                       {/* Metric 2: Duration */}
                       <div className="flex flex-col items-center">
                         <span className="text-[16px] font-medium text-white leading-none">
-                          {gig.durationHours}
+                          {gig.durationHours || "2 Hours"}
                         </span>
                         <span className="text-[11px] font-medium text-white/60 mt-1.5">
                           Duration
@@ -130,7 +167,7 @@ export default function MyGigsPage() {
                       {/* Metric 3: Rate */}
                       <div className="flex flex-col items-end">
                         <span className="text-[16px] font-medium text-white leading-none">
-                          LKR {Math.round(gig.hourlyRateLKR / 1000)}k/hr
+                          {rateDisplay}
                         </span>
                         <span className="text-[11px] font-medium text-white/60 mt-1.5">
                           Rate
@@ -138,11 +175,11 @@ export default function MyGigsPage() {
                       </div>
                     </div>
 
-                    {/* Action Row: View Package Button (Opaque Glass Effect) */}
-                    <div className="pt-1">
+                    {/* Action Row: View Package Button & Edit Button */}
+                    <div className="pt-1 flex items-center gap-2">
                       <Link
                         href={`/model/gigs/${gig.id}`}
-                        className="relative overflow-hidden w-full h-12 bg-gradient-to-b from-white via-[#F6F8FA] to-[#E3E7EC] border border-white rounded-full font-medium text-[14px] text-slate-900 flex items-center justify-center shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,1),inset_0_-2px_4px_rgba(0,0,0,0.08),0_8px_24px_rgba(0,0,0,0.35)] hover:brightness-105 active:scale-[0.985] transition-all cursor-pointer"
+                        className="relative overflow-hidden flex-1 h-12 bg-gradient-to-b from-white via-[#F6F8FA] to-[#E3E7EC] border border-white rounded-full font-medium text-[14px] text-slate-900 flex items-center justify-center shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,1),inset_0_-2px_4px_rgba(0,0,0,0.08),0_8px_24px_rgba(0,0,0,0.35)] hover:brightness-105 active:scale-[0.985] transition-all cursor-pointer"
                       >
                         {/* Upper Specular Glass Sheen */}
                         <div className="absolute inset-x-2 top-0.5 h-[46%] bg-gradient-to-b from-white/95 via-white/40 to-transparent rounded-t-full pointer-events-none" />
@@ -152,6 +189,15 @@ export default function MyGigsPage() {
                           View Package
                         </span>
                       </Link>
+
+                      <Link
+                        href={`/model/gigs/${gig.id}/edit`}
+                        className="w-12 h-12 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 backdrop-blur-md flex items-center justify-center text-white transition-all active:scale-95 shrink-0 cursor-pointer"
+                        title="Edit Gig"
+                        aria-label="Edit Gig"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -160,7 +206,9 @@ export default function MyGigsPage() {
           ) : (
             <div className="p-8 text-center bg-white border border-slate-200/60 rounded-2xl shadow-xs">
               <p className="text-slate-500 text-[14px] font-medium">
-                No gigs found matching &quot;{searchQuery}&quot;.
+                {gigs.length === 0
+                  ? "You haven't created any gigs yet."
+                  : `No gigs found matching "${searchQuery}".`}
               </p>
             </div>
           )}

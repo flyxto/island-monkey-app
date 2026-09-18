@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useCustomer } from "@/lib/portal/CustomerContext";
 import { PackageCard } from "@/components/portal/PackageCard";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 
 export default function PackagesListPage() {
-  const { packages, setSelectedPackage } = useCustomer();
+  const { user, packages, isLoadingPackages, setSelectedPackage } = useCustomer();
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredPackages = packages.filter(
@@ -55,7 +55,11 @@ export default function PackagesListPage() {
 
         {/* Packages List */}
         <div className="flex flex-col gap-3.5">
-          {filteredPackages.length > 0 ? (
+          {isLoadingPackages ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-[#FF6433]" />
+            </div>
+          ) : filteredPackages.length > 0 ? (
             filteredPackages.map((pkg) => (
               <PackageCard
                 key={pkg.id}
