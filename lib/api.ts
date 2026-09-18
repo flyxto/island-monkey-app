@@ -161,3 +161,49 @@ export async function getGigs(status?: string) {
   }
   return response.json();
 }
+
+export async function createGig(data: any) {
+  const response = await fetchWithAuth(`${API_URL}/gigs`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to create gig');
+  }
+  
+  return response.json();
+}
+
+export async function getGig(id: string) {
+  const response = await fetchWithAuth(`${API_URL}/gigs/${id}`, { method: 'GET' });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to fetch gig');
+  }
+  return response.json();
+}
+
+export async function updateGig(id: string, data: any) {
+  const response = await fetchWithAuth(`${API_URL}/gigs/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to update gig');
+  }
+  return response.json();
+}
+
+export async function initiatePayment(bookingId: string) {
+  const response = await fetchWithAuth(`${API_URL}/payments/initiate/${bookingId}`, {
+    method: 'POST',
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to initiate payment');
+  }
+  return response.json();
+}

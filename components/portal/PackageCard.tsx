@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { PackageItem } from "@/lib/mock-data/customer-portal";
-import { Camera } from "lucide-react";
+import { Camera, Pencil } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -15,6 +15,7 @@ export interface PackageCardProps {
   priceSuffix?: string; // e.g. "/hr"
   detailHref?: string;
   statusBadge?: StatusType;
+  editHref?: string;
 }
 
 /**
@@ -29,6 +30,7 @@ export function PackageCard({
   priceSuffix = "",
   detailHref,
   statusBadge,
+  editHref,
 }: PackageCardProps) {
   const formattedPrice = `LKR ${packageItem.priceLKR.toLocaleString()}${priceSuffix}`;
   const targetHref = detailHref || `/customer/packages/${packageItem.id}`;
@@ -53,6 +55,18 @@ export function PackageCard({
               Best Seller
             </Badge>
           )
+        )}
+        
+        {/* Edit Button overlay */}
+        {editHref && (
+          <Link 
+            href={editHref}
+            className="absolute top-3 right-3 w-8 h-8 bg-white/90 hover:bg-white text-im-heading rounded-full shadow-sm flex items-center justify-center transition-colors backdrop-blur-sm z-10"
+            onClick={(e) => e.stopPropagation()}
+            aria-label="Edit Gig"
+          >
+            <Pencil className="w-4 h-4" />
+          </Link>
         )}
       </div>
 

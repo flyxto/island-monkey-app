@@ -10,7 +10,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Camera, ChevronLeft, Loader2 } from "lucide-react";
-import { getAvailableSlots, createBooking } from "@/lib/api";
+import { getAvailableSlots, createBooking, initiatePayment } from "@/lib/api";
+
+declare global {
+  interface Window {
+    payhere: any;
+  }
+}
 
 export default function BookingPage() {
   const router = useRouter();
@@ -60,8 +66,8 @@ export default function BookingPage() {
   const handleProceed = async () => {
     try {
       setIsBooking(true);
-      // Create the booking in backend
-      await createBooking({
+      // 1. Create the booking in backend
+      const booking = await createBooking({
         packageId: selectedPackage.id,
         date: selectedDate,
         time: selectedTime,
@@ -69,17 +75,39 @@ export default function BookingPage() {
         notes: "Booked via Island Monkey App",
       });
       
-      // Navigate to confirmation page
-      const queryParams = new URLSearchParams({
-        packageId: selectedPackage.id,
-        date: selectedDate,
-        time: selectedTime,
-      });
-      router.push(`/customer/booking/confirmation?${queryParams.toString()}`);
-    } catch (error) {
+      // 2. Fetch PayHere checkout payload using the booking ID
+      const paymentData = await initiatePayment(booking.id);
+      
+      // 3. Setup PayHere callbacks
+      window.payhere.onCompleted = function onCompleted(orderId: string) {
+        // Navigate to confirmation page
+        const queryParams = new URLSearchParams({
+          packageId: selectedPackage.id,
+          date: selectedDate,
+          time: selectedTime,
+          orderId, // Optionally pass orderId
+        });
+        router.push(`/customer/booking/confirmation?${queryParams.toString()}`);
+      };
+
+      window.payhere.onDismissed = function onDismissed() {
+        console.log("Payment dismissed");
+        alert("Payment was cancelled. You can try again.");
+        setIsBooking(false); // Reset loading state if they dismiss the modal
+      };
+
+      window.payhere.onError = function onError(error: string) {
+        console.error("Payment error:", error);
+        alert("Payment error: " + error);
+        setIsBooking(false);
+      };
+
+      // 4. Trigger the checkout popup
+      window.payhere.startPayment(paymentData.payload);
+
+    } catch (error: any) {
       console.error("Booking failed:", error);
-      alert("Booking failed. Please try again.");
-    } finally {
+      alert(error.message || "Booking failed. Please try again.");
       setIsBooking(false);
     }
   };
