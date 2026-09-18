@@ -105,6 +105,30 @@ export default function MyGigsPage() {
                   key={gig.id}
                   className="relative w-full rounded-[32px] overflow-hidden shadow-lg bg-neutral-900 aspect-[3/4.2] min-h-[460px] flex flex-col justify-end"
                 >
+                  <div
+                    className={`absolute top-5 left-5 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold capitalize backdrop-blur-md border ${
+                      gig.status === "active"
+                        ? "bg-green-500/20 text-green-300 border-green-400/30"
+                        : gig.status === "pending"
+                          ? "bg-yellow-500/20 text-yellow-300 border-yellow-400/30"
+                          : gig.status === "rejected"
+                            ? "bg-red-500/20 text-red-300 border-red-400/30"
+                            : "bg-white/15 text-white/80 border-white/20"
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        gig.status === "active"
+                          ? "bg-green-400"
+                          : gig.status === "pending"
+                            ? "bg-yellow-400"
+                            : gig.status === "rejected"
+                              ? "bg-red-400"
+                              : "bg-white/60"
+                      }`}
+                    />
+                    {gig.status}
+                  </div>
                   {/* Full Background Image */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
