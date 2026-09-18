@@ -7,10 +7,18 @@ import { QuickActionCard } from "@/components/portal/QuickActionCard";
 import { SessionListItem } from "@/components/portal/SessionListItem";
 import { QRModal } from "@/components/portal/QRModal";
 import { MOCK_UPCOMING_SESSIONS } from "@/lib/mock-data/customer-portal";
-import { Info, History, Handshake } from "lucide-react";
+import { Info, History, Handshake, Loader2 } from "lucide-react";
 
 export default function CustomerHomePage() {
-  const { user, balance, isQRModalOpen, setIsQRModalOpen } = useCustomer();
+  const { user, balance, isLoadingUser, isQRModalOpen, setIsQRModalOpen } = useCustomer();
+
+  if (isLoadingUser || !user || !balance) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-im-accent" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8 pt-8 pb-11.5">

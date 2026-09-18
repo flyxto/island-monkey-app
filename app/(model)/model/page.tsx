@@ -4,15 +4,38 @@ import Link from "next/link";
 import { BalanceCard } from "@/components/portal/BalanceCard";
 import { QuickActionCard } from "@/components/portal/QuickActionCard";
 import { StatusBadge } from "@/components/portal/StatusBadge";
-import {
-  MOCK_MODEL_PROFILE,
-  MOCK_BOOKINGS,
-} from "@/lib/mock-data/model-portal";
+import { MOCK_BOOKINGS } from "@/lib/mock-data/model-portal";
+import { useModel } from "@/lib/portal/ModelContext";
 import { Info, History, Camera, Eye } from "lucide-react";
 import { CardContent } from "@/components/ui/card";
 
 export default function ModelHomePage() {
+  const { user, balance, isLoadingUser, error } = useModel();
   const upcomingSampleBookings = MOCK_BOOKINGS.slice(0, 3);
+
+  if (error) {
+    return (
+      <div className="flex h-[50vh] flex-col items-center justify-center gap-4 text-center">
+        <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center">
+          <Info className="w-6 h-6" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-im-heading">Profile Not Found</h2>
+          <p className="text-im-muted text-sm mt-1 max-w-sm">
+            {error}. You may have registered as a model, but a complete model profile hasn't been set up yet. Please contact support to set up your profile.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoadingUser || !user || !balance) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <div className="w-8 h-8 animate-spin rounded-full border-4 border-im-accent border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8 pt-8 pb-11.5">
@@ -20,7 +43,7 @@ export default function ModelHomePage() {
         {/* Greeting Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-[28px] font-semibold text-im-heading tracking-tight">
-            Hi, {MOCK_MODEL_PROFILE.firstName}.
+            Hi, {user.firstName}.
           </h1>
           <span className="px-3.5 py-1.5 bg-im-accent-light text-im-accent text-[12px] font-semibold rounded-full">
             Talent Portal
@@ -30,8 +53,8 @@ export default function ModelHomePage() {
 
         {/* Extended Balance Card with double-glow variant */}
         <BalanceCard
-          points={MOCK_MODEL_PROFILE.pointsBalance}
-          formattedPoints={MOCK_MODEL_PROFILE.formattedPoints}
+          points={balance.pointsBalance}
+          formattedPoints={balance.formattedPoints}
           variant="double-glow"
         />
 
@@ -40,7 +63,7 @@ export default function ModelHomePage() {
           <Info className="w-5 h-5 text-im-accent shrink-0" />
           <p className="text-[14px] leading-tight">
             <strong className="font-bold text-im-muted">
-              1 Point = 200 LKR Today
+              1 Point = {balance.conversionRateLKR} LKR Today
             </strong>{" "}
             <span className="text-im-muted-light font-semibold">
               • Conversion rates are updated daily.

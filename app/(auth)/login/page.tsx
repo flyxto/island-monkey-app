@@ -53,9 +53,9 @@ export default function LoginPage() {
         localStorage.setItem("userRole", role);
         
         // Redirect based on role
-        if (role === "customer") router.push("/(customer)");
-        else if (role === "model") router.push("/(model)");
-        else if (role === "partner") router.push("/(partner)");
+        if (role === "customer") router.push("/customer");
+        else if (role === "model") router.push("/model");
+        else if (role === "partner") router.push("/partner");
         else router.push("/");
       }
     } catch (err: any) {

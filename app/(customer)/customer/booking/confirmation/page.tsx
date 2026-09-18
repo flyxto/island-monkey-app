@@ -1,9 +1,8 @@
 "use client";
 
 import { use } from "react";
-import Link from "next/link";
 import { useCustomer } from "@/lib/portal/CustomerContext";
-import { CheckCircle, Calendar, Sparkles } from "lucide-react";
+import { CheckCircle, Calendar } from "lucide-react";
 
 export default function BookingConfirmationPage({
   searchParams,
@@ -67,33 +66,6 @@ export default function BookingConfirmationPage({
             </span>
           </div>
         </div>
-      </div>
-
-      {/* Integration Handoff Banner */}
-      <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-amber-900 text-[13px] leading-relaxed">
-        <Sparkles className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-        <div>
-          <strong className="font-semibold block">
-            TODO / Payment Gateway Handoff Point
-          </strong>
-          This screen completes the booking preview flow. Connect your Sri Lanka payment gateway or points-redemption API at this step.
-        </div>
-      </div>
-
-      {/* Navigation Actions */}
-      <div className="flex flex-col gap-3">
-        <Link
-          href="/customer"
-          className="w-full py-3.5 bg-im-btn-primary text-white text-[16px] font-medium rounded-xs hover:bg-im-btn-primary/90 transition-all text-center"
-        >
-          Return to Home
-        </Link>
-        <Link
-          href="/customer/sessions"
-          className="w-full py-3 bg-white text-im-accent text-[15px] font-semibold rounded-xs border border-im-border hover:border-im-accent transition-all text-center"
-        >
-          View My Sessions
-        </Link>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   PackageItem,
   MOCK_PACKAGES,
@@ -9,11 +10,12 @@ import {
   CustomerUser,
   BalanceInfo,
 } from "@/lib/mock-data/customer-portal";
-import { getPackages } from "@/lib/api";
+import { getPackages, getCustomerProfile } from "@/lib/api";
 
-interface CustomerContextType {
-  user: CustomerUser;
-  balance: BalanceInfo;
+export interface CustomerContextType {
+  user: CustomerUser | null;
+  balance: BalanceInfo | null;
+  isLoadingUser: boolean;
   packages: PackageItem[];
   isLoadingPackages: boolean;
   selectedPackage: PackageItem | null;
@@ -25,15 +27,53 @@ interface CustomerContextType {
 const CustomerContext = createContext<CustomerContextType | undefined>(undefined);
 
 export function CustomerProvider({ children }: { children: React.ReactNode }) {
-  const [user] = useState<CustomerUser>(MOCK_CUSTOMER_USER);
-  const [balance] = useState<BalanceInfo>(MOCK_CUSTOMER_BALANCE);
+  const router = useRouter();
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [user, setUser] = useState<CustomerUser | null>(null);
+  const [balance, setBalance] = useState<BalanceInfo | null>(null);
   const [packages, setPackages] = useState<PackageItem[]>([]);
   const [isLoadingPackages, setIsLoadingPackages] = useState(true);
   
   // Default selected package is null until fetched
   const [selectedPackage, setSelectedPackage] = useState<PackageItem | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    const fetchUser = async () => {
+      try {
+        setIsLoadingUser(true);
+        const data = await getCustomerProfile();
+        setUser({
+          id: data.id,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          phone: data.phone,
+          qrCodeValue: data.qrCodeValue,
+          memberId: data.memberId,
+          role: data.role,
+        });
+        setBalance({
+          pointsBalance: data.balance.pointsBalance,
+          formattedPoints: data.balance.formattedPoints,
+          conversionRateLKR: data.balance.conversionRateLKR,
+          lastUpdated: data.balance.lastUpdated,
+        });
+      } catch (error) {
+        console.error("Failed to fetch customer profile:", error);
+      } finally {
+        setIsLoadingUser(false);
+      }
+    };
+    fetchUser();
+  }, [router]);
+
+  useEffect(() => {
     const fetchPackages = async () => {
       try {
         setIsLoadingPackages(true);
@@ -83,9 +123,10 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         balance,
+        isLoadingUser,
         packages,
         isLoadingPackages,
-        selectedPackage: selectedPackage || MOCK_PACKAGES[0],
+        selectedPackage: selectedPackage || packages[0] || MOCK_PACKAGES[0],
         setSelectedPackage: (pkg: PackageItem) => setSelectedPackage(pkg),
         isQRModalOpen,
         setIsQRModalOpen,

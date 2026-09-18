@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCustomer } from "@/lib/portal/CustomerContext";
@@ -9,33 +9,79 @@ import { TimeSlotChip } from "@/components/portal/TimeSlotChip";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Camera, ChevronLeft } from "lucide-react";
+import { Camera, ChevronLeft, Loader2 } from "lucide-react";
+import { getAvailableSlots, createBooking } from "@/lib/api";
 
 export default function BookingPage() {
   const router = useRouter();
   const { selectedPackage } = useCustomer();
 
   // State for Date & Time selection
-  const [selectedDate, setSelectedDate] = useState("2026-06-18");
-  const [selectedTime, setSelectedTime] = useState("02:00 PM");
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  });
+  const [selectedTime, setSelectedTime] = useState("");
 
   const formattedPrice = `LKR ${selectedPackage.priceLKR.toLocaleString()}`;
 
-  const timeSlots = [
-    { time: "10:00 AM", disabled: false },
-    { time: "02:00 PM", disabled: false },
-    { time: "06:00 PM", disabled: false },
-    { time: "08:00 PM", disabled: true },
-  ];
+  const [timeSlots, setTimeSlots] = useState<{time: string, disabled: boolean}[]>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+  const [isBooking, setIsBooking] = useState(false);
 
-  const handleProceed = () => {
-    // Encapsulate booking query state into URL
-    const queryParams = new URLSearchParams({
-      packageId: selectedPackage.id,
-      date: selectedDate,
-      time: selectedTime,
-    });
-    router.push(`/customer/booking/confirmation?${queryParams.toString()}`);
+  useEffect(() => {
+    async function fetchSlots() {
+      try {
+        setIsLoadingSlots(true);
+        const slots = await getAvailableSlots(selectedDate, selectedPackage.studioName);
+        const formattedSlots = slots.map((s: any) => ({
+          time: s.time,
+          disabled: !s.available
+        }));
+        setTimeSlots(formattedSlots);
+        
+        // Auto-select first available slot if current is disabled or none selected
+        if (formattedSlots.length > 0) {
+          const available = formattedSlots.filter((s) => !s.disabled);
+          if (available.length > 0) {
+            setSelectedTime(available[0].time);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch slots:", error);
+      } finally {
+        setIsLoadingSlots(false);
+      }
+    }
+    
+    fetchSlots();
+  }, [selectedDate, selectedPackage.studioName]);
+
+  const handleProceed = async () => {
+    try {
+      setIsBooking(true);
+      // Create the booking in backend
+      await createBooking({
+        packageId: selectedPackage.id,
+        date: selectedDate,
+        time: selectedTime,
+        studioRoom: selectedPackage.studioName,
+        notes: "Booked via Island Monkey App",
+      });
+      
+      // Navigate to confirmation page
+      const queryParams = new URLSearchParams({
+        packageId: selectedPackage.id,
+        date: selectedDate,
+        time: selectedTime,
+      });
+      router.push(`/customer/booking/confirmation?${queryParams.toString()}`);
+    } catch (error) {
+      console.error("Booking failed:", error);
+      alert("Booking failed. Please try again.");
+    } finally {
+      setIsBooking(false);
+    }
   };
 
   return (
@@ -101,16 +147,24 @@ export default function BookingPage() {
             Select a Time
           </h2>
 
-          <div className="flex w-full flex-wrap items-center gap-2.5">
-            {timeSlots.map((slot) => (
-              <TimeSlotChip
-                key={slot.time}
-                time={slot.time}
-                isSelected={selectedTime === slot.time}
-                isDisabled={slot.disabled}
-                onSelect={setSelectedTime}
-              />
-            ))}
+          <div className="flex w-full flex-wrap items-center gap-2.5 min-h-[44px]">
+            {isLoadingSlots ? (
+              <div className="flex w-full items-center justify-center p-4">
+                <Loader2 className="w-6 h-6 animate-spin text-im-accent" />
+              </div>
+            ) : timeSlots.length > 0 ? (
+              timeSlots.map((slot) => (
+                <TimeSlotChip
+                  key={slot.time}
+                  time={slot.time}
+                  isSelected={selectedTime === slot.time}
+                  isDisabled={slot.disabled}
+                  onSelect={setSelectedTime}
+                />
+              ))
+            ) : (
+              <p className="text-im-muted text-[14px]">No slots available for this date.</p>
+            )}
           </div>
         </div>
       </div>
@@ -126,8 +180,10 @@ export default function BookingPage() {
 
             <Button
               onClick={handleProceed}
+              disabled={isBooking || !selectedTime}
               className="w-full py-3.5 bg-im-btn-primary text-white text-[16px] font-medium rounded-xs hover:bg-im-btn-primary/90 active:bg-im-btn-primary/80 transition-all shadow-md text-center h-auto"
             >
+              {isBooking && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
               Proceed
             </Button>
           </CardContent>
