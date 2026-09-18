@@ -1,14 +1,33 @@
-import { redirect } from "next/navigation";
+"use client";
 
-/**
- * Root Route Handler:
- * TEMPORARY PLACEHOLDER ROUTER: Currently redirects directly to /customer as the Customer Portal
- * is the first reference implementation.
- * 
- * TODO (Multi-Portal Auth): When Partner and Model portals are added, replace this static redirect
- * with role-based auth middleware/landing page routing (e.g., routing customers to /customer,
- * partners to /partner, and talent models to /model based on session role).
- */
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+
 export default function RootPage() {
-  redirect("/customer");
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    const role = localStorage.getItem("userRole");
+
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    if (role === "partner") {
+      router.replace("/partner");
+    } else if (role === "model") {
+      router.replace("/model");
+    } else {
+      router.replace("/customer");
+    }
+  }, [router]);
+
+  return (
+    <div className="flex h-screen w-screen items-center justify-center bg-black">
+      <Loader2 className="h-8 w-8 animate-spin text-[#FF6433]" />
+    </div>
+  );
 }

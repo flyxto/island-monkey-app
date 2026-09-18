@@ -8,7 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -18,7 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { registerApi } from "@/lib/api";
 
 const formSchema = z.object({
@@ -72,41 +71,38 @@ export default function RegisterPage() {
 
   return (
     <>
-      <div className="flex flex-col space-y-2 text-center mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-[#0B1C30]">Create an account</h1>
-        <p className="text-sm text-[#616161]">
-          Enter your details below to create your account
+      <div className="flex flex-col space-y-1.5 text-center mb-6">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Create an account</h1>
+        <p className="text-[13px] text-slate-500">
+          Join Island Monkey to book or showcase talent
         </p>
       </div>
 
-      <Tabs defaultValue="customer" className="w-full mb-8" onValueChange={(v) => setRole(v as any)}>
-        <TabsList className="grid w-full grid-cols-2 p-1 bg-[#fdf2ea] rounded-xl h-auto">
-          <TabsTrigger 
-            value="customer" 
-            className="rounded-lg py-2 data-[state=active]:bg-[#C85A17] data-[state=active]:text-white data-[state=active]:shadow-sm transition-all text-[#616161]"
-          >
-            Customer
-          </TabsTrigger>
-          <TabsTrigger 
-            value="model" 
-            className="rounded-lg py-2 data-[state=active]:bg-[#C85A17] data-[state=active]:text-white data-[state=active]:shadow-sm transition-all text-[#616161]"
-          >
-            Model
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <SegmentedControl<"customer" | "model">
+        value={role}
+        onChange={setRole}
+        options={[
+          { value: "customer", label: "Customer" },
+          { value: "model", label: "Model" },
+        ]}
+        className="mb-6"
+      />
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <FormField
               control={form.control}
               name="firstName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[#0B1C30]">First Name</FormLabel>
+                  <FormLabel className="text-[13px] font-medium text-slate-700">First Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="John" {...field} className="h-12 border-[#c6c6cd] focus-visible:ring-[#C85A17] rounded-xl" />
+                    <Input 
+                      placeholder="John" 
+                      {...field} 
+                      className="h-11 border-slate-200/90 focus-visible:ring-2 focus-visible:ring-[#FF6433]/25 focus-visible:border-[#FF6433] rounded-xl bg-white text-[14px] shadow-2xs placeholder:text-slate-400" 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -117,9 +113,13 @@ export default function RegisterPage() {
               name="lastName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[#0B1C30]">Last Name</FormLabel>
+                  <FormLabel className="text-[13px] font-medium text-slate-700">Last Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Doe" {...field} className="h-12 border-[#c6c6cd] focus-visible:ring-[#C85A17] rounded-xl" />
+                    <Input 
+                      placeholder="Doe" 
+                      {...field} 
+                      className="h-11 border-slate-200/90 focus-visible:ring-2 focus-visible:ring-[#FF6433]/25 focus-visible:border-[#FF6433] rounded-xl bg-white text-[14px] shadow-2xs placeholder:text-slate-400" 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -131,9 +131,14 @@ export default function RegisterPage() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[#0B1C30]">Email</FormLabel>
+                <FormLabel className="text-[13px] font-medium text-slate-700">Email address</FormLabel>
                 <FormControl>
-                  <Input placeholder="name@example.com" {...field} className="h-12 border-[#c6c6cd] focus-visible:ring-[#C85A17] rounded-xl" />
+                  <Input 
+                    type="email"
+                    placeholder="name@example.com" 
+                    {...field} 
+                    className="h-11 border-slate-200/90 focus-visible:ring-2 focus-visible:ring-[#FF6433]/25 focus-visible:border-[#FF6433] rounded-xl bg-white text-[14px] shadow-2xs placeholder:text-slate-400" 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -144,9 +149,14 @@ export default function RegisterPage() {
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[#0B1C30]">Phone <span className="text-sm font-normal text-gray-500">(Optional)</span></FormLabel>
+                <FormLabel className="text-[13px] font-medium text-slate-700">Phone <span className="text-[12px] font-normal text-slate-400">(Optional)</span></FormLabel>
                 <FormControl>
-                  <Input placeholder="+1234567890" {...field} className="h-12 border-[#c6c6cd] focus-visible:ring-[#C85A17] rounded-xl" />
+                  <Input 
+                    type="tel"
+                    placeholder="+1 (555) 000-0000" 
+                    {...field} 
+                    className="h-11 border-slate-200/90 focus-visible:ring-2 focus-visible:ring-[#FF6433]/25 focus-visible:border-[#FF6433] rounded-xl bg-white text-[14px] shadow-2xs placeholder:text-slate-400" 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -157,9 +167,14 @@ export default function RegisterPage() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[#0B1C30]">Password</FormLabel>
+                <FormLabel className="text-[13px] font-medium text-slate-700">Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} className="h-12 border-[#c6c6cd] focus-visible:ring-[#C85A17] rounded-xl" />
+                  <Input 
+                    type="password" 
+                    placeholder="••••••••" 
+                    {...field} 
+                    className="h-11 border-slate-200/90 focus-visible:ring-2 focus-visible:ring-[#FF6433]/25 focus-visible:border-[#FF6433] rounded-xl bg-white text-[14px] shadow-2xs placeholder:text-slate-400" 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -167,25 +182,26 @@ export default function RegisterPage() {
           />
 
           {error && (
-            <div className="p-3 text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg">
+            <div className="p-3 text-[13px] text-rose-600 bg-rose-50 border border-rose-200/80 rounded-xl leading-relaxed">
               {error}
             </div>
           )}
 
-          <Button 
+          <button 
             type="submit" 
-            className="w-full h-12 text-base font-semibold bg-[#000000] hover:bg-[#000000]/90 text-white rounded-xl shadow-sm transition-all mt-4"
             disabled={isLoading}
+            className="relative overflow-hidden w-full h-11 bg-gradient-to-b from-[#FF7A45] via-[#FF6433] to-[#E84A23] border border-white/35 rounded-full font-medium text-[14px] text-white flex items-center justify-center gap-2 shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,0.7),inset_0_-2px_4px_rgba(0,0,0,0.15),0_8px_20px_rgba(232,74,35,0.25)] hover:brightness-105 active:scale-[0.985] transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mt-2"
           >
-            {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-            Sign Up
-          </Button>
+            <div className="absolute inset-x-2 top-0.5 h-[46%] bg-gradient-to-b from-white/70 via-white/20 to-transparent rounded-t-full pointer-events-none" />
+            {isLoading && <Loader2 className="h-4 w-4 animate-spin text-white" />}
+            <span>{isLoading ? "Creating account..." : "Create Account"}</span>
+          </button>
         </form>
       </Form>
 
-      <p className="px-8 text-center text-sm text-[#616161] mt-8">
+      <p className="text-center text-[13px] text-slate-500 pt-2">
         Already have an account?{" "}
-        <Link href="/login" className="font-semibold text-[#C85A17] hover:underline">
+        <Link href="/login" className="font-semibold text-[#FF6433] hover:underline">
           Sign in
         </Link>
       </p>

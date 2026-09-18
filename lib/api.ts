@@ -232,3 +232,141 @@ export async function getCustomerBookings() {
   }
   return response.json();
 }
+
+export async function getPackage(id: string) {
+  const response = await fetch(`${API_URL}/packages/${id}`);
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to fetch package');
+  }
+  return response.json();
+}
+
+export async function rejectModelBooking(id: string) {
+  const response = await fetchWithAuth(`${API_URL}/model-bookings/${id}/reject`, {
+    method: 'PATCH',
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to reject booking');
+  }
+  return response.json();
+}
+
+export async function updateModelAvailability(id: string, availability: 'Available' | 'Unavailable') {
+  const response = await fetchWithAuth(`${API_URL}/models/${id}/availability`, {
+    method: 'PATCH',
+    body: JSON.stringify({ availability }),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to update availability');
+  }
+  return response.json();
+}
+
+// ─── Partner Portal APIs ───────────────────────────────────────────────────────
+
+export async function getPartnerProfile() {
+  const response = await fetchWithAuth(`${API_URL}/partners/me`, { method: 'GET' });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to fetch partner profile');
+  }
+  return response.json();
+}
+
+export async function getPartnerTransactions() {
+  const response = await fetchWithAuth(`${API_URL}/partners/me/transactions`, { method: 'GET' });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to fetch partner transactions');
+  }
+  return response.json();
+}
+
+export async function getPartnerOffers(partnerId?: string) {
+  const url = new URL(`${API_URL}/offers`);
+  if (partnerId) url.searchParams.append('partnerId', partnerId);
+  const response = await fetchWithAuth(url.toString(), { method: 'GET' });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to fetch partner offers');
+  }
+  return response.json();
+}
+
+export async function getOffer(id: string) {
+  const response = await fetchWithAuth(`${API_URL}/offers/${id}`, { method: 'GET' });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to fetch offer detail');
+  }
+  return response.json();
+}
+
+export async function createOffer(data: any) {
+  const response = await fetchWithAuth(`${API_URL}/offers`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to create offer');
+  }
+  return response.json();
+}
+
+export async function updateOffer(id: string, data: any) {
+  const response = await fetchWithAuth(`${API_URL}/offers/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to update offer');
+  }
+  return response.json();
+}
+
+export async function lookupCustomerByQr(qrValue: string) {
+  const response = await fetchWithAuth(`${API_URL}/customers/lookup/qr/${encodeURIComponent(qrValue)}`, {
+    method: 'GET',
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Customer not found for this QR code');
+  }
+  return response.json();
+}
+
+export async function deductPoints(data: { userId: string; amount: number; description?: string; referenceId?: string }) {
+  const response = await fetchWithAuth(`${API_URL}/points/deduct`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to deduct points');
+  }
+  return response.json();
+}
+
+export async function logoutApi(refreshToken?: string) {
+  const token = refreshToken || (typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null);
+  if (token) {
+    try {
+      await fetchWithAuth(`${API_URL}/auth/logout`, {
+        method: 'POST',
+        body: JSON.stringify({ refreshToken: token }),
+      });
+    } catch (e) {
+      console.warn('Logout API error:', e);
+    }
+  }
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userRole');
+  }
+}
