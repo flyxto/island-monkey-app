@@ -142,7 +142,7 @@ export function PortalLayout({
           ? "fixed inset-0 w-full h-full overflow-hidden overscroll-none bg-[#000002] p-1 justify-between gap-3 sm:gap-4"
           : isModelProfile || isPartnerProfile || isCustomerProfile
           ? "min-h-svh bg-gradient-to-b from-[#FFEFE8] via-[#FAF6F3] to-[#F6F7F9] relative"
-          : isPartnerDetail || isCustomerDetail
+          : isModelDetail || isPartnerDetail || isCustomerDetail
           ? "fixed inset-0 w-full h-full overflow-hidden overscroll-none bg-[#000002] p-1"
           : "min-h-svh bg-linear-to-b from-[#f8f9ff] to-[#ffffff] relative"
       } flex flex-col`}

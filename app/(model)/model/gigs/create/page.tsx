@@ -5,10 +5,19 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import {
+  ChevronLeft,
+  Loader2,
+  Sparkles,
+  Check,
+  Coins,
+  Clock,
+  MapPin,
+  Tag,
+  CheckCircle2,
+} from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -16,11 +25,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { createGig } from "@/lib/api";
+
+const PRESET_IMAGES = [
+  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800",
+  "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=800",
+  "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=800",
+  "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800",
+];
 
 const formSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -44,17 +59,19 @@ export default function CreateGigPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
-      tag: "",
+      tag: "Fashion & Portfolio",
       description: "",
-      hourlyRateLkr: 0,
-      durationHours: "1 Hour",
-      venueName: "",
-      highlightTitle: "",
-      highlightSubtitle: "",
-      whatsIncluded: "",
-      coverImageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800",
+      hourlyRateLkr: 5000,
+      durationHours: "2 Hours",
+      venueName: "Studio A - Colombo",
+      highlightTitle: "Studio Wardrobe",
+      highlightSubtitle: "2 outfit changes included",
+      whatsIncluded: "Professional Studio Lighting, Makeup Touch-ups, 10 High-Res Edits, All Raw Files",
+      coverImageUrl: PRESET_IMAGES[0],
     },
   });
+
+  const selectedCover = form.watch("coverImageUrl");
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -62,10 +79,10 @@ export default function CreateGigPage() {
     try {
       const parsedValues = {
         ...values,
-        whatsIncluded: values.whatsIncluded.split(",").map(i => i.trim()).filter(Boolean),
-        coverImageUrl: values.coverImageUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800"
+        whatsIncluded: values.whatsIncluded.split(",").map((i) => i.trim()).filter(Boolean),
+        coverImageUrl: values.coverImageUrl || PRESET_IMAGES[0],
       };
-      
+
       await createGig(parsedValues);
       router.push("/model/gigs");
       router.refresh();
@@ -77,186 +94,383 @@ export default function CreateGigPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8 pt-4 pb-12 max-w-2xl mx-auto w-full">
-      <div className="flex items-center gap-4">
-        <Link 
+    <div className="flex-1 flex flex-col w-full overflow-hidden justify-between gap-3 sm:gap-4 min-h-0 select-none">
+      {/* Upper Navigation Row in Dark Frame */}
+      <div className="px-3 pt-2 pb-0.5 flex items-center justify-between shrink-0">
+        <Link
           href="/model/gigs"
-          className="w-10 h-10 rounded-full border border-im-border flex items-center justify-center text-im-muted hover:text-im-heading hover:bg-gray-50 transition-colors"
+          className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-xs flex items-center justify-center text-white transition-all cursor-pointer"
+          aria-label="Back to gigs"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ChevronLeft className="w-5 h-5 -ml-0.5 text-white" />
         </Link>
-        <div>
-          <h1 className="text-[28px] font-semibold text-im-heading tracking-tight">
+
+        <div className="flex flex-col items-center">
+          <span className="text-[15px] font-medium text-white tracking-tight">
             Create New Gig
-          </h1>
-          <p className="text-im-muted text-sm mt-1">Fill out the details to offer a new service</p>
+          </span>
+          <span className="text-[11px] font-medium text-white/60">
+            Publish Casting Service
+          </span>
         </div>
+
+        <span className="px-3 py-1 bg-[#FF6433]/20 border border-[#FF6433]/40 text-[#FF8C6E] text-[12px] font-medium rounded-full">
+          New Gig
+        </span>
       </div>
 
-      <div className="bg-white rounded-2xl border border-im-border p-6 shadow-sm">
+      {/* Bottom Sheet Container: Light curved panel with notch */}
+      <div className="flex-1 min-h-0 bg-[#DCE0E2] rounded-t-[36px] rounded-b px-4 pt-3 pb-8 flex flex-col gap-3.5 overflow-y-auto">
+        {/* Drag Notch Indicator */}
+        <div className="w-10 h-1 bg-slate-400/50 rounded-full mx-auto my-0.5 shrink-0" />
+
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Gig Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Basic Fashion Shoot" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="tag"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category Tag</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Fashion & Portfolio" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Describe what the client gets..." 
-                      className="resize-none min-h-[100px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <FormField
-                control={form.control}
-                name="hourlyRateLkr"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hourly Rate (LKR)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="5000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="durationHours"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Duration</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. 3 Hours" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="venueName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Venue</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Studio B" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-gray-50 rounded-xl border border-im-border/50">
-              <div className="col-span-full">
-                <h3 className="font-semibold text-sm text-im-heading">Highlight Feature</h3>
-                <p className="text-xs text-im-muted">A special callout feature displayed on the gig card</p>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-3.5">
+            {/* Bento Card 1: Gig Overview */}
+            <div className="bg-white rounded-[24px] p-4 sm:p-5 border border-black/5 shadow-xs flex flex-col gap-3.5">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 bg-[#FFF0EB] text-[#FF6433] text-[11px] font-medium rounded-full">
+                  Overview
+                </span>
+                <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                  Basic Info
+                </span>
               </div>
+
+              <div className="flex flex-col gap-3">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[12px] font-medium text-slate-600">
+                        Gig Title
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. Editorial Fashion Shoot"
+                          className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 placeholder:text-slate-400 focus-visible:ring-[#FF6433] focus-visible:border-[#FF6433] shadow-none"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-[11px] text-red-500 font-medium" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="tag"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[12px] font-medium text-slate-600 flex items-center gap-1.5">
+                        <Tag className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Category Tag</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. Fashion & Portfolio"
+                          className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 placeholder:text-slate-400 focus-visible:ring-[#FF6433] focus-visible:border-[#FF6433] shadow-none"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-[11px] text-red-500 font-medium" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[12px] font-medium text-slate-600">
+                        Description
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Describe the styling, mood, poses, and deliverables for this session..."
+                          className="w-full min-h-[88px] p-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 placeholder:text-slate-400 focus-visible:ring-[#FF6433] focus-visible:border-[#FF6433] shadow-none resize-none leading-relaxed"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-[11px] text-red-500 font-medium" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Bento Card 2: Pricing & Logistics */}
+            <div className="bg-white rounded-[24px] p-4 sm:p-5 border border-black/5 shadow-xs flex flex-col gap-3.5">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 bg-[#FFF0EB] text-[#FF6433] text-[11px] font-medium rounded-full">
+                  Logistics & Rate
+                </span>
+                <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                  Pricing
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <FormField
+                  control={form.control}
+                  name="hourlyRateLkr"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[12px] font-medium text-slate-600 flex items-center gap-1.5">
+                        <Coins className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Hourly Rate</span>
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative flex items-center">
+                          <Input
+                            type="number"
+                            placeholder="5000"
+                            className="w-full h-11 pl-3 pr-14 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 placeholder:text-slate-400 focus-visible:ring-[#FF6433] focus-visible:border-[#FF6433] shadow-none"
+                            {...field}
+                          />
+                          <span className="absolute right-3 text-[12px] font-medium text-slate-400 select-none">
+                            LKR/hr
+                          </span>
+                        </div>
+                      </FormControl>
+                      <FormMessage className="text-[11px] text-red-500 font-medium" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="durationHours"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[12px] font-medium text-slate-600 flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Session Length</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. 2 Hours"
+                          className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 placeholder:text-slate-400 focus-visible:ring-[#FF6433] focus-visible:border-[#FF6433] shadow-none"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-[11px] text-red-500 font-medium" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="venueName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[12px] font-medium text-slate-600 flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Location / Venue</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. Studio A"
+                          className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 placeholder:text-slate-400 focus-visible:ring-[#FF6433] focus-visible:border-[#FF6433] shadow-none"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-[11px] text-red-500 font-medium" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Bento Card 3: Visual Cover Photo */}
+            <div className="bg-white rounded-[24px] p-4 sm:p-5 border border-black/5 shadow-xs flex flex-col gap-3.5">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 bg-[#FFF0EB] text-[#FF6433] text-[11px] font-medium rounded-full">
+                  Cover Photo
+                </span>
+                <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                  Select Visual
+                </span>
+              </div>
+
+              {/* Preset Gallery Picker */}
+              <div className="grid grid-cols-4 gap-2.5">
+                {PRESET_IMAGES.map((imgUrl, idx) => {
+                  const isSelected = selectedCover === imgUrl;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => form.setValue("coverImageUrl", imgUrl)}
+                      className={`relative aspect-[3/4] rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
+                        isSelected
+                          ? "border-[#FF6433] ring-2 ring-[#FF6433]/30 scale-[1.02]"
+                          : "border-slate-200 opacity-70 hover:opacity-100 hover:border-slate-400"
+                      }`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={imgUrl}
+                        alt={`Preset ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      {isSelected && (
+                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                          <div className="w-5 h-5 rounded-full bg-[#FF6433] text-white flex items-center justify-center shadow-xs">
+                            <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          </div>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
               <FormField
                 control={form.control}
-                name="highlightTitle"
+                name="coverImageUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Title</FormLabel>
+                    <FormLabel className="text-[11px] font-medium text-slate-500">
+                      Or Custom Image URL
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. Studio Wardrobe" {...field} className="bg-white" />
+                      <Input
+                        placeholder="https://..."
+                        className="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] font-medium text-slate-900 placeholder:text-slate-400 focus-visible:ring-[#FF6433] focus-visible:border-[#FF6433] shadow-none"
+                        {...field}
+                      />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="highlightSubtitle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Subtitle</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. 2 outfit changes" {...field} className="bg-white" />
-                    </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-[11px] text-red-500 font-medium" />
                   </FormItem>
                 )}
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="whatsIncluded"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>What's Included</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Hair styling, Makeup, Raw files..." {...field} />
-                  </FormControl>
-                  <FormDescription>Separate multiple items with commas</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Bento Card 4: Highlight Callout */}
+            <div className="bg-white rounded-[24px] p-4 sm:p-5 border border-black/5 shadow-xs flex flex-col gap-3.5">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 bg-[#FFF0EB] text-[#FF6433] text-[11px] font-medium rounded-full flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-[#FF6433]" />
+                  <span>Featured Callout</span>
+                </span>
+                <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                  Card Highlight
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <FormField
+                  control={form.control}
+                  name="highlightTitle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[12px] font-medium text-slate-600">
+                        Feature Title
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. Studio Wardrobe"
+                          className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 placeholder:text-slate-400 focus-visible:ring-[#FF6433] focus-visible:border-[#FF6433] shadow-none"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-[11px] text-red-500 font-medium" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="highlightSubtitle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[12px] font-medium text-slate-600">
+                        Feature Subtitle
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. 2 outfit changes included"
+                          className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 placeholder:text-slate-400 focus-visible:ring-[#FF6433] focus-visible:border-[#FF6433] shadow-none"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-[11px] text-red-500 font-medium" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Bento Card 5: What's Included */}
+            <div className="bg-white rounded-[24px] p-4 sm:p-5 border border-black/5 shadow-xs flex flex-col gap-3.5">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 bg-[#FFF0EB] text-[#FF6433] text-[11px] font-medium rounded-full flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3 text-[#FF6433]" />
+                  <span>Deliverables</span>
+                </span>
+                <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                  Inclusions
+                </span>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="whatsIncluded"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[12px] font-medium text-slate-600">
+                      Included Items (comma-separated)
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g. Studio Lighting, Hair & Makeup, 10 Retouched Edits, Full RAWs"
+                        className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 placeholder:text-slate-400 focus-visible:ring-[#FF6433] focus-visible:border-[#FF6433] shadow-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-[11px] text-red-500 font-medium" />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             {error && (
-              <div className="p-3 text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg">
+              <div className="p-3 bg-red-50 border border-red-200 text-red-600 text-[13px] font-medium rounded-2xl">
                 {error}
               </div>
             )}
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-im-border">
-              <Button 
-                type="button" 
-                variant="outline" 
+            {/* Bottom Actions Bento Card */}
+            <div className="bg-white rounded-[24px] p-4 border border-black/5 shadow-xs flex flex-col gap-2.5 mt-1">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-12 bg-linear-to-b from-[#FF7A45] via-[#FF6433] to-[#E84A23] hover:from-[#FF8A55] hover:to-[#EA5A33] text-white text-[14px] font-medium rounded-full transition-all shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,0.4),0_8px_20px_rgba(232,74,35,0.25)] active:scale-[0.98] cursor-pointer text-center disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                    <span>Publishing Gig...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 text-white" />
+                    <span>Publish Gig</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
                 onClick={() => router.push("/model/gigs")}
                 disabled={isLoading}
+                className="w-full h-11 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[13px] font-medium rounded-full transition-colors flex items-center justify-center cursor-pointer"
               >
                 Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                className="bg-im-accent hover:bg-im-accent/90 text-white min-w-[120px]"
-                disabled={isLoading}
-              >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Gig
-              </Button>
+              </button>
             </div>
           </form>
         </Form>
