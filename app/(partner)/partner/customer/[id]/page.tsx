@@ -1,10 +1,11 @@
 "use client";
 
-import { use } from "react";
+import { use, useState, useEffect } from "react";
 import Link from "next/link";
 import { TransactionForm } from "@/components/portal/TransactionForm";
-import { MOCK_CUSTOMER_LOOKUPS } from "@/lib/mock-data/partner-portal";
-import { ChevronLeft, CheckCircle2, User, Phone } from "lucide-react";
+import { lookupCustomerByQr, deductPoints } from "@/lib/api";
+import { usePartner } from "@/lib/portal/PartnerContext";
+import { ChevronLeft, CheckCircle2, User, Phone, Loader2, AlertCircle } from "lucide-react";
 
 export default function CustomerDetailsPage({
   params,
@@ -15,11 +16,86 @@ export default function CustomerDetailsPage({
 }) {
   const resolvedParams = use(params);
   const resolvedSearchParams = use(searchParams);
+  const { refreshPartner } = usePartner();
 
-  const customer =
-    MOCK_CUSTOMER_LOOKUPS[resolvedParams.id] || MOCK_CUSTOMER_LOOKUPS.cust_8829;
+  const [customer, setCustomer] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const prefilledDiscount = resolvedSearchParams.discount || "450";
+
+  useEffect(() => {
+    const fetchCustomer = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await lookupCustomerByQr(decodeURIComponent(resolvedParams.id));
+        setCustomer(data);
+      } catch (err: any) {
+        console.error("Failed to lookup customer:", err);
+        setError(err?.message || "Customer not found");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (resolvedParams.id) {
+      fetchCustomer();
+    }
+  }, [resolvedParams.id]);
+
+  const handleDeduct = async (formData: { amount: string; description: string }) => {
+    if (!customer?.id) return;
+    const pts = Number(formData.amount);
+    const result = await deductPoints({
+      userId: customer.id,
+      amount: pts,
+      description: formData.description,
+    });
+    // Update local customer balance
+    if (result && typeof result.newBalance === "number") {
+      setCustomer((prev: any) => ({ ...prev, balance: result.newBalance }));
+    } else {
+      setCustomer((prev: any) => ({
+        ...prev,
+        balance: Math.max(0, (prev?.balance || 0) - pts),
+      }));
+    }
+    // Refresh partner stats
+    await refreshPartner();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center bg-black">
+        <Loader2 className="w-8 h-8 animate-spin text-[#FF6433]" />
+      </div>
+    );
+  }
+
+  if (error || !customer) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center bg-black p-6 gap-4 text-center">
+        <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-red-400">
+          <AlertCircle className="w-6 h-6" />
+        </div>
+        <p className="text-white text-[16px] font-medium">{error || "Customer not found"}</p>
+        <p className="text-slate-400 text-[13px] max-w-xs">
+          No customer found matching code &ldquo;{decodeURIComponent(resolvedParams.id)}&rdquo;.
+        </p>
+        <Link
+          href="/partner/scan"
+          className="mt-2 px-5 py-2.5 bg-[#FF6433] hover:bg-[#E84A23] text-white text-[13px] font-medium rounded-full transition-colors"
+        >
+          Back to Scanner
+        </Link>
+      </div>
+    );
+  }
+
+  const customerName = [customer.firstName, customer.lastName].filter(Boolean).join(" ") || "Member";
+  const customerPhone = customer.phone || "No phone provided";
+  const formattedBalance = Number(customer.balance || 0).toLocaleString();
 
   return (
     <div className="relative flex-1 flex flex-col w-full h-full overflow-hidden bg-black select-none">
@@ -51,11 +127,11 @@ export default function CustomerDetailsPage({
             </div>
           </div>
           <h1 className="text-[20px] font-medium text-white tracking-tight mt-2.5">
-            {customer.name}
+            {customerName}
           </h1>
           <div className="flex items-center gap-1.5 text-white/70 text-[12px] font-medium mt-0.5">
             <Phone className="w-3 h-3" />
-            <span>{customer.phone}</span>
+            <span>{customerPhone}</span>
           </div>
         </div>
 
@@ -77,12 +153,12 @@ export default function CustomerDetailsPage({
                 Available Balance
               </span>
               <span className="text-[13px] font-medium text-slate-700 mt-0.5">
-                Member ID: #{resolvedParams.id}
+                Member ID: #{customer.memberId || customer.id.slice(0, 8)}
               </span>
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-[22px] font-medium text-[#FF6433] tracking-tight">
-                {customer.formattedBalance}
+                {formattedBalance}
               </span>
               <span className="text-[12px] font-medium text-slate-400">
                 pts
@@ -97,7 +173,8 @@ export default function CustomerDetailsPage({
             </h2>
             <TransactionForm
               initialAmount={prefilledDiscount}
-              initialDescription="Blue Denim Jacket"
+              initialDescription="Point Redemption"
+              onSubmit={handleDeduct}
             />
           </div>
         </div>

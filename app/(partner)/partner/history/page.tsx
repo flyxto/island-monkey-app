@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { MOCK_PARTNER_TRANSACTIONS, PartnerTransaction } from "@/lib/mock-data/partner-portal";
+import { useState, useEffect } from "react";
+import { getPartnerTransactions } from "@/lib/api";
 import { Input } from "@/components/ui/input";
-import { ShoppingBag, Search, CheckCircle2 } from "lucide-react";
+import { ShoppingBag, Search, CheckCircle2, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,13 +13,34 @@ import {
 
 export default function PartnerHistoryPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTx, setSelectedTx] = useState<PartnerTransaction | null>(null);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedTx, setSelectedTx] = useState<any | null>(null);
 
-  const filteredTxs = MOCK_PARTNER_TRANSACTIONS.filter(
-    (tx) =>
-      tx.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tx.userId.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    getPartnerTransactions()
+      .then((data) => {
+        setTransactions(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch partner transactions:", err);
+        setTransactions([]);
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const filteredTxs = transactions.filter((tx) => {
+    const desc = (tx.description || "").toLowerCase();
+    const customer = (
+      [tx.user?.firstName, tx.user?.lastName].filter(Boolean).join(" ") +
+      " " +
+      (tx.user?.memberId || "") +
+      " " +
+      (tx.userId || "")
+    ).toLowerCase();
+    const q = searchQuery.toLowerCase();
+    return desc.includes(q) || customer.includes(q);
+  });
 
   return (
     <div className="flex-1 flex flex-col w-full overflow-hidden justify-between gap-3 sm:gap-4 min-h-0">
@@ -58,19 +79,39 @@ export default function PartnerHistoryPage() {
           </span>
         </div>
 
-        {/* Transactions List - Matching Recent Booking List Item UI */}
+        {/* Transactions List */}
         <div className="flex flex-col gap-2">
-          {filteredTxs.length > 0 ? (
+          {isLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-[#FF6433]" />
+            </div>
+          ) : filteredTxs.length > 0 ? (
             filteredTxs.map((tx, idx) => {
-              const isYesterday = tx.timestamp.toLowerCase().includes("yesterday");
-              const month = "Oct";
-              const day = isYesterday ? "23" : "24";
+              const txDate = tx.createdAt ? new Date(tx.createdAt) : new Date();
+              const month = txDate.toLocaleString("en-US", { month: "short" });
+              const day = txDate.getDate().toString();
+              const points = Math.abs(Number(tx.amount || 0));
+              const amountLkr = points * 200;
+              const customerName =
+                [tx.user?.firstName, tx.user?.lastName].filter(Boolean).join(" ") ||
+                (tx.user?.memberId ? `Member ${tx.user.memberId}` : "Customer");
+              const timeStr = txDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
               return (
                 <button
                   key={tx.id}
                   type="button"
-                  onClick={() => setSelectedTx(tx)}
+                  onClick={() =>
+                    setSelectedTx({
+                      id: tx.id,
+                      itemName: tx.description || "Point Redemption",
+                      pointsDeducted: points,
+                      amountLKR: amountLkr,
+                      customerName,
+                      userId: tx.user?.memberId || tx.userId || "Member",
+                      timestamp: `${txDate.toLocaleDateString()} ${timeStr}`,
+                    })
+                  }
                   className="w-full text-left bg-white rounded-2xl p-3 shadow-xs border border-black/5 flex items-center gap-3.5 hover:shadow-sm transition-all shrink-0 cursor-pointer"
                 >
                   {/* Date Column with subtle vertical line */}
@@ -99,20 +140,20 @@ export default function PartnerHistoryPage() {
                   {/* Title & Details (Item Name, Timestamp & Customer User ID) */}
                   <div className="flex flex-col min-w-0 flex-1">
                     <span className="text-[14px] font-medium text-slate-900 truncate">
-                      {tx.itemName}
+                      {tx.description || "Point Redemption"}
                     </span>
                     <span className="text-[12px] font-medium text-slate-400 truncate mt-0.5">
-                      {tx.timestamp} • User {tx.userId}
+                      {timeStr} • {customerName}
                     </span>
                   </div>
 
                   {/* Points Deducted & Amount in LKR */}
                   <div className="flex flex-col items-end shrink-0 pl-1">
                     <span className="text-[13px] font-medium text-[#FF6433]">
-                      -{tx.pointsDeducted} pts
+                      -{points.toLocaleString()} pts
                     </span>
                     <span className="text-[11px] font-medium text-slate-400 mt-0.5">
-                      LKR {tx.amountLKR.toLocaleString()}
+                      LKR {amountLkr.toLocaleString()}
                     </span>
                   </div>
                 </button>
@@ -121,7 +162,9 @@ export default function PartnerHistoryPage() {
           ) : (
             <div className="p-8 text-center bg-white border border-slate-200/60 rounded-2xl shadow-xs">
               <p className="text-slate-500 text-[14px] font-medium">
-                No transactions found matching &quot;{searchQuery}&quot;.
+                {searchQuery
+                  ? `No transactions found matching "${searchQuery}".`
+                  : "No transactions recorded yet."}
               </p>
             </div>
           )}
@@ -152,15 +195,15 @@ export default function PartnerHistoryPage() {
                 </div>
                 <div className="flex justify-between items-center text-[13px] font-medium">
                   <span className="text-slate-500">Points Deducted</span>
-                  <span className="text-[#FF6433]">-{selectedTx.pointsDeducted} pts</span>
+                  <span className="text-[#FF6433]">-{selectedTx.pointsDeducted.toLocaleString()} pts</span>
                 </div>
                 <div className="flex justify-between items-center text-[13px] font-medium">
                   <span className="text-slate-500">Total Value</span>
                   <span className="text-slate-900">LKR {selectedTx.amountLKR.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between items-center text-[13px] font-medium">
-                  <span className="text-slate-500">Customer User ID</span>
-                  <span className="text-slate-700">{selectedTx.userId}</span>
+                  <span className="text-slate-500">Customer</span>
+                  <span className="text-slate-700">{selectedTx.customerName || selectedTx.userId}</span>
                 </div>
                 <div className="flex justify-between items-center text-[13px] font-medium">
                   <span className="text-slate-500">Time & Status</span>

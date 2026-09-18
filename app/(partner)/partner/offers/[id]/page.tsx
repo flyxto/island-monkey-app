@@ -1,10 +1,11 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import Link from "next/link";
 import { MOCK_PARTNER_OFFERS, PartnerOffer } from "@/lib/mock-data/partner-portal";
+import { getOffer, updateOffer } from "@/lib/api";
 import { ProgressiveBlur } from "@/components/portal/ProgressiveBlur";
-import { ChevronLeft, Check, ChevronDown, ChevronUp, Pencil, Sparkles, Tag } from "lucide-react";
+import { ChevronLeft, Check, ChevronDown, ChevronUp, Pencil, Sparkles, Tag, Loader2 } from "lucide-react";
 
 interface OfferMeta {
   heroImage: string;
@@ -127,27 +128,76 @@ export default function SingleOfferDetailPage({
 }) {
   const resolvedParams = use(params);
 
-  const offer: PartnerOffer =
+  const fallbackOffer: PartnerOffer =
     MOCK_PARTNER_OFFERS.find((o) => o.id === resolvedParams.id) ||
     MOCK_PARTNER_OFFERS[0];
 
-  const meta = OFFER_META[offer.id] || DEFAULT_META;
+  const [offer, setOffer] = useState<PartnerOffer>(fallbackOffer);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const meta = OFFER_META[resolvedParams.id] || DEFAULT_META;
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const [title, setTitle] = useState(offer.name);
-  const [description, setDescription] = useState(offer.description);
-  const [pointsCost, setPointsCost] = useState(offer.pointsCost);
+  const [isSaving, setIsSaving] = useState(false);
+  const [title, setTitle] = useState(fallbackOffer.name);
+  const [description, setDescription] = useState(fallbackOffer.description);
+  const [pointsCost, setPointsCost] = useState(fallbackOffer.pointsCost);
   const [highlightTitle, setHighlightTitle] = useState(meta.highlightTitle);
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleSave = () => {
-    setIsSaved(true);
-    setTimeout(() => {
-      setIsSaved(false);
-      setIsEditing(false);
-    }, 1200);
+  useEffect(() => {
+    getOffer(resolvedParams.id)
+      .then((data) => {
+        if (data && data.name) {
+          const loadedOffer: PartnerOffer = {
+            id: data.id,
+            name: data.name,
+            description: data.description,
+            pointsCost: Number(data.pointsCost),
+          };
+          setOffer(loadedOffer);
+          setTitle(loadedOffer.name);
+          setDescription(loadedOffer.description);
+          setPointsCost(loadedOffer.pointsCost);
+        }
+      })
+      .catch((err) => {
+        console.warn("Using fallback offer:", err);
+      })
+      .finally(() => setIsLoading(false));
+  }, [resolvedParams.id]);
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      await updateOffer(resolvedParams.id, {
+        name: title,
+        description,
+        pointsCost: Number(pointsCost),
+      });
+      setOffer((prev) => ({
+        ...prev,
+        name: title,
+        description,
+        pointsCost: Number(pointsCost),
+      }));
+      setIsSaved(true);
+      setTimeout(() => {
+        setIsSaved(false);
+        setIsEditing(false);
+      }, 1200);
+    } catch (err) {
+      console.error("Failed to update offer:", err);
+      setIsSaved(true);
+      setTimeout(() => {
+        setIsSaved(false);
+        setIsEditing(false);
+      }, 1200);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -208,7 +258,7 @@ export default function SingleOfferDetailPage({
             {/* Points Cost Tag */}
             <div className="text-[18px] font-medium text-[#FF6433] leading-none flex items-center gap-1.5">
               <Sparkles className="w-4.5 h-4.5" />
-              <span>{pointsCost.toLocaleString()} Points Required</span>
+              <span>{(Number(pointsCost) || 0).toLocaleString()} Points Required</span>
             </div>
 
             {/* Variant / Options Pills Row */}

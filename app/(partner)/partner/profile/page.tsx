@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePartner } from "@/lib/portal/PartnerContext";
 import { MOCK_STORE_PROFILE } from "@/lib/mock-data/partner-portal";
 import {
   Tag,
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 
 export default function PartnerProfilePage() {
+  const { partner, dailyPointsProcessed, transactionsProcessedCount, logout } = usePartner();
   const [store, setStore] = useState(MOCK_STORE_PROFILE);
   const [isAcceptingPoints, setIsAcceptingPoints] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -29,16 +31,29 @@ export default function PartnerProfilePage() {
 
   // Form edit states
   const [formData, setFormData] = useState({
-    storeName: store.storeName,
-    email: store.email || "hello@pepperst.lk",
-    phone: store.phone || "+94 11 268 4500",
-    location: store.location || "42 Ward Place, Colombo 07, Sri Lanka",
+    storeName: partner?.storeName || store.storeName,
+    email: partner?.user?.email || (partner as any)?.email || store.email || "partner@pepperst.com",
+    phone: partner?.phone || store.phone || "+94 11 268 4500",
+    location: partner?.address || store.location || "42 Ward Place, Colombo 07, Sri Lanka",
     instagram: store.instagram || "@pepperst.official",
-    about: store.about || "",
+    about: partner?.description || store.about || "",
   });
 
+  useEffect(() => {
+    if (partner) {
+      setFormData((prev) => ({
+        ...prev,
+        storeName: partner.storeName || prev.storeName,
+        email: partner.user?.email || (partner as any)?.email || prev.email,
+        phone: partner.phone || prev.phone,
+        location: partner.address || prev.location,
+        about: partner.description || prev.about,
+      }));
+    }
+  }, [partner]);
+
   // Listen for open edit modal trigger from top orange card
-  React.useEffect(() => {
+  useEffect(() => {
     const handleOpenEdit = () => setIsEditModalOpen(true);
     window.addEventListener("open-partner-edit-modal", handleOpenEdit);
     return () => window.removeEventListener("open-partner-edit-modal", handleOpenEdit);
@@ -64,7 +79,7 @@ export default function PartnerProfilePage() {
         {/* Total Redemptions */}
         <div className="bg-white rounded-[22px] py-3.5 px-2 flex flex-col items-center justify-center shadow-xs border border-black/5">
           <span className="text-[18px] font-medium text-slate-900 tracking-tight leading-none">
-            {store.transactionsProcessedCount}
+            {transactionsProcessedCount}
           </span>
           <span className="text-[12px] font-medium text-slate-400 mt-1.5">
             Redemptions
@@ -75,7 +90,7 @@ export default function PartnerProfilePage() {
         <div className="bg-white rounded-[22px] py-3.5 px-2 flex flex-col items-center justify-center shadow-xs border border-black/5">
           <div className="flex items-center gap-1 leading-none">
             <span className="text-[18px] font-medium text-slate-900 tracking-tight">
-              {store.rating || 4.9}
+              4.9
             </span>
             <Star className="w-3.5 h-3.5 fill-[#F59E0B] text-[#F59E0B]" />
           </div>
@@ -87,10 +102,10 @@ export default function PartnerProfilePage() {
         {/* Total Points Processed */}
         <div className="bg-white rounded-[22px] py-3.5 px-2 flex flex-col items-center justify-center shadow-xs border border-black/5">
           <span className="text-[18px] font-medium text-[#FF6433] tracking-tight leading-none">
-            {store.totalPointsProcessed || "248.5k"}
+            {(dailyPointsProcessed ?? 0).toLocaleString()}
           </span>
           <span className="text-[12px] font-medium text-slate-400 mt-1.5">
-            Points
+            Daily Pts
           </span>
         </div>
       </div>
@@ -297,7 +312,7 @@ export default function PartnerProfilePage() {
           {/* Sign Out */}
           <button
             type="button"
-            onClick={() => alert("Signed out of Partner Store Portal.")}
+            onClick={() => setActiveModal("Sign Out Confirmation")}
             className="flex items-center justify-between p-3 rounded-2xl hover:bg-rose-50/50 transition-colors cursor-pointer text-left w-full text-rose-600"
           >
             <div className="flex items-center gap-3">
@@ -537,15 +552,39 @@ export default function PartnerProfilePage() {
                 "POS terminal #IM-POS-7741 is active. 3 cashier staff PINs are configured for checkout authorization and customer QR scanning."}
               {activeModal === "Merchant Desk Support" &&
                 "Direct line to Island Monkey Merchant Operations: +94 11 268 4501 or partners@islandmonkey.io. 24/7 technical and terminal support."}
+              {activeModal === "Sign Out Confirmation" &&
+                "Are you sure you want to sign out of the Partner Store Portal on this device?"}
             </p>
 
-            <button
-              type="button"
-              onClick={() => setActiveModal(null)}
-              className="w-full h-11 rounded-full bg-slate-900 text-white text-[14px] font-medium hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              Close
-            </button>
+            {activeModal === "Sign Out Confirmation" ? (
+              <div className="flex gap-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setActiveModal(null)}
+                  className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[14px] font-medium rounded-full cursor-pointer transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveModal(null);
+                    logout();
+                  }}
+                  className="flex-1 py-3 bg-rose-600 hover:bg-rose-700 text-white text-[14px] font-medium rounded-full cursor-pointer transition-colors"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setActiveModal(null)}
+                className="w-full h-11 rounded-full bg-slate-900 text-white text-[14px] font-medium hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            )}
           </div>
         </div>
       )}

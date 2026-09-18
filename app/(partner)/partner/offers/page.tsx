@@ -1,15 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { OfferListItem } from "@/components/portal/OfferListItem";
-import { MOCK_PARTNER_OFFERS } from "@/lib/mock-data/partner-portal";
+import { PartnerOffer } from "@/lib/mock-data/partner-portal";
+import { getPartnerOffers } from "@/lib/api";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 
 export default function OffersListPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [offers, setOffers] = useState<PartnerOffer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredOffers = MOCK_PARTNER_OFFERS.filter(
+  useEffect(() => {
+    getPartnerOffers()
+      .then((data) => {
+        const mapped: PartnerOffer[] = (Array.isArray(data) ? data : []).map((o: any) => ({
+          id: o.id,
+          name: o.name,
+          description: o.description,
+          pointsCost: Number(o.pointsCost || 0),
+        }));
+        setOffers(mapped);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch offers:", err);
+        setOffers([]);
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const filteredOffers = offers.filter(
     (offer) =>
       offer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       offer.description.toLowerCase().includes(searchQuery.toLowerCase())
@@ -54,14 +75,20 @@ export default function OffersListPage() {
 
         {/* Offers List */}
         <div className="flex flex-col gap-3.5">
-          {filteredOffers.length > 0 ? (
+          {isLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-[#FF6433]" />
+            </div>
+          ) : filteredOffers.length > 0 ? (
             filteredOffers.map((offer) => (
               <OfferListItem key={offer.id} offer={offer} />
             ))
           ) : (
             <div className="p-8 text-center bg-white border border-black/5 rounded-2xl shadow-2xs">
-              <p className="text-slate-400 text-[14px] font-medium">
-                No offers found matching &quot;{searchQuery}&quot;.
+              <p className="text-slate-500 text-[14px] font-medium">
+                {searchQuery
+                  ? `No offers found matching "${searchQuery}".`
+                  : "No store offers active yet."}
               </p>
             </div>
           )}

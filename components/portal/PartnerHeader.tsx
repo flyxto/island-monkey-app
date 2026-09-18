@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Link from "next/link";
 import { Info, Bell, ScanLine, CheckCircle2, Pencil } from "lucide-react";
-import { MOCK_STORE_PROFILE } from "@/lib/mock-data/partner-portal";
+import { usePartner } from "@/lib/portal/PartnerContext";
 
 export interface PartnerHeaderProps {
   isCompact?: boolean;
@@ -11,18 +11,20 @@ export interface PartnerHeaderProps {
 }
 
 export function PartnerHeader({ isCompact = false, isProfile = false }: PartnerHeaderProps) {
-  const [storeData, setStoreData] = useState(MOCK_STORE_PROFILE);
+  const { partner, dailyPointsProcessed = 0, transactionsProcessedCount = 0 } = usePartner();
 
-  useEffect(() => {
-    const handleStoreUpdate = (e: Event) => {
-      const customEvent = e as CustomEvent<Partial<typeof MOCK_STORE_PROFILE>>;
-      if (customEvent.detail) {
-        setStoreData((prev) => ({ ...prev, ...customEvent.detail }));
-      }
-    };
-    window.addEventListener("partner-store-updated", handleStoreUpdate);
-    return () => window.removeEventListener("partner-store-updated", handleStoreUpdate);
-  }, []);
+  const pointsCount = typeof dailyPointsProcessed === "number" ? dailyPointsProcessed : Number(partner?.dailyPointsProcessed || 0);
+  const txCount = typeof transactionsProcessedCount === "number" ? transactionsProcessedCount : Number(partner?.transactionsProcessedCount || 0);
+
+  const storeName = partner?.storeName || "Partner Store";
+  const initials = (() => {
+    if (!storeName) return "PS";
+    const parts = storeName.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return storeName.slice(0, 2).toUpperCase();
+  })();
 
   const handleOpenEdit = () => {
     window.dispatchEvent(new CustomEvent("open-partner-edit-modal"));
@@ -73,7 +75,7 @@ export function PartnerHeader({ isCompact = false, isProfile = false }: PartnerH
                     : "text-sm"
                 }`}
               >
-                PS
+                {initials}
               </div>
             </div>
 
@@ -107,7 +109,7 @@ export function PartnerHeader({ isCompact = false, isProfile = false }: PartnerH
                   isProfile ? "text-[20px] sm:text-[22px]" : "text-[17px]"
                 }`}
               >
-                {storeData.storeName}
+                {storeName}
               </span>
               <span className="text-[12px] font-medium text-white/80 block mt-0.5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]">
                 {isProfile ? "Island Monkey Verified Shop" : "Merchant Partner"}
@@ -192,14 +194,14 @@ export function PartnerHeader({ isCompact = false, isProfile = false }: PartnerH
               </span>
               <div className="flex items-baseline justify-center mt-1 leading-none">
                 <span className="text-5xl sm:text-6xl font-medium text-white tracking-tight">
-                  {storeData.dailyPointsProcessed.toLocaleString()}
+                  {pointsCount.toLocaleString()}
                 </span>
                 <span className="text-xl sm:text-2xl font-medium text-white/60 tracking-tight ml-2">
                   pts
                 </span>
               </div>
               <span className="text-[12px] font-medium text-white/80 mt-1.5">
-                {storeData.transactionsProcessedCount} Transactions Today
+                {txCount} Transactions Today
               </span>
             </div>
           </div>
