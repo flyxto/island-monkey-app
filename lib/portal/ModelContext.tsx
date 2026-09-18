@@ -49,18 +49,24 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
         setIsLoadingUser(true);
         const data = await getModelProfile();
         setUser({
-          id: data.id,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email,
-          phone: data.phone,
-          status: data.status,
+          id: data.userId || data.id,
+          firstName: data.user?.firstName || data.firstName || "Model",
+          lastName: data.user?.lastName || data.lastName || "",
+          email: data.user?.email || data.email || "",
+          phone: data.user?.phone || data.phone || "",
+          status: data.availability || data.status || "Available",
         });
+        
+        // Backend currently returns a flat number for model balance, 
+        // whereas customer balance returns an object. We parse safely.
+        const points = typeof data.balance === 'number' ? data.balance : (data.balance?.pointsBalance || 0);
+        const conversionRate = typeof data.balance === 'number' ? 200 : (data.balance?.conversionRateLKR || 200);
+
         setBalance({
-          pointsBalance: data.balance.pointsBalance,
-          formattedPoints: data.balance.formattedPoints,
-          conversionRateLKR: data.balance.conversionRateLKR,
-          lastUpdated: data.balance.lastUpdated,
+          pointsBalance: points,
+          formattedPoints: points.toLocaleString('en-US', { minimumFractionDigits: 2 }),
+          conversionRateLKR: conversionRate,
+          lastUpdated: 'Now',
         });
       } catch (err: any) {
         console.error("Failed to fetch model profile:", err);
