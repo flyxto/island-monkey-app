@@ -29,7 +29,7 @@ export default function BookingPage() {
   });
   const [selectedTime, setSelectedTime] = useState("");
 
-  const formattedPrice = `LKR ${selectedPackage.priceLKR.toLocaleString()}`;
+  const formattedPrice = `LKR ${selectedPackage?.priceLKR?.toLocaleString() || 0}`;
 
   const [timeSlots, setTimeSlots] = useState<{time: string, disabled: boolean}[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
@@ -38,6 +38,7 @@ export default function BookingPage() {
   useEffect(() => {
     async function fetchSlots() {
       try {
+        if (!selectedPackage) return;
         setIsLoadingSlots(true);
         const slots = await getAvailableSlots(selectedDate, selectedPackage.studioName);
         const formattedSlots = slots.map((s: any) => ({
@@ -48,7 +49,7 @@ export default function BookingPage() {
         
         // Auto-select first available slot if current is disabled or none selected
         if (formattedSlots.length > 0) {
-          const available = formattedSlots.filter((s) => !s.disabled);
+          const available = formattedSlots.filter((s: { time: string, disabled: boolean }) => !s.disabled);
           if (available.length > 0) {
             setSelectedTime(available[0].time);
           }
@@ -61,11 +62,13 @@ export default function BookingPage() {
     }
     
     fetchSlots();
-  }, [selectedDate, selectedPackage.studioName]);
+  }, [selectedDate, selectedPackage?.studioName]);
 
   const handleProceed = async () => {
     try {
       setIsBooking(true);
+      if (!selectedPackage) throw new Error("No package selected");
+      
       // 1. Create the booking in backend
       const booking = await createBooking({
         packageId: selectedPackage.id,
@@ -82,7 +85,7 @@ export default function BookingPage() {
       window.payhere.onCompleted = function onCompleted(orderId: string) {
         // Navigate to confirmation page
         const queryParams = new URLSearchParams({
-          packageId: selectedPackage.id,
+          packageId: selectedPackage?.id || "",
           date: selectedDate,
           time: selectedTime,
           orderId, // Optionally pass orderId
@@ -123,7 +126,7 @@ export default function BookingPage() {
 
         {/* Back Button */}
         <Link
-          href={`/customer/packages/${selectedPackage.id}`}
+          href={`/customer/packages/${selectedPackage?.id || ''}`}
           className="absolute top-10 left-4 p-2 bg-white/80 backdrop-blur-sm rounded-full text-im-heading hover:bg-white transition-colors z-20 shadow-sm"
           aria-label="Back to package detail"
         >
@@ -144,13 +147,13 @@ export default function BookingPage() {
 
             <div className="flex items-center justify-between">
               <h1 className="text-[24px] font-medium text-im-heading">
-                {selectedPackage.name}
+                {selectedPackage?.name}
               </h1>
             </div>
 
             {/* Dynamic Meta Line from PackageItem model */}
             <p className="text-[15px] font-medium text-im-body">
-              {selectedPackage.metaLine}
+              {selectedPackage?.metaLine}
             </p>
             <span className="text-[24px] font-medium text-im-heading">
                 {formattedPrice}

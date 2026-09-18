@@ -20,7 +20,7 @@ export default function PackagesListPage() {
     <div className="flex flex-col gap-8 pt-8 pb-11.5">
       {/* Greeting Header */}
       <h1 className="text-[28px] font-semibold text-im-heading tracking-tight">
-        Good morning, {user.firstName}.
+        Good morning, {user?.firstName || 'Guest'}.
       </h1>
 
       {/* Search Bar using shadcn Input */}
