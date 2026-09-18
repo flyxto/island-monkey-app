@@ -1,13 +1,29 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { MOCK_BOOKINGS } from "@/lib/mock-data/model-portal";
+import { getModelBookings } from "@/lib/api";
 import { useModel } from "@/lib/portal/ModelContext";
 import { Info, History, Camera, Calendar, ArrowRight, Loader2, Check, Clock } from "lucide-react";
 
 export default function ModelHomePage() {
   const { user, balance, isLoadingUser, error } = useModel();
-  const upcomingSampleBookings = MOCK_BOOKINGS.slice(0, 2);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [isLoadingBookings, setIsLoadingBookings] = useState(true);
+
+  useEffect(() => {
+    getModelBookings()
+      .then((data) => {
+        setBookings(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => {
+        console.error("Failed to load model bookings:", err);
+        setBookings([]);
+      })
+      .finally(() => setIsLoadingBookings(false));
+  }, []);
+
+  const upcomingSampleBookings = bookings.slice(0, 2);
 
   if (error) {
     return (
@@ -89,67 +105,86 @@ export default function ModelHomePage() {
 
         {/* Bookings Card List */}
         <div className="flex flex-col gap-2 overflow-hidden">
-          {upcomingSampleBookings.map((booking, idx) => {
-            const parts = booking.dateTime.split(" ");
-            const month = parts[0] || "Oct";
-            const day = (parts[1] || "24").replace(",", "");
-
-            return (
+          {isLoadingBookings ? (
+            <div className="flex justify-center items-center py-6 text-[#FF6433]">
+              <Loader2 className="w-5 h-5 animate-spin" />
+            </div>
+          ) : upcomingSampleBookings.length === 0 ? (
+            <div className="bg-white rounded-2xl p-5 text-center shadow-xs border border-black/5 flex flex-col items-center justify-center gap-1.5">
+              <p className="text-[14px] font-medium text-slate-800">No upcoming bookings</p>
+              <p className="text-[12px] text-slate-400">Apply to open gigs to get booked for shoots.</p>
               <Link
-                key={booking.id}
-                href={`/model/bookings/${booking.id}`}
-                className="bg-white rounded-2xl p-3 shadow-xs border border-black/5 flex items-center gap-3.5 hover:shadow-sm transition-all shrink-0"
+                href="/model/gigs"
+                className="mt-2 px-4 py-1.5 bg-[#FF6433] text-white text-[12px] font-medium rounded-full shadow-xs hover:bg-[#E84A23] transition-colors"
               >
-                {/* Date Column with subtle vertical line */}
-                <div className="flex flex-col items-center justify-center w-7 shrink-0">
-                  <span className="text-[11px] font-medium text-slate-400 uppercase tracking-tight">
-                    {month}
-                  </span>
-                  <span className="text-[18px] font-medium text-slate-800 leading-none mt-0.5">
-                    {day}
-                  </span>
-                </div>
-
-                <div className="w-px h-7 bg-slate-200/80 shrink-0" />
-
-                {/* Thumbnail */}
-                <div
-                  className={`w-11 h-11 rounded-xl shrink-0 flex items-center justify-center shadow-xs overflow-hidden ${
-                    idx === 0
-                      ? "bg-linear-to-br from-amber-500 via-orange-500 to-[#E84A23] text-white"
-                      : "bg-linear-to-br from-teal-500 via-emerald-500 to-emerald-600 text-white"
-                  }`}
-                >
-                  <Camera className="w-5 h-5 text-white/95" />
-                </div>
-
-                {/* Title & Status */}
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-[14px] font-medium text-slate-900 truncate">
-                    {booking.clientName}
-                  </span>
-                  <span className="text-[12px] font-medium text-slate-400 capitalize">
-                    {booking.status === "accepted"
-                      ? "Upcoming"
-                      : booking.status === "pending"
-                      ? "Incomplete"
-                      : booking.status}
-                  </span>
-                </div>
-
-                {/* Status Indicator Icon */}
-                {booking.status === "accepted" || booking.status === "completed" ? (
-                  <div className="w-6.5 h-6.5 rounded-full bg-[#00c08b] flex items-center justify-center shrink-0 shadow-xs">
-                    <Check className="w-3.5 h-3.5 text-white stroke-[2.5]" />
-                  </div>
-                ) : (
-                  <div className="w-6.5 h-6.5 rounded-full border border-slate-300/80 flex items-center justify-center shrink-0 text-slate-400">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
-                  </div>
-                )}
+                Browse Gigs
               </Link>
-            );
-          })}
+            </div>
+          ) : (
+            upcomingSampleBookings.map((booking, idx) => {
+              const bDate = booking.dateTime ? new Date(booking.dateTime) : new Date();
+              const month = isNaN(bDate.getTime()) ? "Oct" : bDate.toLocaleString("en-US", { month: "short" });
+              const day = isNaN(bDate.getTime()) ? "24" : bDate.getDate().toString();
+              const title = booking.gig?.title || booking.clientName || "Editorial Shoot";
+              const status = (booking.status || "pending").toLowerCase();
+
+              return (
+                <Link
+                  key={booking.id}
+                  href={`/model/bookings/${booking.id}`}
+                  className="bg-white rounded-2xl p-3 shadow-xs border border-black/5 flex items-center gap-3.5 hover:shadow-sm transition-all shrink-0"
+                >
+                  {/* Date Column with subtle vertical line */}
+                  <div className="flex flex-col items-center justify-center w-7 shrink-0">
+                    <span className="text-[11px] font-medium text-slate-400 uppercase tracking-tight">
+                      {month}
+                    </span>
+                    <span className="text-[18px] font-medium text-slate-800 leading-none mt-0.5">
+                      {day}
+                    </span>
+                  </div>
+
+                  <div className="w-px h-7 bg-slate-200/80 shrink-0" />
+
+                  {/* Thumbnail */}
+                  <div
+                    className={`w-11 h-11 rounded-xl shrink-0 flex items-center justify-center shadow-xs overflow-hidden ${
+                      idx === 0
+                        ? "bg-linear-to-br from-amber-500 via-orange-500 to-[#E84A23] text-white"
+                        : "bg-linear-to-br from-teal-500 via-emerald-500 to-emerald-600 text-white"
+                    }`}
+                  >
+                    <Camera className="w-5 h-5 text-white/95" />
+                  </div>
+
+                  {/* Title & Status */}
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="text-[14px] font-medium text-slate-900 truncate">
+                      {title}
+                    </span>
+                    <span className="text-[12px] font-medium text-slate-400 capitalize">
+                      {status === "accepted"
+                        ? "Upcoming"
+                        : status === "pending"
+                        ? "Incomplete"
+                        : status}
+                    </span>
+                  </div>
+
+                  {/* Status Indicator Icon */}
+                  {status === "accepted" || status === "completed" ? (
+                    <div className="w-6.5 h-6.5 rounded-full bg-[#00c08b] flex items-center justify-center shrink-0 shadow-xs">
+                      <Check className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                    </div>
+                  ) : (
+                    <div className="w-6.5 h-6.5 rounded-full border border-slate-300/80 flex items-center justify-center shrink-0 text-slate-400">
+                      <Clock className="w-3.5 h-3.5 text-slate-400" />
+                    </div>
+                  )}
+                </Link>
+              );
+            })
+          )}
         </div>
       </div>
     </div>

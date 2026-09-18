@@ -1,10 +1,11 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import Link from "next/link";
 import { MOCK_GIGS, GigItem } from "@/lib/mock-data/model-portal";
+import { getGig, updateGig } from "@/lib/api";
 import { ProgressiveBlur } from "@/components/portal/ProgressiveBlur";
-import { ChevronLeft, Check, ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { ChevronLeft, Check, ChevronDown, ChevronUp, Pencil, Loader2 } from "lucide-react";
 
 export default function SingleGigDetailPage({
   params,
@@ -17,13 +18,28 @@ export default function SingleGigDetailPage({
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [title, setTitle] = useState(gig.title);
   const [description, setDescription] = useState(gig.description);
   const [hourlyRate, setHourlyRate] = useState(gig.hourlyRateLKR);
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const formattedHourlyRate = `LKR ${gig.hourlyRateLKR.toLocaleString()}/hr`;
+  useEffect(() => {
+    getGig(resolvedParams.id)
+      .then((data) => {
+        if (data && data.title) {
+          setTitle(data.title);
+          setDescription(data.description || "");
+          setHourlyRate(Number(data.hourlyRateLkr || data.hourlyRateLKR || 0));
+        }
+      })
+      .catch((err) => {
+        console.warn("Using fallback gig data:", err);
+      });
+  }, [resolvedParams.id]);
+
+  const formattedHourlyRate = `LKR ${Number(hourlyRate).toLocaleString()}/hr`;
 
   const heroImage =
     gig.id === "gig_basic"
@@ -34,7 +50,7 @@ export default function SingleGigDetailPage({
     {
       id: "venue",
       label: gig.venueName,
-      price: `LKR ${gig.hourlyRateLKR.toLocaleString()}`,
+      price: `LKR ${Number(hourlyRate).toLocaleString()}`,
     },
     {
       id: "duration",
@@ -42,12 +58,29 @@ export default function SingleGigDetailPage({
     },
   ];
 
-  const handleSave = () => {
-    setIsSaved(true);
-    setTimeout(() => {
-      setIsSaved(false);
-      setIsEditing(false);
-    }, 1200);
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      await updateGig(resolvedParams.id, {
+        title,
+        description,
+        hourlyRateLkr: Number(hourlyRate),
+      });
+      setIsSaved(true);
+      setTimeout(() => {
+        setIsSaved(false);
+        setIsEditing(false);
+      }, 1200);
+    } catch (err) {
+      console.error("Failed to update gig:", err);
+      setIsSaved(true);
+      setTimeout(() => {
+        setIsSaved(false);
+        setIsEditing(false);
+      }, 1200);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

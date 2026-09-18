@@ -4,7 +4,7 @@ import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { StatusBadge } from "@/components/portal/StatusBadge";
 import { ProgressiveBlur } from "@/components/portal/ProgressiveBlur";
-import { getModelBooking, acceptModelBooking } from "@/lib/api";
+import { getModelBooking, acceptModelBooking, rejectModelBooking } from "@/lib/api";
 import {
   ChevronLeft,
   Calendar,
@@ -81,12 +81,25 @@ export default function SingleBookingDetailPage({
     }
   };
 
-  const handleReject = () => {
-    setActionFeedback("Declined");
-    setBooking((prev: any) => ({ ...prev, status: "rejected" }));
-    setTimeout(() => {
+  const [isRejecting, setIsRejecting] = useState(false);
+
+  const handleReject = async () => {
+    try {
+      setIsRejecting(true);
+      setActionFeedback("Declining...");
+      await rejectModelBooking(booking.id);
+      setBooking((prev: any) => ({ ...prev, status: "rejected" }));
+      setActionFeedback("Declined");
+      setTimeout(() => {
+        setActionFeedback(null);
+      }, 1500);
+    } catch (error: any) {
+      console.error("Failed to reject booking:", error);
+      alert(error.message || "Failed to decline booking");
       setActionFeedback(null);
-    }, 1500);
+    } finally {
+      setIsRejecting(false);
+    }
   };
 
   const sessionDeliverables = [
@@ -158,7 +171,7 @@ export default function SingleBookingDetailPage({
         {/* Client Name + Status Badge */}
         <div className="flex items-center justify-between gap-3">
           <h1 className="text-[22px] sm:text-[24px] font-medium text-slate-900 leading-tight tracking-tight truncate">
-            {booking.clientName}
+            {booking.clientName || booking.gig?.title || "Model Shoot Booking"}
           </h1>
           <StatusBadge status={activeStatus} className="shrink-0" />
         </div>
@@ -182,15 +195,19 @@ export default function SingleBookingDetailPage({
         <div className="flex items-center gap-2 flex-wrap pt-0.5">
           <div className="py-2 px-3.5 rounded-full text-[13px] font-medium bg-[#F1F3F2] text-slate-700 flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-slate-500" />
-            <span>{booking.dateTime}</span>
+            <span>
+              {booking.dateTime?.includes("-") || booking.dateTime?.includes("T")
+                ? new Date(booking.dateTime).toLocaleDateString()
+                : booking.dateTime || "Scheduled"}
+            </span>
           </div>
           <div className="py-2 px-3.5 rounded-full text-[13px] font-medium bg-[#F1F3F2] text-slate-700 flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-slate-500" />
-            <span>{booking.duration}</span>
+            <span>{booking.duration || "4 Hours"}</span>
           </div>
           <div className="py-2 px-3.5 rounded-full text-[13px] font-medium bg-[#F1F3F2] text-slate-700 flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5 text-slate-500" />
-            <span>{booking.location}</span>
+            <span>{booking.location || "Island Monkey Studio"}</span>
           </div>
         </div>
 

@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useModel } from "@/lib/portal/ModelContext";
+import { getModelBookings } from "@/lib/api";
 import { MOCK_MODEL_PROFILE } from "@/lib/mock-data/model-portal";
 import {
   Camera,
@@ -20,8 +22,11 @@ import {
 } from "lucide-react";
 
 export default function ModelProfilePage() {
+  const { user, balance, updateAvailability, logout } = useModel();
   const [profile, setProfile] = useState(MOCK_MODEL_PROFILE);
-  const [isAvailable, setIsAvailable] = useState(true);
+  const [isAvailable, setIsAvailable] = useState(user?.status === "Available");
+  const [isUpdatingAvailability, setIsUpdatingAvailability] = useState(false);
+  const [bookingsCount, setBookingsCount] = useState<number>(0);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSpecsModalOpen, setIsSpecsModalOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -29,18 +34,58 @@ export default function ModelProfilePage() {
 
   // Form edit states
   const [formData, setFormData] = useState({
-    firstName: profile.firstName,
-    lastName: profile.lastName,
+    firstName: user?.firstName || profile.firstName,
+    lastName: user?.lastName || profile.lastName,
     handle: profile.handle || "@shalini_perera",
-    email: profile.email || "shalini.perera@islandmonkey.io",
-    phone: profile.phone || "+94 77 234 5678",
+    email: user?.email || profile.email || "shalini.perera@islandmonkey.io",
+    phone: user?.phone || profile.phone || "+94 77 234 5678",
     bio: profile.bio || "",
     location: profile.location || "Colombo, Sri Lanka",
     instagram: profile.instagram || "@shalini.modele",
   });
 
+  useEffect(() => {
+    if (user) {
+      setIsAvailable(user.status === "Available");
+      setFormData((prev) => ({
+        ...prev,
+        firstName: user.firstName || prev.firstName,
+        lastName: user.lastName || prev.lastName,
+        email: user.email || prev.email,
+        phone: user.phone || prev.phone,
+      }));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    getModelBookings()
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setBookingsCount(data.length);
+        }
+      })
+      .catch((err) => {
+        console.warn("Failed to load bookings count:", err);
+      });
+  }, []);
+
+  const handleToggleAvailability = async () => {
+    if (isUpdatingAvailability) return;
+    const nextStatus = isAvailable ? "Unavailable" : "Available";
+    setIsAvailable(!isAvailable);
+    setIsUpdatingAvailability(true);
+    try {
+      await updateAvailability(nextStatus);
+    } catch (err) {
+      console.error("Failed to update availability:", err);
+      setIsAvailable(isAvailable);
+    } finally {
+      setIsUpdatingAvailability(false);
+    }
+  };
+
   // Listen for open edit modal event from top orange card
-  React.useEffect(() => {
+  useEffect(() => {
     const handleOpenEdit = () => setIsEditModalOpen(true);
     window.addEventListener("open-model-edit-modal", handleOpenEdit);
     return () => window.removeEventListener("open-model-edit-modal", handleOpenEdit);
@@ -66,7 +111,7 @@ export default function ModelProfilePage() {
         {/* Completed Bookings */}
         <div className="bg-white rounded-[22px] py-3.5 px-2 flex flex-col items-center justify-center shadow-xs border border-black/5">
           <span className="text-[18px] font-medium text-slate-900 tracking-tight leading-none">
-            {profile.completedBookingsCount}
+            {bookingsCount}
           </span>
           <span className="text-[12px] font-medium text-slate-400 mt-1.5">
             Bookings
@@ -77,7 +122,7 @@ export default function ModelProfilePage() {
         <div className="bg-white rounded-[22px] py-3.5 px-2 flex flex-col items-center justify-center shadow-xs border border-black/5">
           <div className="flex items-center gap-1 leading-none">
             <span className="text-[18px] font-medium text-slate-900 tracking-tight">
-              {profile.rating}
+              4.9
             </span>
             <Star className="w-3.5 h-3.5 fill-[#F59E0B] text-[#F59E0B]" />
           </div>
@@ -89,7 +134,7 @@ export default function ModelProfilePage() {
         {/* Points / Earnings */}
         <div className="bg-white rounded-[22px] py-3.5 px-2 flex flex-col items-center justify-center shadow-xs border border-black/5">
           <span className="text-[18px] font-medium text-[#FF6433] tracking-tight leading-none">
-            75.5k
+            {balance?.formattedPoints || (typeof balance?.pointsBalance === "number" ? balance.pointsBalance.toLocaleString() : "0")}
           </span>
           <span className="text-[12px] font-medium text-slate-400 mt-1.5">
             Points
@@ -137,7 +182,7 @@ export default function ModelProfilePage() {
                   Booking History
                 </span>
                 <span className="text-[11px] font-medium text-slate-400">
-                  {profile.completedBookingsCount} fulfilled sessions & client history
+                  {bookingsCount} fulfilled sessions & client history
                 </span>
               </div>
             </div>
@@ -161,7 +206,8 @@ export default function ModelProfilePage() {
             </div>
             <button
               type="button"
-              onClick={() => setIsAvailable(!isAvailable)}
+              disabled={isUpdatingAvailability}
+              onClick={handleToggleAvailability}
               className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-medium transition-colors cursor-pointer ${
                 isAvailable
                   ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
@@ -299,7 +345,7 @@ export default function ModelProfilePage() {
           {/* Sign Out */}
           <button
             type="button"
-            onClick={() => alert("Signed out of Model Portal.")}
+            onClick={() => setActiveModal("Sign Out Confirmation")}
             className="flex items-center justify-between p-3 rounded-2xl hover:bg-rose-50/50 transition-colors cursor-pointer text-left w-full text-rose-600"
           >
             <div className="flex items-center gap-3">
@@ -535,15 +581,39 @@ export default function ModelProfilePage() {
                 "SMS and in-app notifications are active for new shoot booking requests, direct client messages, and payment releases."}
               {activeModal === "Talent Concierge Support" &&
                 "Contact your dedicated Island Monkey model coordinator at +94 11 789 0000 or email models@islandmonkey.io for 24/7 on-set support."}
+              {activeModal === "Sign Out Confirmation" &&
+                "Are you sure you want to sign out of your Island Monkey Model account on this device?"}
             </p>
 
-            <button
-              type="button"
-              onClick={() => setActiveModal(null)}
-              className="w-full h-11 rounded-full bg-slate-900 text-white text-[14px] font-medium hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              Close
-            </button>
+            {activeModal === "Sign Out Confirmation" ? (
+              <div className="flex gap-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setActiveModal(null)}
+                  className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[14px] font-medium rounded-full cursor-pointer transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveModal(null);
+                    logout();
+                  }}
+                  className="flex-1 py-3 bg-rose-600 hover:bg-rose-700 text-white text-[14px] font-medium rounded-full cursor-pointer transition-colors"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setActiveModal(null)}
+                className="w-full h-11 rounded-full bg-slate-900 text-white text-[14px] font-medium hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            )}
           </div>
         </div>
       )}

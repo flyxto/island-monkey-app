@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Link from "next/link";
 import { Info, Bell, CheckCircle2, Pencil } from "lucide-react";
-import { MOCK_MODEL_PROFILE } from "@/lib/mock-data/model-portal";
+import { useModel } from "@/lib/portal/ModelContext";
 
 export interface ModelHeaderProps {
   isCompact?: boolean;
@@ -11,19 +11,14 @@ export interface ModelHeaderProps {
 }
 
 export function ModelHeader({ isCompact = false, isProfile = false }: ModelHeaderProps) {
-  const [profileData, setProfileData] = useState(MOCK_MODEL_PROFILE);
-  const [pointsWhole, pointsCents] = profileData.formattedPoints.split(".");
+  const { user, balance } = useModel();
 
-  useEffect(() => {
-    const handleProfileUpdate = (e: Event) => {
-      const customEvent = e as CustomEvent<Partial<typeof MOCK_MODEL_PROFILE>>;
-      if (customEvent.detail) {
-        setProfileData((prev) => ({ ...prev, ...customEvent.detail }));
-      }
-    };
-    window.addEventListener("model-profile-updated", handleProfileUpdate);
-    return () => window.removeEventListener("model-profile-updated", handleProfileUpdate);
-  }, []);
+  const firstName = user?.firstName || "Model";
+  const lastName = user?.lastName || "";
+  const initials = `${firstName[0] || "M"}${lastName[0] || ""}`.toUpperCase();
+  const formattedPoints = balance?.formattedPoints || (typeof balance?.pointsBalance === "number" ? balance.pointsBalance.toLocaleString() : "0");
+  const [pointsWhole, pointsCents] = formattedPoints.split(".");
+  const conversionRate = balance?.conversionRateLKR || 200;
 
   const handleOpenEdit = () => {
     window.dispatchEvent(new CustomEvent("open-model-edit-modal"));
@@ -74,8 +69,7 @@ export function ModelHeader({ isCompact = false, isProfile = false }: ModelHeade
                     : "text-sm"
                 }`}
               >
-                {profileData.firstName[0]}
-                {profileData.lastName[0]}
+                {initials}
               </div>
             </div>
 
@@ -109,7 +103,7 @@ export function ModelHeader({ isCompact = false, isProfile = false }: ModelHeade
                   isProfile ? "text-[20px] sm:text-[22px]" : "text-[17px]"
                 }`}
               >
-                {profileData.firstName} {profileData.lastName}
+                {firstName} {lastName}
               </span>
               <span className="text-[12px] font-medium text-white/80 block mt-0.5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]">
                 {isProfile ? "Island Monkey Verified Model" : "Model"}
@@ -203,7 +197,7 @@ export function ModelHeader({ isCompact = false, isProfile = false }: ModelHeade
         }`}
       >
         <Info className="w-3.5 h-3.5 text-im-accent shrink-0" />
-        <span>1 Point = 200 LKR Today</span>
+        <span>1 Point = {conversionRate} LKR Today</span>
       </div>
     </header>
   );

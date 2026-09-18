@@ -27,7 +27,17 @@ export default function MyBookingsPage() {
     fetchBookings();
   }, []);
 
-  const filteredBookings = bookings.filter((booking) => {
+  const normalizedBookings = bookings.map((b: any) => ({
+    id: b.id,
+    clientName: b.gig?.title || b.clientName || "Editorial Shoot",
+    location: b.location || "Island Monkey Studio",
+    duration: b.duration || "4 Hours",
+    dateTime: b.dateTime || new Date().toISOString(),
+    paymentLKR: Number(b.paymentLkr ?? b.paymentLKR ?? 0),
+    status: (b.status || "pending").toLowerCase() as StatusType,
+  }));
+
+  const filteredBookings = normalizedBookings.filter((booking) => {
     const matchesSearch =
       booking.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       booking.location.toLowerCase().includes(searchQuery.toLowerCase());
