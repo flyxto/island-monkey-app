@@ -1,11 +1,11 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { MOCK_BOOKINGS, BookingItem } from "@/lib/mock-data/model-portal";
 import { StatusBadge } from "@/components/portal/StatusBadge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { getModelBooking, acceptModelBooking } from "@/lib/api";
 import {
   ChevronLeft,
   Calendar,
@@ -23,17 +23,57 @@ export default function SingleBookingDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = use(params);
-  const [currentStatus, setCurrentStatus] = useState<BookingItem["status"] | null>(null);
+  const [booking, setBooking] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAccepting, setIsAccepting] = useState(false);
 
-  const booking: BookingItem =
-    MOCK_BOOKINGS.find((b) => b.id === resolvedParams.id) || MOCK_BOOKINGS[0];
+  useEffect(() => {
+    async function fetchBooking() {
+      try {
+        const data = await getModelBooking(resolvedParams.id);
+        setBooking(data);
+      } catch (error) {
+        console.error("Failed to load booking details:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchBooking();
+  }, [resolvedParams.id]);
 
-  const activeStatus = currentStatus || booking.status;
-  const formattedPayment = `LKR ${booking.paymentLKR.toLocaleString()}`;
+  const activeStatus = booking?.status;
+  const formattedPayment = booking ? `LKR ${Number(booking.paymentLkr).toLocaleString()}` : '';
 
-  const handleAccept = () => {
-    setCurrentStatus("accepted");
+  const handleAccept = async () => {
+    try {
+      setIsAccepting(true);
+      await acceptModelBooking(booking.id);
+      setBooking({ ...booking, status: "accepted" });
+      alert("Booking accepted successfully!");
+    } catch (error: any) {
+      console.error("Failed to accept booking:", error);
+      alert(error.message || "Failed to accept booking");
+    } finally {
+      setIsAccepting(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64 text-im-accent">
+        <p>Loading booking details...</p>
+      </div>
+    );
+  }
+
+  if (!booking) {
+    return (
+      <div className="flex flex-col gap-4 items-center justify-center h-64 text-im-body">
+        <p>Booking not found.</p>
+        <Link href="/model/bookings" className="text-im-accent underline">Back to bookings</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8 py-2 pt-6 pb-6">
@@ -87,7 +127,7 @@ export default function SingleBookingDetailPage({
               <div className="flex flex-col gap-0.5">
                 <span className="text-[12px] text-[#9e9e9e]">Date & Time</span>
                 <span className="font-medium text-[16px] text-im-heading">
-                  {booking.dateTime}
+                  {new Date(booking.dateTime).toLocaleString()}
                 </span>
               </div>
             </div>
@@ -146,10 +186,11 @@ export default function SingleBookingDetailPage({
         <Button
           type="button"
           onClick={handleAccept}
-          className="w-full h-13 bg-im-btn-primary hover:bg-im-btn-primary/90 active:bg-im-btn-primary/80 text-white text-[16px] font-medium rounded-sm transition-all shadow-md flex items-center justify-center gap-2"
+          disabled={isAccepting}
+          className="w-full h-13 bg-im-btn-primary hover:bg-im-btn-primary/90 active:bg-im-btn-primary/80 text-white text-[16px] font-medium rounded-sm transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
         >
           <CheckCircle2 className="w-6 h-6" />
-          <span>Accept Booking</span>
+          <span>{isAccepting ? "Accepting..." : "Accept Booking"}</span>
         </Button>
       )}
     </div>

@@ -1,18 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { MOCK_BOOKINGS } from "@/lib/mock-data/model-portal";
 import { StatusBadge, StatusType } from "@/components/portal/StatusBadge";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Camera, Eye } from "lucide-react";
+import { Search, Camera, Eye, Loader2 } from "lucide-react";
+import { getModelBookings } from "@/lib/api";
 
 export default function MyBookingsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<"all" | StatusType>("all");
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredBookings = MOCK_BOOKINGS.filter((booking) => {
+  useEffect(() => {
+    async function fetchBookings() {
+      try {
+        const data = await getModelBookings();
+        setBookings(data);
+      } catch (error) {
+        console.error("Failed to load model bookings:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchBookings();
+  }, []);
+
+  const filteredBookings = bookings.filter((booking) => {
     const matchesSearch =
       booking.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       booking.location.toLowerCase().includes(searchQuery.toLowerCase());
@@ -29,7 +45,7 @@ export default function MyBookingsPage() {
           My Bookings
         </h1>
         <span className="px-3 py-1 bg-im-accent-light text-im-accent text-[12px] font-semibold rounded-full">
-          {MOCK_BOOKINGS.length} Total Bookings
+          {bookings.length} Total Bookings
         </span>
       </div>
 
@@ -76,7 +92,11 @@ export default function MyBookingsPage() {
       {/* Bookings List Card */}
       <Card className="bg-white border border-im-border rounded-xl overflow-hidden p-0">
         <CardContent className="p-0 flex flex-col">
-          {filteredBookings.length > 0 ? (
+          {isLoading ? (
+            <div className="p-8 flex justify-center text-im-accent">
+              <Loader2 className="w-8 h-8 animate-spin" />
+            </div>
+          ) : filteredBookings.length > 0 ? (
             filteredBookings.map((booking, index) => (
               <div key={booking.id} className="flex flex-col w-full">
                 <div className="flex items-center justify-between gap-3 py-3.5 px-4 hover:bg-slate-50 transition-colors">
@@ -90,7 +110,7 @@ export default function MyBookingsPage() {
                         {booking.clientName}
                       </span>
                       <span className="text-[13px] text-[#9e9e9e] text-wrap">
-                        {booking.dateTime} • {booking.duration}
+                        {new Date(booking.dateTime).toLocaleDateString()} • {booking.duration}
                       </span>
                     </div>
                   </div>
