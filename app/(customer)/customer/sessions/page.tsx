@@ -1,32 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SessionListItem } from "@/components/portal/SessionListItem";
-import { MOCK_UPCOMING_SESSIONS } from "@/lib/mock-data/customer-portal";
-import { Camera } from "lucide-react";
+import { Camera, Loader2 } from "lucide-react";
+import { getCustomerBookings } from "@/lib/api";
 
 export default function SessionsPage() {
   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const pastSessions = [
-    {
-      id: "sess_past_01",
-      title: "Family Portrait Shoot",
-      timestamp: "03:15 PM • Aug 14, 2026",
-      studioTag: "Studio B",
-      status: "completed" as const,
-    },
-    {
-      id: "sess_past_02",
-      title: "Fashion Portfolio",
-      timestamp: "11:00 AM • Jul 20, 2026",
-      studioTag: "Studio A",
-      status: "completed" as const,
-    },
-  ];
+  useEffect(() => {
+    async function fetchBookings() {
+      try {
+        const data = await getCustomerBookings();
+        setBookings(data);
+      } catch (error) {
+        console.error("Failed to load customer sessions:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchBookings();
+  }, []);
+
+  const upcomingSessions = bookings.filter(b => b.status === "Pending" || b.status === "Approved");
+  const pastSessions = bookings.filter(b => b.status === "Completed" || b.status === "Cancelled" || b.status === "Rejected");
 
   const displayedSessions =
-    activeTab === "upcoming" ? MOCK_UPCOMING_SESSIONS : pastSessions;
+    activeTab === "upcoming" ? upcomingSessions : pastSessions;
 
   return (
     <div className="flex flex-col gap-8 pt-8 pb-11.5">
@@ -51,7 +53,7 @@ export default function SessionsPage() {
               : "text-[#9e9e9e] hover:text-im-heading"
           }`}
         >
-          Upcoming ({MOCK_UPCOMING_SESSIONS.length})
+          Upcoming ({upcomingSessions.length})
         </button>
         <button
           type="button"
@@ -68,15 +70,37 @@ export default function SessionsPage() {
 
       {/* Sessions Card */}
       <div className="bg-white border border-im-border rounded-xl shadow-sm overflow-hidden flex flex-col">
-        {displayedSessions.map((session, index) => (
-          <SessionListItem
-            key={session.id}
-            title={session.title}
-            timestamp={session.timestamp}
-            studioTag={session.studioTag}
-            showDivider={index < displayedSessions.length - 1}
-          />
-        ))}
+        {isLoading ? (
+          <div className="flex justify-center items-center h-48 text-im-accent">
+            <Loader2 className="w-8 h-8 animate-spin" />
+          </div>
+        ) : displayedSessions.length > 0 ? (
+          displayedSessions.map((session, index) => {
+            const formattedDate = new Date(session.dateTime).toLocaleDateString(undefined, {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric'
+            });
+            const formattedTime = new Date(session.dateTime).toLocaleTimeString(undefined, {
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+
+            return (
+              <SessionListItem
+                key={session.id}
+                title={session.package?.name || "Session"}
+                timestamp={`${formattedTime} • ${formattedDate}`}
+                studioTag={session.package?.studioName || "Studio"}
+                showDivider={index < displayedSessions.length - 1}
+              />
+            );
+          })
+        ) : (
+          <div className="flex justify-center items-center h-48 text-im-body">
+            <p>No {activeTab} sessions found.</p>
+          </div>
+        )}
       </div>
     </div>
   );

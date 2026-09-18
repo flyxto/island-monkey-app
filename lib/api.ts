@@ -224,3 +224,11 @@ export async function acceptModelBooking(id: string) {
   }
   return response.json();
 }
+
+export async function getCustomerBookings() {
+  const response = await fetchWithAuth(`${API_URL}/bookings/mine`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch customer bookings');
+  }
+  return response.json();
+}
