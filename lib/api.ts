@@ -1,4 +1,4 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 async function refreshTokens(): Promise<string | null> {
   const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
