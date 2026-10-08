@@ -139,11 +139,11 @@ export function PortalLayout({
     <div
       className={`w-full ${
         isDarkLayout
-          ? "fixed inset-0 w-full h-full overflow-hidden overscroll-none bg-[#000002] p-1 justify-between gap-3 sm:gap-4"
+          ? "fixed inset-0 w-full h-full overflow-hidden overscroll-none bg-[#000002] pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] px-1 justify-between gap-3 sm:gap-4"
           : isModelProfile || isPartnerProfile || isCustomerProfile
           ? "min-h-svh bg-gradient-to-b from-[#FFEFE8] via-[#FAF6F3] to-[#F6F7F9] relative"
           : isModelDetail || isPartnerDetail || isCustomerDetail
-          ? "fixed inset-0 w-full h-full overflow-hidden overscroll-none bg-[#000002] p-1"
+          ? "fixed inset-0 w-full h-full overflow-hidden overscroll-none bg-[#000002] pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] px-1"
           : "min-h-svh bg-linear-to-b from-[#f8f9ff] to-[#ffffff] relative"
       } flex flex-col`}
     >
@@ -171,10 +171,10 @@ export function PortalLayout({
             : isModelDetail || isPartnerDetail || isCustomerDetail
             ? "pt-0 pb-0 overflow-hidden h-full"
             : isModelProfile || isPartnerProfile || isCustomerProfile
-            ? "pt-3.5 px-4 pb-32 gap-5 overflow-y-auto"
+            ? "pt-3.5 px-4 pb-[calc(8rem+env(safe-area-inset-bottom,0px))] gap-5 overflow-y-auto"
             : shouldHideTopBar
-            ? "pt-0 pb-32 overflow-y-auto"
-            : "pt-16 px-4 py-8 pb-32 gap-8 overflow-y-auto"
+            ? "pt-0 pb-[calc(8rem+env(safe-area-inset-bottom,0px))] overflow-y-auto"
+            : "pt-[calc(4rem+env(safe-area-inset-top,0px))] px-4 py-8 pb-[calc(8rem+env(safe-area-inset-bottom,0px))] gap-8 overflow-y-auto"
         }`}
       >
         {children}

@@ -29,7 +29,7 @@ export function BottomNavBar({
   };
 
   return (
-    <div className="fixed bottom-5 sm:bottom-6 left-0 right-0 z-40 flex justify-center items-center pointer-events-none px-3 w-full">
+    <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:bottom-[calc(1.5rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-40 flex justify-center items-center pointer-events-none px-3 w-full">
       <nav className="pointer-events-auto inline-flex items-center gap-2 p-2 bg-white/70 backdrop-blur-2xl border border-white/80 shadow-[0_16px_40px_rgba(0,0,0,0.14),inset_0_1px_2px_rgba(255,255,255,0.9)] rounded-full ring-1 ring-black/5">
         {navItems.map((item) => {
           const active = isItemActive(item);

@@ -42,10 +42,10 @@ export function CustomerHeader({ isCompact = false, isProfile = false }: Custome
     <header
       className={`relative bg-linear-to-b from-[#E84A23] via-[#FF6A48] to-[#FF8C6E] px-5 border border-black/5 shadow-md flex flex-col text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] shrink-0 w-full ${
         isProfile
-          ? "pt-6 pb-7 rounded-b-[32px] gap-0 z-20"
+          ? "pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-7 rounded-b-[32px] gap-0 z-20"
           : isCompact
-          ? "pt-3.5 pb-3.5 rounded-b-[24px] gap-0 z-30"
-          : "pt-6 pb-8 rounded-t rounded-b-[32px] gap-5 z-20"
+          ? "pt-[calc(0.875rem+env(safe-area-inset-top,0px))] pb-3.5 rounded-b-[24px] gap-0 z-30"
+          : "pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-8 rounded-t rounded-b-[32px] gap-5 z-20"
       }`}
     >
       {/* Top App Bar Content: Single Persistent Container for Seamless Route Transitions */}
