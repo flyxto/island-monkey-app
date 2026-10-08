@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCustomer } from "@/lib/portal/CustomerContext";
+import { PackageItem } from "@/lib/mock-data/customer-portal";
 import { DateCalendar } from "@/components/portal/DateCalendar";
 import { TimeSlotChip } from "@/components/portal/TimeSlotChip";
 import { ChevronLeft, Loader2 } from "lucide-react";
-import { getAvailableSlots, createBooking, initiatePayment } from "@/lib/api";
+import { getAvailableSlots, createBooking, initiatePayment, getPackage } from "@/lib/api";
 
 declare global {
   interface Window {
@@ -15,9 +16,71 @@ declare global {
   }
 }
 
-export default function BookingPage() {
+export default function BookingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ packageId?: string }>;
+}) {
+  const resolvedParams = use(searchParams);
   const router = useRouter();
-  const { selectedPackage } = useCustomer();
+  const { selectedPackage, setSelectedPackage, packages, isLoadingPackages } = useCustomer();
+
+  const [directPkg, setDirectPkg] = useState<PackageItem | null>(null);
+  const [isResolvingPkg, setIsResolvingPkg] = useState(false);
+
+  // Determine active package: context pkg if matching ID, or find in packages list, or direct fetch
+  const targetPkgId = resolvedParams.packageId || selectedPackage?.id;
+
+  useEffect(() => {
+    if (!targetPkgId) return;
+
+    // Check if context package is already the target
+    if (selectedPackage && selectedPackage.id === targetPkgId) {
+      return;
+    }
+
+    // Check if it exists in loaded packages
+    const match = packages.find((p) => p.id === targetPkgId);
+    if (match) {
+      setSelectedPackage(match);
+      return;
+    }
+
+    // If not in packages and packages finished loading (or direct URL load), fetch from API
+    if (!isLoadingPackages) {
+      setIsResolvingPkg(true);
+      getPackage(targetPkgId)
+        .then((apiPkg) => {
+          const mapped: PackageItem = {
+            id: apiPkg.id,
+            name: apiPkg.name,
+            description: apiPkg.description,
+            priceLKR: Number(apiPkg.priceLkr || apiPkg.priceLKR || 0),
+            isBestSeller: apiPkg.isBestSeller,
+            durationHours: apiPkg.durationHours,
+            studioName: apiPkg.studioName,
+            photographersCount: apiPkg.photographersCount,
+            metaLine: apiPkg.metaLine,
+            highlightFeature: {
+              title: apiPkg.highlightTitle,
+              subtitle: apiPkg.highlightSubtitle,
+            },
+            whatsIncluded: apiPkg.whatsIncluded || [],
+            imageUrl: apiPkg.imageUrl,
+          };
+          setDirectPkg(mapped);
+          setSelectedPackage(mapped);
+        })
+        .catch((err) => {
+          console.error("Failed to load booking package:", err);
+        })
+        .finally(() => {
+          setIsResolvingPkg(false);
+        });
+    }
+  }, [targetPkgId, selectedPackage, packages, isLoadingPackages, setSelectedPackage]);
+
+  const activePackage = (selectedPackage?.id === targetPkgId ? selectedPackage : null) || directPkg || selectedPackage;
 
   // State for Date & Time selection
   const [selectedDate, setSelectedDate] = useState(() => {
@@ -26,7 +89,7 @@ export default function BookingPage() {
   });
   const [selectedTime, setSelectedTime] = useState("");
 
-  const formattedPrice = `LKR ${selectedPackage?.priceLKR?.toLocaleString() || 0}`;
+  const formattedPrice = `LKR ${activePackage?.priceLKR?.toLocaleString() || 0}`;
 
   const [timeSlots, setTimeSlots] = useState<{time: string, disabled: boolean}[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
@@ -35,9 +98,9 @@ export default function BookingPage() {
   useEffect(() => {
     async function fetchSlots() {
       try {
-        if (!selectedPackage) return;
+        if (!activePackage?.studioName) return;
         setIsLoadingSlots(true);
-        const slots = await getAvailableSlots(selectedDate, selectedPackage.studioName);
+        const slots = await getAvailableSlots(selectedDate, activePackage.studioName);
         const formattedSlots = slots.map((s: any) => ({
           time: s.time,
           disabled: !s.available
@@ -59,19 +122,19 @@ export default function BookingPage() {
     }
     
     fetchSlots();
-  }, [selectedDate, selectedPackage?.studioName]);
+  }, [selectedDate, activePackage?.studioName]);
 
   const handleProceed = async () => {
     try {
       setIsBooking(true);
-      if (!selectedPackage) throw new Error("No package selected");
+      if (!activePackage) throw new Error("No package selected");
       
       // 1. Create the booking in backend
       const booking = await createBooking({
-        packageId: selectedPackage.id,
+        packageId: activePackage.id,
         date: selectedDate,
         time: selectedTime,
-        studioRoom: selectedPackage.studioName,
+        studioRoom: activePackage.studioName,
         notes: "Booked via Island Monkey App",
       });
       
@@ -82,7 +145,7 @@ export default function BookingPage() {
       window.payhere.onCompleted = function onCompleted(orderId: string) {
         // Navigate to confirmation page
         const queryParams = new URLSearchParams({
-          packageId: selectedPackage?.id || "",
+          packageId: activePackage?.id || "",
           date: selectedDate,
           time: selectedTime,
           orderId, // Optionally pass orderId
@@ -112,12 +175,21 @@ export default function BookingPage() {
     }
   };
 
+  if (isResolvingPkg) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-white">
+        <Loader2 className="w-8 h-8 animate-spin text-[#FF6433] mb-3" />
+        <p className="text-sm text-white/70">Loading booking package...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 flex flex-col w-full overflow-hidden justify-between gap-3 sm:gap-4 min-h-0 select-none">
       {/* Upper Navigation Row in Dark Frame */}
       <div className="px-3 pt-2 pb-0.5 flex items-center justify-between shrink-0">
         <Link
-          href={`/customer/packages/${selectedPackage?.id || ""}`}
+          href={`/customer/packages/${activePackage?.id || ""}`}
           className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-xs flex items-center justify-center text-white transition-all cursor-pointer"
           aria-label="Back to package detail"
         >
@@ -129,7 +201,7 @@ export default function BookingPage() {
             Book Studio Session
           </span>
           <span className="text-[11px] font-medium text-white/60 truncate max-w-44">
-            {selectedPackage?.name || "Package"}
+            {activePackage?.name || "Package"}
           </span>
         </div>
 
@@ -150,16 +222,16 @@ export default function BookingPage() {
               Package Selected
             </span>
             <span className="text-[12px] font-medium text-slate-400">
-              {selectedPackage?.durationHours}
+              {activePackage?.durationHours}
             </span>
           </div>
 
           <div className="flex flex-col gap-0.5">
             <h1 className="text-[18px] font-medium text-slate-900 tracking-tight">
-              {selectedPackage?.name}
+              {activePackage?.name}
             </h1>
             <p className="text-[13px] font-medium text-slate-500">
-              {selectedPackage?.metaLine}
+              {activePackage?.metaLine}
             </p>
           </div>
         </div>

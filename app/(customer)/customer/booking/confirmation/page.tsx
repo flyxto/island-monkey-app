@@ -1,19 +1,68 @@
 "use client";
 
-import { use } from "react";
+import { use, useState, useEffect } from "react";
 import Link from "next/link";
 import { useCustomer } from "@/lib/portal/CustomerContext";
-import { Check, Calendar, Sparkles, ArrowRight } from "lucide-react";
+import { PackageItem } from "@/lib/mock-data/customer-portal";
+import { getPackage } from "@/lib/api";
+import { Check, Calendar, Sparkles, ArrowRight, Loader2 } from "lucide-react";
 
 export default function BookingConfirmationPage({
   searchParams,
 }: {
-  searchParams: Promise<{ date?: string; time?: string }>;
+  searchParams: Promise<{ date?: string; time?: string; packageId?: string; orderId?: string }>;
 }) {
   const resolvedParams = use(searchParams);
-  const { selectedPackage } = useCustomer();
+  const { selectedPackage, setSelectedPackage, packages, isLoadingPackages } = useCustomer();
+  const [directPkg, setDirectPkg] = useState<PackageItem | null>(null);
 
-  const formattedPrice = `LKR ${selectedPackage?.priceLKR?.toLocaleString() || 0}`;
+  const targetPkgId = resolvedParams.packageId || selectedPackage?.id;
+
+  useEffect(() => {
+    if (!targetPkgId) return;
+
+    if (selectedPackage && selectedPackage.id === targetPkgId) {
+      return;
+    }
+
+    const match = packages.find((p) => p.id === targetPkgId);
+    if (match) {
+      setSelectedPackage(match);
+      return;
+    }
+
+    if (!isLoadingPackages) {
+      getPackage(targetPkgId)
+        .then((apiPkg) => {
+          const mapped: PackageItem = {
+            id: apiPkg.id,
+            name: apiPkg.name,
+            description: apiPkg.description,
+            priceLKR: Number(apiPkg.priceLkr || apiPkg.priceLKR || 0),
+            isBestSeller: apiPkg.isBestSeller,
+            durationHours: apiPkg.durationHours,
+            studioName: apiPkg.studioName,
+            photographersCount: apiPkg.photographersCount,
+            metaLine: apiPkg.metaLine,
+            highlightFeature: {
+              title: apiPkg.highlightTitle,
+              subtitle: apiPkg.highlightSubtitle,
+            },
+            whatsIncluded: apiPkg.whatsIncluded || [],
+            imageUrl: apiPkg.imageUrl,
+          };
+          setDirectPkg(mapped);
+          setSelectedPackage(mapped);
+        })
+        .catch((err) => {
+          console.error("Failed to load confirmation package:", err);
+        });
+    }
+  }, [targetPkgId, selectedPackage, packages, isLoadingPackages, setSelectedPackage]);
+
+  const activePackage = (selectedPackage?.id === targetPkgId ? selectedPackage : null) || directPkg || selectedPackage;
+
+  const formattedPrice = `LKR ${activePackage?.priceLKR?.toLocaleString() || 0}`;
   const bookingDate = resolvedParams.date || "2026-06-18";
   const bookingTime = resolvedParams.time || "2:00 PM";
 
@@ -64,7 +113,7 @@ export default function BookingConfirmationPage({
             <div className="flex items-center justify-between text-[13px]">
               <span className="text-slate-400 font-medium">Package</span>
               <span className="font-medium text-slate-900 text-right">
-                {selectedPackage?.name || "Studio Package"}
+                {activePackage?.name || "Studio Package"}
               </span>
             </div>
 
@@ -79,7 +128,7 @@ export default function BookingConfirmationPage({
             <div className="flex items-center justify-between text-[13px]">
               <span className="text-slate-400 font-medium">Studio & Crew</span>
               <span className="font-medium text-slate-700 text-right">
-                {selectedPackage?.metaLine || "Standard Session"}
+                {activePackage?.metaLine || "Standard Session"}
               </span>
             </div>
 
