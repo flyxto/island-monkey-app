@@ -5,6 +5,7 @@ import { PortalLayout } from "@/components/portal/PortalLayout";
 import { PORTAL_CONFIGS } from "@/lib/portal/nav-config";
 import { CustomerProvider, useCustomer } from "@/lib/portal/CustomerContext";
 import { QRModal } from "@/components/portal/QRModal";
+import { RoleRouteGuard } from "@/components/auth/RoleRouteGuard";
 
 function CustomerPortalContent({
   children,
@@ -20,19 +21,19 @@ function CustomerPortalContent({
   }, [setIsQRModalOpen]);
 
   return (
-      <PortalLayout config={PORTAL_CONFIGS.customer}>
-        {children}
-        {/* Global QR Modal accessible across all customer tabs */}
-        {user && balance && (
-          <QRModal
-            isOpen={isQRModalOpen}
-            onClose={() => setIsQRModalOpen(false)}
-            userFullName={`${user.firstName} ${user.lastName}`}
-            qrValue={user.qrCodeValue}
-            pointsBalance={balance.formattedPoints}
-          />
-        )}
-      </PortalLayout>
+    <PortalLayout config={PORTAL_CONFIGS.customer}>
+      {children}
+      {/* Global QR Modal accessible across all customer tabs */}
+      {user && balance && (
+        <QRModal
+          isOpen={isQRModalOpen}
+          onClose={() => setIsQRModalOpen(false)}
+          userFullName={`${user.firstName} ${user.lastName}`}
+          qrValue={user.qrCodeValue}
+          pointsBalance={balance.formattedPoints}
+        />
+      )}
+    </PortalLayout>
   );
 }
 
@@ -42,8 +43,10 @@ export default function CustomerPortalLayout({
   children: React.ReactNode;
 }) {
   return (
-    <CustomerProvider>
-      <CustomerPortalContent>{children}</CustomerPortalContent>
-    </CustomerProvider>
+    <RoleRouteGuard expectedRole="customer">
+      <CustomerProvider>
+        <CustomerPortalContent>{children}</CustomerPortalContent>
+      </CustomerProvider>
+    </RoleRouteGuard>
   );
 }
