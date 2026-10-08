@@ -156,3 +156,8 @@ export function useCustomer() {
   }
   return context;
 }
+
+export function useOptionalCustomer() {
+  return useContext(CustomerContext) ?? null;
+}
+

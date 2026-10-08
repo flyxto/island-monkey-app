@@ -9,7 +9,7 @@ import { ModelHeader } from "./ModelHeader";
 import { PartnerHeader } from "./PartnerHeader";
 import { CustomerHeader } from "./CustomerHeader";
 import { PortalNavConfig } from "@/lib/portal/nav-config";
-import { useCustomer } from "@/lib/portal/CustomerContext";
+import { useOptionalCustomer } from "@/lib/portal/CustomerContext";
 import { QrCode, ScanLine, Bell} from "lucide-react";
 
 export interface PortalLayoutProps {
@@ -73,16 +73,9 @@ export function PortalLayout({
     showCustomerHeader || isCustomerDetail || isCustomerProfile || isCustomerBooking
   );
 
-  // Safe consumer check for CustomerContext
-  let isQRModalOpen = false;
-  let setIsQRModalOpen: ((open: boolean) => void) | undefined;
-  try {
-    const customer = useCustomer();
-    isQRModalOpen = customer.isQRModalOpen;
-    setIsQRModalOpen = customer.setIsQRModalOpen;
-  } catch {
-    // Outside CustomerProvider (partner / model portal)
-  }
+  // Safe consumer check for CustomerContext (null if outside CustomerProvider)
+  const customer = useOptionalCustomer();
+  const setIsQRModalOpen = customer?.setIsQRModalOpen;
 
   // Auto-resolve Partner rightAction if not explicitly supplied as a prop
   const resolveTopBarActions = (): TopAppBarAction[] => {
@@ -91,7 +84,13 @@ export function PortalLayout({
       return [
         {
           icon: QrCode,
-          onClick: () => setIsQRModalOpen?.(true),
+          onClick: () => {
+            if (setIsQRModalOpen) {
+              setIsQRModalOpen(true);
+            } else if (typeof window !== "undefined") {
+              window.dispatchEvent(new CustomEvent("open-customer-qr-modal"));
+            }
+          },
           ariaLabel: "Open My QR Code",
         },
         {
