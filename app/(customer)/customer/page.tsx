@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useCustomer } from "@/lib/portal/CustomerContext";
 import { getCustomerBookings } from "@/lib/api";
-import { QrCode, Package, Camera, ArrowRight, Loader2 } from "lucide-react";
+import { QrCode, Package, Camera, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 
 export default function CustomerHomePage() {
-  const { user, balance, isLoadingUser, setIsQRModalOpen } = useCustomer();
+  const { user, balance, isLoadingUser, error, refreshCustomer, setIsQRModalOpen } = useCustomer();
   const [bookings, setBookings] = useState<any[]>([]);
   const [isLoadingBookings, setIsLoadingBookings] = useState(true);
 
@@ -46,10 +46,33 @@ export default function CustomerHomePage() {
     return { month: "Oct", day: "24", time: "10:00 AM" };
   };
 
-  if (isLoadingUser || !user || !balance) {
+  if (isLoadingUser) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[#FF6433]" />
+      </div>
+    );
+  }
+
+  if (error || !user || !balance) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-6 text-center gap-4">
+        <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-red-500">
+          <AlertCircle className="w-6 h-6" />
+        </div>
+        <div className="space-y-1">
+          <h2 className="text-white text-[16px] font-semibold">Unable to Load Profile</h2>
+          <p className="text-slate-400 text-[13px] max-w-xs leading-relaxed">
+            {error || "We could not load your customer profile. Please check your connection and try again."}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => refreshCustomer()}
+          className="mt-2 px-5 py-2.5 bg-[#FF6433] hover:bg-[#E84A23] text-white rounded-full text-[13px] font-medium transition-all active:scale-95 cursor-pointer shadow-md"
+        >
+          Try Again
+        </button>
       </div>
     );
   }

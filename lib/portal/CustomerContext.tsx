@@ -13,6 +13,7 @@ export interface CustomerContextType {
   user: CustomerUser | null;
   balance: BalanceInfo | null;
   isLoadingUser: boolean;
+  error: string | null;
   packages: PackageItem[];
   isLoadingPackages: boolean;
   selectedPackage: PackageItem | null;
@@ -30,6 +31,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [user, setUser] = useState<CustomerUser | null>(null);
   const [balance, setBalance] = useState<BalanceInfo | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [packages, setPackages] = useState<PackageItem[]>([]);
   const [isLoadingPackages, setIsLoadingPackages] = useState(true);
   
@@ -39,6 +41,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
   const fetchUser = React.useCallback(async () => {
     try {
       setIsLoadingUser(true);
+      setError(null);
       const data = await getCustomerProfile();
       setUser({
         id: data.id,
@@ -56,8 +59,9 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
         conversionRateLKR: data.balance.conversionRateLKR,
         lastUpdated: data.balance.lastUpdated,
       });
-    } catch (error) {
-      console.error("Failed to fetch customer profile:", error);
+    } catch (err: any) {
+      console.error("Failed to fetch customer profile:", err);
+      setError(err?.message || "Failed to load customer profile.");
     } finally {
       setIsLoadingUser(false);
     }
@@ -129,6 +133,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
         user,
         balance,
         isLoadingUser,
+        error,
         packages,
         isLoadingPackages,
         selectedPackage: selectedPackage || packages[0] || null,
