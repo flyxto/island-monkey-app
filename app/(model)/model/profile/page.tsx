@@ -20,7 +20,11 @@ import {
   X,
   Check,
   Loader2,
+  UploadCloud,
 } from "lucide-react";
+import { uploadDirectToR2 } from "@/lib/upload";
+import { getR2PublicUrl } from "@/lib/r2";
+import { ImageCropperModal } from "@/components/ui/image-cropper-modal";
 
 export default function ModelProfilePage() {
   const { user, profileData, balance, updateAvailability, updateProfile, logout } = useModel();
@@ -33,6 +37,14 @@ export default function ModelProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [saveToast, setSaveToast] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarUploadError, setAvatarUploadError] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Image Cropper states
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [imageToCropSrc, setImageToCropSrc] = useState<string>("");
+  const [uploadPercent, setUploadPercent] = useState<number>(0);
 
   // Form edit states
   const [formData, setFormData] = useState({
@@ -127,12 +139,82 @@ export default function ModelProfilePage() {
     }
   };
 
-  // Listen for open edit modal event from top card
+  // Listen for open edit modal and avatar upload event from top card
   useEffect(() => {
     const handleOpenEdit = () => setIsEditModalOpen(true);
+    const handleTriggerAvatarUpload = () => {
+      fileInputRef.current?.click();
+    };
+
     window.addEventListener("open-model-edit-modal", handleOpenEdit);
-    return () => window.removeEventListener("open-model-edit-modal", handleOpenEdit);
+    window.addEventListener("trigger-avatar-upload", handleTriggerAvatarUpload);
+    return () => {
+      window.removeEventListener("open-model-edit-modal", handleOpenEdit);
+      window.removeEventListener("trigger-avatar-upload", handleTriggerAvatarUpload);
+    };
   }, []);
+
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please select a valid image file (JPEG, PNG, WEBP).");
+      return;
+    }
+
+    if (file.size > 15 * 1024 * 1024) {
+      alert("Image file size must be less than 15MB.");
+      return;
+    }
+
+    // Create object URL and open 1:1 image cropper
+    const objectUrl = URL.createObjectURL(file);
+    setImageToCropSrc(objectUrl);
+    setCropperOpen(true);
+
+    // Reset input value so user can pick the same file if needed
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleCroppedUpload = async (_blob: Blob, croppedFile: File) => {
+    setCropperOpen(false);
+    if (imageToCropSrc) {
+      URL.revokeObjectURL(imageToCropSrc);
+      setImageToCropSrc("");
+    }
+
+    try {
+      setIsUploadingAvatar(true);
+      setUploadPercent(0);
+      setAvatarUploadError(null);
+
+      // Upload directly to Cloudflare R2 with progress
+      const result = await uploadDirectToR2(croppedFile, {
+        type: "profile",
+        modelId: user?.profileId || user?.id,
+        category: "models",
+        onProgress: (percent) => setUploadPercent(percent),
+      });
+
+      // Save R2 key in the database via PATCH /api/models/me
+      await updateProfile({
+        avatarUrl: result.r2Key,
+      });
+
+      setSaveToast(true);
+      setTimeout(() => setSaveToast(false), 2500);
+    } catch (err: any) {
+      console.error("Avatar upload failed:", err);
+      setAvatarUploadError(err.message || "Failed to update profile photo");
+      alert(err.message || "Failed to update profile photo. Please try again.");
+    } finally {
+      setIsUploadingAvatar(false);
+      setUploadPercent(0);
+    }
+  };
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -453,6 +535,38 @@ export default function ModelProfilePage() {
             </div>
 
             <form onSubmit={handleSaveProfile} className="flex flex-col gap-3.5 max-h-[65vh] overflow-y-auto pr-1">
+              {/* Profile Photo Quick Change */}
+              <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                <div className="relative w-14 h-14 rounded-full bg-slate-200 border border-slate-300 overflow-hidden shrink-0 flex items-center justify-center">
+                  {profileData?.avatarUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={getR2PublicUrl(profileData.avatarUrl)}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-[18px] font-medium text-slate-500">
+                      {formData.firstName?.[0] || "M"}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-col gap-1 min-w-0 flex-1">
+                  <span className="text-[13px] font-medium text-slate-800">
+                    Profile Photo
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingAvatar}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded-full text-[12px] font-medium text-[#FF6433] w-fit shadow-2xs transition-colors cursor-pointer"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>{isUploadingAvatar ? "Uploading..." : "Change Photo"}</span>
+                  </button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-2.5">
                 <div className="flex flex-col gap-1">
                   <label className="text-[12px] font-medium text-slate-500">
@@ -778,6 +892,63 @@ export default function ModelProfilePage() {
                 Close
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 1:1 Profile Image Cropper Modal */}
+      <ImageCropperModal
+        isOpen={cropperOpen}
+        imageSrc={imageToCropSrc}
+        aspect={1}
+        cropShape="round"
+        title="Crop Profile Photo"
+        onCancel={() => {
+          setCropperOpen(false);
+          if (imageToCropSrc) {
+            URL.revokeObjectURL(imageToCropSrc);
+            setImageToCropSrc("");
+          }
+        }}
+        onCropComplete={handleCroppedUpload}
+      />
+
+      {/* Hidden File Input for Profile Photo Upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/jpg"
+        className="hidden"
+        onChange={handleAvatarFileChange}
+      />
+
+      {/* Avatar Uploading Progress Overlay */}
+      {isUploadingAvatar && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 shadow-2xl flex flex-col items-center gap-3.5 max-w-xs w-full text-center border border-black/5 animate-in zoom-in-95 duration-200">
+            <div className="relative w-14 h-14 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center text-[#FF6433]">
+              <Loader2 className="w-7 h-7 animate-spin" />
+            </div>
+            <div className="flex flex-col gap-1 w-full">
+              <h4 className="text-[15px] font-medium text-slate-900 tracking-tight">
+                Saving Your Photo
+              </h4>
+              <p className="text-[12px] font-medium text-slate-500">
+                {uploadPercent > 0 && uploadPercent < 100
+                  ? `Uploading photo (${uploadPercent}%)...`
+                  : uploadPercent === 100
+                  ? "Almost done! Updating profile..."
+                  : "Optimizing and updating your profile picture..."}
+              </p>
+              {uploadPercent > 0 && uploadPercent < 100 && (
+                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-2">
+                  <div
+                    className="bg-[#FF6433] h-full transition-all duration-200 rounded-full"
+                    style={{ width: `${uploadPercent}%` }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

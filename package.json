@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1149.0",
+    "@aws-sdk/s3-request-presigner": "^3.1149.0",
     "@base-ui/react": "^1.6.0",
     "@hookform/resolvers": "^5.9.1",
     "@radix-ui/react-label": "^2.1.15",
@@ -22,6 +24,7 @@
     "next": "16.2.12",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-easy-crop": "^6.2.4",
     "react-hook-form": "^7.88.0",
     "react-qr-code": "^2.2.0",
     "shadcn": "^4.16.0",
