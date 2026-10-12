@@ -2,10 +2,10 @@
 
 import { use, useState, useEffect } from "react";
 import Link from "next/link";
-import { MOCK_GIGS, GigItem } from "@/lib/mock-data/model-portal";
 import { getGig, updateGig } from "@/lib/api";
+import { getR2PublicUrl } from "@/lib/r2";
 import { ProgressiveBlur } from "@/components/portal/ProgressiveBlur";
-import { ChevronLeft, Check, ChevronDown, ChevronUp, Pencil, Loader2 } from "lucide-react";
+import { ChevronLeft, Check, ChevronDown, ChevronUp, Pencil, Loader2, Image as ImageIcon } from "lucide-react";
 
 export default function SingleGigDetailPage({
   params,
@@ -13,50 +13,72 @@ export default function SingleGigDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = use(params);
-  const gig: GigItem =
-    MOCK_GIGS.find((g) => g.id === resolvedParams.id) || MOCK_GIGS[0];
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [gigData, setGigData] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [title, setTitle] = useState(gig.title);
-  const [description, setDescription] = useState(gig.description);
-  const [hourlyRate, setHourlyRate] = useState(gig.hourlyRateLKR);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [hourlyRate, setHourlyRate] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [coverUrl, setCoverUrl] = useState<string>("");
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [selectedHeroImage, setSelectedHeroImage] = useState<string>("");
 
   useEffect(() => {
+    setIsLoading(true);
     getGig(resolvedParams.id)
       .then((data) => {
-        if (data && data.title) {
-          setTitle(data.title);
+        if (data) {
+          setGigData(data);
+          setTitle(data.title || "");
           setDescription(data.description || "");
           setHourlyRate(Number(data.hourlyRateLkr || data.hourlyRateLKR || 0));
+          const cover = data.coverImageUrl || "";
+          setCoverUrl(cover);
+          const gallery = Array.isArray(data.galleryImages) ? data.galleryImages : [];
+          setGalleryImages(gallery);
+          setSelectedHeroImage(cover);
         }
       })
       .catch((err) => {
-        console.warn("Using fallback gig data:", err);
+        console.error("Failed to load gig:", err);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, [resolvedParams.id]);
 
-  const formattedHourlyRate = `LKR ${Number(hourlyRate).toLocaleString()}/hr`;
-
-  const heroImage =
-    gig.id === "gig_basic"
-      ? "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=1000&auto=format&fit=crop&q=85"
-      : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1000&auto=format&fit=crop&q=85";
+  const heroImage = getR2PublicUrl(selectedHeroImage || coverUrl);
 
   const variants = [
-    {
-      id: "venue",
-      label: gig.venueName,
-      price: `LKR ${Number(hourlyRate).toLocaleString()}`,
-    },
-    {
-      id: "duration",
-      label: `${gig.durationHours} Session`,
-    },
+    ...(gigData?.venueName
+      ? [
+          {
+            id: "venue",
+            label: gigData.venueName,
+            price: `LKR ${Number(hourlyRate).toLocaleString()}`,
+          },
+        ]
+      : []),
+    ...(gigData?.durationHours
+      ? [
+          {
+            id: "duration",
+            label: `${gigData.durationHours} Session`,
+          },
+        ]
+      : []),
   ];
+
+  const whatsIncluded: string[] = Array.isArray(gigData?.whatsIncluded)
+    ? gigData.whatsIncluded
+    : typeof gigData?.whatsIncluded === "string"
+      ? gigData.whatsIncluded.split(",").map((s: string) => s.trim()).filter(Boolean)
+      : [];
 
   const handleSave = async () => {
     try {
@@ -83,16 +105,31 @@ export default function SingleGigDetailPage({
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-black text-white">
+        <Loader2 className="w-8 h-8 animate-spin text-[#FF6433]" />
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 w-full h-full h-svh max-h-svh flex flex-col justify-between overflow-hidden overscroll-none touch-none select-none">
-      {/* Full Background Image from Top to Bottom behind Card */}
+      {/* Full Background Image / Neutral Background behind Card */}
       <div className="absolute inset-0 w-full h-full z-0 overflow-hidden pointer-events-none">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={heroImage}
-          alt={title}
-          className="w-full h-full object-cover object-center"
-        />
+        {heroImage ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={heroImage}
+            alt={title}
+            className="w-full h-full object-cover object-center"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-b from-neutral-800 via-neutral-900 to-black flex flex-col items-center justify-center text-white/30 gap-2">
+            <ImageIcon className="w-16 h-16 stroke-[1.2]" />
+            <span className="text-[13px] font-medium text-white/40">No cover photo</span>
+          </div>
+        )}
       </div>
 
       {/* Progressive Blur behind the Card */}
@@ -170,27 +207,85 @@ export default function SingleGigDetailPage({
             >
               <div className="overflow-hidden max-h-[38vh] overflow-y-auto overscroll-contain touch-auto pr-0.5 flex flex-col gap-3.5 pt-1">
                 {/* Highlights Box */}
-                {gig.highlightTitle && (
+                {gigData?.highlightTitle && (
                   <div className="bg-[#F6F8F7] border border-[#E3E8E5] rounded-2xl p-3.5 flex flex-col gap-1">
                     <span className="text-[13px] font-medium text-slate-900">
-                      {gig.highlightTitle}
+                      {gigData.highlightTitle}
                     </span>
-                    {gig.highlightSubtitle && (
+                    {gigData?.highlightSubtitle && (
                       <span className="text-[12px] font-normal text-slate-500">
-                        {gig.highlightSubtitle}
+                        {gigData.highlightSubtitle}
                       </span>
                     )}
                   </div>
                 )}
 
+                {/* Lookbook & Gallery Images Strip */}
+                {galleryImages.length > 0 && (
+                  <div className="flex flex-col gap-2 pt-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] font-medium text-slate-800">
+                        Lookbook & Portfolio ({galleryImages.length})
+                      </span>
+                      <span className="text-[11px] text-slate-400">Tap photo to view</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none">
+                      {/* Cover Photo Thumbnail */}
+                      {coverUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedHeroImage(coverUrl)}
+                          className={`relative w-16 h-20 rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
+                            (selectedHeroImage === coverUrl || (!selectedHeroImage && coverUrl))
+                              ? "border-[#FF6433] ring-2 ring-[#FF6433]/30 scale-[1.02]"
+                              : "border-slate-200 opacity-70 hover:opacity-100"
+                          }`}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={getR2PublicUrl(coverUrl)}
+                            alt="Cover"
+                            className="w-full h-full object-cover"
+                          />
+                          <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] font-medium py-0.5 text-center">
+                            Cover
+                          </span>
+                        </button>
+                      )}
+
+                      {/* Gallery Thumbnails */}
+                      {galleryImages.map((imgKey, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setSelectedHeroImage(imgKey)}
+                          className={`relative w-16 h-20 rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
+                            selectedHeroImage === imgKey
+                              ? "border-[#FF6433] ring-2 ring-[#FF6433]/30 scale-[1.02]"
+                              : "border-slate-200 opacity-70 hover:opacity-100"
+                          }`}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={getR2PublicUrl(imgKey)}
+                            alt={`Gallery ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* What's Included */}
-                {gig.whatsIncluded && gig.whatsIncluded.length > 0 && (
+                {whatsIncluded.length > 0 && (
                   <div className="flex flex-col gap-2 pt-1">
                     <span className="text-[13px] font-medium text-slate-800">
                       What&apos;s Included
                     </span>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {gig.whatsIncluded.map((item, idx) => (
+                      {whatsIncluded.map((item, idx) => (
                         <div
                           key={idx}
                           className="flex items-center gap-2 text-[13px] font-normal text-slate-600"
@@ -236,10 +331,9 @@ export default function SingleGigDetailPage({
                   </span>
                 </button>
               ) : (
-                /* Then: Show Edit Gig button in Orange Shades Glass Style */
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(true)}
+                /* Then: Show Edit Gig button linking to edit page in Orange Shades Glass Style */
+                <Link
+                  href={`/model/gigs/${resolvedParams.id}/edit`}
                   className="relative overflow-hidden w-full h-12 bg-gradient-to-b from-[#FF7A45] via-[#FF6433] to-[#E84A23] border border-white/35 rounded-full font-medium text-[14px] text-white flex items-center justify-center gap-2 shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,0.7),inset_0_-2px_4px_rgba(0,0,0,0.15),0_8px_24px_rgba(232,74,35,0.35)] hover:brightness-105 active:scale-[0.985] transition-all cursor-pointer animate-in fade-in zoom-in-95 duration-200"
                 >
                   {/* Upper Specular Glass Sheen */}
@@ -250,7 +344,7 @@ export default function SingleGigDetailPage({
                     <Pencil className="w-4 h-4" />
                     <span>Edit Gig</span>
                   </span>
-                </button>
+                </Link>
               )}
             </div>
           </>

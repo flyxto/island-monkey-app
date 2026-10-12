@@ -29,13 +29,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { createGig } from "@/lib/api";
-
-const PRESET_IMAGES = [
-  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800",
-  "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=800",
-  "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=800",
-  "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=800",
-];
+import { GigImageUploader, GalleryItem } from "@/components/ui/gig-image-uploader";
+import { uploadDirectToR2 } from "@/lib/upload";
+import { useModel } from "@/lib/portal/ModelContext";
 
 const formSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -47,40 +43,91 @@ const formSchema = z.object({
   highlightTitle: z.string().min(2, "Highlight title is required"),
   highlightSubtitle: z.string().min(2, "Highlight subtitle is required"),
   whatsIncluded: z.string().min(2, "Please provide at least one feature"),
-  coverImageUrl: z.string().url("Must be a valid image URL").optional().or(z.literal("")),
+  coverImageUrl: z.string().min(1, "Cover image is required"),
+  galleryImages: z.array(z.string()),
 });
 
 export default function CreateGigPage() {
   const router = useRouter();
+  const { user } = useModel();
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadProgressText, setUploadProgressText] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  // Local deferred image state (blobs until Publish is clicked)
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string>("");
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
-      tag: "Fashion & Portfolio",
+      tag: "",
       description: "",
-      hourlyRateLkr: 5000,
-      durationHours: "2 Hours",
-      venueName: "Studio A - Colombo",
-      highlightTitle: "Studio Wardrobe",
-      highlightSubtitle: "2 outfit changes included",
-      whatsIncluded: "Professional Studio Lighting, Makeup Touch-ups, 10 High-Res Edits, All Raw Files",
-      coverImageUrl: PRESET_IMAGES[0],
+      hourlyRateLkr: "" as any,
+      durationHours: "",
+      venueName: "",
+      highlightTitle: "",
+      highlightSubtitle: "",
+      whatsIncluded: "",
+      coverImageUrl: "",
+      galleryImages: [],
     },
   });
 
-  const selectedCover = form.watch("coverImageUrl");
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!coverFile && !coverPreview) {
+      setError("Please upload a cover image for your gig.");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
+
     try {
+      const modelId = user?.profileId || user?.id;
+      let finalCoverKey = coverPreview;
+
+      // 1. Upload cover to R2 on Publish
+      if (coverFile) {
+        setUploadProgressText("Uploading cover image...");
+        const coverRes = await uploadDirectToR2(coverFile, {
+          type: "gig-cover",
+          modelId,
+          category: "gigs",
+          onProgress: (pct) => setUploadProgressText(`Uploading cover image (${pct}%)...`),
+        });
+        finalCoverKey = coverRes.r2Key;
+      }
+
+      // 2. Upload gallery lookbook photos to R2 on Publish
+      const finalGalleryKeys: string[] = [];
+      const newFiles = galleryItems.filter((item) => !!item.file);
+      let uploadedIdx = 0;
+
+      for (const item of galleryItems) {
+        if (item.file) {
+          uploadedIdx++;
+          setUploadProgressText(`Uploading lookbook photo (${uploadedIdx}/${newFiles.length})...`);
+          const galRes = await uploadDirectToR2(item.file, {
+            type: "gig-gallery",
+            modelId,
+            category: "gigs",
+          });
+          finalGalleryKeys.push(galRes.r2Key);
+        } else if (item.key || item.url) {
+          finalGalleryKeys.push(item.key || item.url);
+        }
+      }
+
+      setUploadProgressText("Publishing gig...");
+
       const parsedValues = {
         ...values,
         whatsIncluded: values.whatsIncluded.split(",").map((i) => i.trim()).filter(Boolean),
-        coverImageUrl: values.coverImageUrl || PRESET_IMAGES[0],
+        coverImageUrl: finalCoverKey,
+        galleryImages: finalGalleryKeys,
       };
 
       await createGig(parsedValues);
@@ -90,6 +137,7 @@ export default function CreateGigPage() {
       setError(err.message || "Failed to create gig");
     } finally {
       setIsLoading(false);
+      setUploadProgressText("");
     }
   }
 
@@ -284,69 +332,39 @@ export default function CreateGigPage() {
               </div>
             </div>
 
-            {/* Bento Card 3: Visual Cover Photo */}
+            {/* Bento Card 3: Visual Cover & Lookbook Multi-Image Gallery */}
             <div className="bg-white rounded-[24px] p-4 sm:p-5 border border-black/5 shadow-xs flex flex-col gap-3.5">
               <div className="flex items-center justify-between">
                 <span className="px-2.5 py-0.5 bg-[#FFF0EB] text-[#FF6433] text-[11px] font-medium rounded-full">
-                  Cover Photo
+                  Photos & Media
                 </span>
                 <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-                  Select Visual
+                  Cover & Lookbook
                 </span>
               </div>
 
-              {/* Preset Gallery Picker */}
-              <div className="grid grid-cols-4 gap-2.5">
-                {PRESET_IMAGES.map((imgUrl, idx) => {
-                  const isSelected = selectedCover === imgUrl;
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => form.setValue("coverImageUrl", imgUrl)}
-                      className={`relative aspect-[3/4] rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
-                        isSelected
-                          ? "border-[#FF6433] ring-2 ring-[#FF6433]/30 scale-[1.02]"
-                          : "border-slate-200 opacity-70 hover:opacity-100 hover:border-slate-400"
-                      }`}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={imgUrl}
-                        alt={`Preset ${idx + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                      {isSelected && (
-                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                          <div className="w-5 h-5 rounded-full bg-[#FF6433] text-white flex items-center justify-center shadow-xs">
-                            <Check className="w-3.5 h-3.5 stroke-[3]" />
-                          </div>
-                        </div>
-                      )}
-                    </button>
+              <GigImageUploader
+                coverPreview={coverPreview}
+                onCoverSelected={(file, previewUrl) => {
+                  setCoverFile(file);
+                  setCoverPreview(previewUrl);
+                  form.setValue("coverImageUrl", previewUrl, { shouldValidate: true });
+                }}
+                galleryItems={galleryItems}
+                onGalleryChange={(items) => {
+                  setGalleryItems(items);
+                  form.setValue(
+                    "galleryImages",
+                    items.map((i) => i.key || i.url)
                   );
-                })}
-              </div>
-
-              <FormField
-                control={form.control}
-                name="coverImageUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[11px] font-medium text-slate-500">
-                      Or Custom Image URL
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="https://..."
-                        className="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] font-medium text-slate-900 placeholder:text-slate-400 focus-visible:ring-[#FF6433] focus-visible:border-[#FF6433] shadow-none"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className="text-[11px] text-red-500 font-medium" />
-                  </FormItem>
-                )}
+                }}
+                maxGalleryImages={8}
               />
+              {form.formState.errors.coverImageUrl && (
+                <p className="text-[11px] text-red-500 font-medium">
+                  {form.formState.errors.coverImageUrl.message}
+                </p>
+              )}
             </div>
 
             {/* Bento Card 4: Highlight Callout */}
@@ -453,7 +471,7 @@ export default function CreateGigPage() {
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin text-white" />
-                    <span>Publishing Gig...</span>
+                    <span>{uploadProgressText || "Publishing Gig..."}</span>
                   </>
                 ) : (
                   <>

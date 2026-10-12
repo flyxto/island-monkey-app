@@ -9,7 +9,7 @@ export interface DirectUploadResult {
 }
 
 export interface DirectUploadOptions {
-  type: "profile" | "portfolio";
+  type: "profile" | "portfolio" | "gig-cover" | "gig-gallery";
   modelId?: string;
   category?: "models" | "creators" | "professionals" | "gigs";
   onProgress?: (percent: number) => void;

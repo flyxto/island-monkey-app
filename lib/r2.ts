@@ -51,7 +51,12 @@ export function getR2Client(): S3Client {
  */
 export function getR2PublicUrl(keyOrUrl?: string | null): string {
   if (!keyOrUrl) return "";
-  if (keyOrUrl.startsWith("http://") || keyOrUrl.startsWith("https://")) {
+  if (
+    keyOrUrl.startsWith("http://") ||
+    keyOrUrl.startsWith("https://") ||
+    keyOrUrl.startsWith("blob:") ||
+    keyOrUrl.startsWith("data:")
+  ) {
     return keyOrUrl;
   }
   const baseUrl = (
@@ -104,6 +109,26 @@ export function generatePortfolioKey(
     .slice(0, 30);
   const uniqueSuffix = `${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
   return `${category}/${entityId}/portfolio/${uniqueSuffix}-${baseName}.${cleanExt}`;
+}
+
+/**
+ * Generates a standard R2 storage key for a Gig asset:
+ * gigs/<modelOrGigId>/<subfolder>/<unique-file-name>.<ext>
+ * where subfolder is 'cover' or 'gallery'
+ */
+export function generateGigKey(
+  entityId: string,
+  filename: string,
+  subfolder: "cover" | "gallery" = "gallery"
+): string {
+  const ext = filename.includes(".") ? filename.split(".").pop() : "jpg";
+  const cleanExt = (ext || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const baseName = filename
+    .replace(/\.[^/.]+$/, "")
+    .replace(/[^a-zA-Z0-9_-]/g, "_")
+    .slice(0, 30);
+  const uniqueSuffix = `${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
+  return `gigs/${entityId}/${subfolder}/${uniqueSuffix}-${baseName}.${cleanExt}`;
 }
 
 /**

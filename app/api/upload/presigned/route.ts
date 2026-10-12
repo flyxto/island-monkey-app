@@ -3,6 +3,7 @@ import {
   getPresignedUploadUrl,
   generateProfileKey,
   generatePortfolioKey,
+  generateGigKey,
   StorageCategory,
 } from "@/lib/r2";
 
@@ -31,12 +32,12 @@ export async function POST(request: NextRequest) {
         : "models";
 
     const prefix =
-      validCategory === "creators"
+      type === "gig-cover" || type === "gig-gallery" || validCategory === "gigs"
+        ? "gig"
+        : validCategory === "creators"
         ? "crt"
         : validCategory === "professionals"
         ? "pro"
-        : validCategory === "gigs"
-        ? "gig"
         : "mdl";
 
     const entityId =
@@ -46,11 +47,19 @@ export async function POST(request: NextRequest) {
 
     // Key format:
     // Profile: <category>/<entityId>/profile/<unique-file-name>.<ext>
-    // Portfolio / Gig: <category>/<entityId>/portfolio/<unique-file-name>.<ext>
-    const key =
-      type === "profile"
-        ? generateProfileKey(entityId, filename, validCategory)
-        : generatePortfolioKey(entityId, filename, validCategory);
+    // Gig Cover: gigs/<entityId>/cover/<unique-file-name>.<ext>
+    // Gig Gallery: gigs/<entityId>/gallery/<unique-file-name>.<ext>
+    // Portfolio: <category>/<entityId>/portfolio/<unique-file-name>.<ext>
+    let key: string;
+    if (type === "profile") {
+      key = generateProfileKey(entityId, filename, validCategory);
+    } else if (type === "gig-cover") {
+      key = generateGigKey(entityId, filename, "cover");
+    } else if (type === "gig-gallery") {
+      key = generateGigKey(entityId, filename, "gallery");
+    } else {
+      key = generatePortfolioKey(entityId, filename, validCategory);
+    }
 
     // Generate temporary PUT upload URL (valid for 15 minutes)
     const { uploadUrl, r2Key, publicUrl } = await getPresignedUploadUrl(

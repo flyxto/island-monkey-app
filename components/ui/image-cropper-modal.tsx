@@ -11,6 +11,7 @@ export interface ImageCropperModalProps {
   aspect?: number;
   cropShape?: "round" | "rect";
   title?: string;
+  subtitle?: string;
   onCancel: () => void;
   onCropComplete: (croppedBlob: Blob, croppedFile: File) => void;
 }
@@ -77,6 +78,7 @@ export function ImageCropperModal({
   aspect = 1,
   cropShape = "round",
   title = "Crop Profile Photo",
+  subtitle,
   onCancel,
   onCropComplete: handleCropDone,
 }: ImageCropperModalProps) {
@@ -108,6 +110,9 @@ export function ImageCropperModal({
 
   if (!isOpen) return null;
 
+  const resolvedSubtitle =
+    subtitle || (aspect === 1 ? "Pinch or drag to position (1:1 square)" : "Pinch or drag to frame photo");
+
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl flex flex-col border border-black/5 animate-in zoom-in-95 duration-200">
@@ -122,7 +127,7 @@ export function ImageCropperModal({
                 {title}
               </h3>
               <p className="text-[11px] font-medium text-slate-400 mt-0.5">
-                Pinch or drag to position (1:1 square)
+                {resolvedSubtitle}
               </p>
             </div>
           </div>

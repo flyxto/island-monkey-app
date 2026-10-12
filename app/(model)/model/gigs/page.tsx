@@ -3,15 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import { Search, Star, Check, Plus, Pencil, Loader2 } from "lucide-react";
+import { Search, Star, Check, Plus, Pencil, Loader2, Image as ImageIcon } from "lucide-react";
 import { getGigs } from "@/lib/api";
-
-const GIG_IMAGES = [
-  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=900&auto=format&fit=crop&q=85",
-  "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=900&auto=format&fit=crop&q=85",
-  "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=900&auto=format&fit=crop&q=85",
-  "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=900&auto=format&fit=crop&q=85",
-];
+import { getR2PublicUrl } from "@/lib/r2";
 
 export default function MyGigsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -129,13 +123,20 @@ export default function MyGigsPage() {
                     />
                     {gig.status}
                   </div>
-                  {/* Full Background Image */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={gig.imageUrl || GIG_IMAGES[index % GIG_IMAGES.length]}
-                    alt={gig.title || "Gig"}
-                    className="absolute inset-0 w-full h-full object-cover object-center"
-                  />
+                  {/* Full Background Image or Neutral Placeholder */}
+                  {(gig.coverImageUrl || gig.imageUrl) ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={getR2PublicUrl(gig.coverImageUrl || gig.imageUrl)}
+                      alt={gig.title || "Gig"}
+                      className="absolute inset-0 w-full h-full object-cover object-center"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-neutral-800 to-neutral-950 flex flex-col items-center justify-center text-white/30 gap-2">
+                      <ImageIcon className="w-12 h-12 stroke-[1.2]" />
+                      <span className="text-[12px] font-medium text-white/40">No cover image</span>
+                    </div>
+                  )}
 
                   {/* Dark Gradient Overlay for Crisp Text Contrast */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 via-45% to-transparent pointer-events-none" />
