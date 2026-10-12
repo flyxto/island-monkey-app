@@ -143,6 +143,18 @@ export async function getCustomerProfile() {
   return response.json();
 }
 
+export async function updateCustomerProfile(data: any) {
+  const response = await fetchWithAuth(`${API_URL}/customers/me`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to update customer profile');
+  }
+  return response.json();
+}
+
 export async function getModelProfile() {
   const response = await fetchWithAuth(`${API_URL}/models/me`, { method: 'GET' });
   
@@ -297,6 +309,18 @@ export async function getPartnerProfile() {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || 'Failed to fetch partner profile');
+  }
+  return response.json();
+}
+
+export async function updatePartnerProfile(data: any) {
+  const response = await fetchWithAuth(`${API_URL}/partners/me`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to update partner profile');
   }
   return response.json();
 }

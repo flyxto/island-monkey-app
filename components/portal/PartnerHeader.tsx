@@ -2,8 +2,9 @@
 
 import React from "react";
 import Link from "next/link";
-import { Info, Bell, ScanLine, CheckCircle2, Pencil } from "lucide-react";
+import { Info, Bell, ScanLine, CheckCircle2, Pencil, Camera } from "lucide-react";
 import { usePartner } from "@/lib/portal/PartnerContext";
+import { getR2PublicUrl } from "@/lib/r2";
 
 export interface PartnerHeaderProps {
   isCompact?: boolean;
@@ -62,33 +63,50 @@ export function PartnerHeader({ isCompact = false, isProfile = false }: PartnerH
             }}
           >
             <div
-              className={`rounded-full bg-white/20 border border-white/40 shadow-sm shrink-0 flex items-center justify-center transform-gpu transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              className={`rounded-full bg-white/20 border border-white/40 shadow-sm shrink-0 flex items-center justify-center transform-gpu transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden ${
                 isProfile
                   ? "w-20 h-20 p-1 shadow-md"
                   : "w-11 h-11 p-0.5"
               }`}
             >
-              <div
-                className={`w-full h-full rounded-full bg-white flex items-center justify-center text-[#E84A23] font-medium shadow-xs tracking-tight transform-gpu transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  isProfile
-                    ? "text-2xl sm:text-3xl"
-                    : "text-sm"
-                }`}
-              >
-                {initials}
-              </div>
+              {partner?.avatarUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={getR2PublicUrl(partner.avatarUrl)}
+                  alt={storeName}
+                  className="w-full h-full rounded-full object-cover shadow-xs"
+                />
+              ) : (
+                <div
+                  className={`w-full h-full rounded-full bg-white flex items-center justify-center text-[#E84A23] font-medium shadow-xs tracking-tight transform-gpu transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    isProfile
+                      ? "text-2xl sm:text-3xl"
+                      : "text-sm"
+                  }`}
+                >
+                  {initials}
+                </div>
+              )}
             </div>
 
-            {/* Verified Store Badge */}
-            <span
-              className={`absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-white text-[#E84A23] rounded-full shadow-xs flex items-center justify-center border border-white transform-gpu transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-                isProfile
-                  ? "scale-100 opacity-100"
-                  : "scale-0 opacity-0 pointer-events-none"
-              }`}
-            >
-              <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
-            </span>
+            {/* Avatar Upload Trigger or Verified Store Badge */}
+            {isProfile ? (
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("trigger-partner-avatar-upload"))}
+                aria-label="Change Store Logo / Picture"
+                className="absolute -bottom-1 -right-1 w-7 h-7 bg-white text-[#FF6433] rounded-full shadow-md flex items-center justify-center border-2 border-[#FF6A48] hover:bg-slate-50 hover:scale-105 active:scale-95 transition-all cursor-pointer z-10"
+                title="Change Store Logo / Picture"
+              >
+                <Camera className="w-3.5 h-3.5 stroke-[2.2]" />
+              </button>
+            ) : (
+              <span
+                className="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-white text-[#E84A23] rounded-full shadow-xs flex items-center justify-center border border-white transform-gpu transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] scale-0 opacity-0 pointer-events-none"
+              >
+                <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+              </span>
+            )}
           </Link>
 
           {/* Name & Role & Edit Store Button Column */}

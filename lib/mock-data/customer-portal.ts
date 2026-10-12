@@ -4,6 +4,7 @@ export interface CustomerUser {
   lastName: string;
   email: string;
   phone?: string;
+  avatarUrl?: string;
   memberId?: string;
   role?: string;
   qrCodeValue: string;

@@ -7,7 +7,7 @@ import {
   CustomerUser,
   BalanceInfo,
 } from "@/lib/mock-data/customer-portal";
-import { getPackages, getCustomerProfile, logoutApi } from "@/lib/api";
+import { getPackages, getCustomerProfile, updateCustomerProfile, logoutApi } from "@/lib/api";
 
 export interface CustomerContextType {
   user: CustomerUser | null;
@@ -21,6 +21,7 @@ export interface CustomerContextType {
   isQRModalOpen: boolean;
   setIsQRModalOpen: (open: boolean) => void;
   refreshCustomer: () => Promise<void>;
+  updateProfile: (data: any) => Promise<void>;
   logout: () => void;
 }
 
@@ -49,6 +50,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
         lastName: data.lastName,
         email: data.email,
         phone: data.phone,
+        avatarUrl: data.avatarUrl,
         qrCodeValue: data.qrCodeValue,
         memberId: data.memberId,
         role: data.role,
@@ -118,6 +120,16 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
     fetchPackages();
   }, []);
 
+  const handleUpdateProfile = async (updateData: any) => {
+    try {
+      const updated = await updateCustomerProfile(updateData);
+      setUser((prev) => (prev ? { ...prev, ...updated } : null));
+    } catch (err) {
+      console.error("Failed to update customer profile:", err);
+      throw err;
+    }
+  };
+
   const logout = React.useCallback(() => {
     logoutApi();
     setUser(null);
@@ -141,6 +153,7 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
         isQRModalOpen,
         setIsQRModalOpen,
         refreshCustomer: fetchUser,
+        updateProfile: handleUpdateProfile,
         logout,
       }}
     >

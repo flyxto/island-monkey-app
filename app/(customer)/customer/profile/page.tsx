@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useCustomer } from "@/lib/portal/CustomerContext";
 import { getCustomerBookings } from "@/lib/api";
@@ -17,16 +17,27 @@ import {
   Star,
   Check,
   X,
+  Loader2,
 } from "lucide-react";
+import { uploadDirectToR2 } from "@/lib/upload";
+import { ImageCropperModal } from "@/components/ui/image-cropper-modal";
 
 export default function CustomerProfilePage() {
-  const { user, balance, logout, refreshCustomer } = useCustomer();
+  const { user, balance, logout, refreshCustomer, updateProfile } = useCustomer();
   const [sessionsCount, setSessionsCount] = useState<number>(0);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPerksModalOpen, setIsPerksModalOpen] = useState(false);
   const [activeInfoModal, setActiveInfoModal] = useState<string | null>(null);
   const [saveToast, setSaveToast] = useState(false);
+
+  // Avatar upload states
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarUploadError, setAvatarUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [imageToCropSrc, setImageToCropSrc] = useState<string>("");
+  const [uploadPercent, setUploadPercent] = useState<number>(0);
 
   // Form edit states
   const [formData, setFormData] = useState({
@@ -61,25 +72,93 @@ export default function CustomerProfilePage() {
     loadSessions();
   }, []);
 
-  // Listen for open edit modal trigger from top orange card
+  // Listen for open edit modal and avatar upload triggers from top orange card
   useEffect(() => {
     const handleOpenEdit = () => setIsEditModalOpen(true);
+    const handleTriggerAvatarUpload = () => {
+      fileInputRef.current?.click();
+    };
+
     window.addEventListener("open-customer-edit-modal", handleOpenEdit);
-    return () => window.removeEventListener("open-customer-edit-modal", handleOpenEdit);
+    window.addEventListener("trigger-avatar-upload", handleTriggerAvatarUpload);
+    return () => {
+      window.removeEventListener("open-customer-edit-modal", handleOpenEdit);
+      window.removeEventListener("trigger-avatar-upload", handleTriggerAvatarUpload);
+    };
   }, []);
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please select a valid image file (JPEG, PNG, WEBP).");
+      return;
+    }
+
+    if (file.size > 15 * 1024 * 1024) {
+      alert("Image file size must be less than 15MB.");
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    setImageToCropSrc(objectUrl);
+    setCropperOpen(true);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleCroppedUpload = async (_blob: Blob, croppedFile: File) => {
+    setCropperOpen(false);
+    if (imageToCropSrc) {
+      URL.revokeObjectURL(imageToCropSrc);
+      setImageToCropSrc("");
+    }
+
+    try {
+      setIsUploadingAvatar(true);
+      setUploadPercent(0);
+      setAvatarUploadError(null);
+
+      const result = await uploadDirectToR2(croppedFile, {
+        type: "profile",
+        modelId: user?.id,
+        category: "customers",
+        onProgress: (percent) => setUploadPercent(percent),
+      });
+
+      await updateProfile({
+        avatarUrl: result.r2Key,
+      });
+
+      setSaveToast(true);
+      setTimeout(() => setSaveToast(false), 2500);
+    } catch (err: any) {
+      console.error("Customer avatar upload failed:", err);
+      setAvatarUploadError(err.message || "Failed to update profile photo");
+      alert(err.message || "Failed to update profile photo. Please try again.");
+    } finally {
+      setIsUploadingAvatar(false);
+      setUploadPercent(0);
+    }
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    const updated = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      phone: formData.phone,
-    };
-    window.dispatchEvent(new CustomEvent("customer-profile-updated", { detail: updated }));
-    setIsEditModalOpen(false);
-    setSaveToast(true);
-    setTimeout(() => setSaveToast(false), 2000);
+    try {
+      await updateProfile({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+      });
+      setIsEditModalOpen(false);
+      setSaveToast(true);
+      setTimeout(() => setSaveToast(false), 2000);
+    } catch (err: any) {
+      alert(err.message || "Failed to save profile changes.");
+    }
   };
 
   const handleOpenQR = () => {
@@ -527,6 +606,64 @@ export default function CustomerProfilePage() {
                 >
                   Close
                 </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden File Input for Customer Avatar Upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/jpg"
+        className="hidden"
+        onChange={handleAvatarFileChange}
+      />
+
+      {/* 1:1 Round Image Cropper Modal */}
+      <ImageCropperModal
+        isOpen={cropperOpen}
+        imageSrc={imageToCropSrc}
+        aspect={1}
+        cropShape="round"
+        title="Crop Profile Picture"
+        subtitle="Adjust and position your photo for your profile"
+        onCancel={() => {
+          setCropperOpen(false);
+          if (imageToCropSrc) {
+            URL.revokeObjectURL(imageToCropSrc);
+            setImageToCropSrc("");
+          }
+        }}
+        onCropComplete={handleCroppedUpload}
+      />
+
+      {/* Avatar Uploading Progress Overlay */}
+      {isUploadingAvatar && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 shadow-2xl flex flex-col items-center gap-3.5 max-w-xs w-full text-center border border-black/5 animate-in zoom-in-95 duration-200">
+            <div className="relative w-14 h-14 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center text-[#FF6433]">
+              <Loader2 className="w-7 h-7 animate-spin" />
+            </div>
+            <div className="flex flex-col gap-1 w-full">
+              <h4 className="text-[15px] font-medium text-slate-900 tracking-tight">
+                Saving Your Photo
+              </h4>
+              <p className="text-[12px] font-medium text-slate-500">
+                {uploadPercent > 0 && uploadPercent < 100
+                  ? `Uploading photo (${uploadPercent}%)...`
+                  : uploadPercent === 100
+                  ? "Almost done! Updating profile..."
+                  : "Optimizing and updating your profile picture..."}
+              </p>
+              {uploadPercent > 0 && uploadPercent < 100 && (
+                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-2">
+                  <div
+                    className="bg-[#FF6433] h-full transition-all duration-200 rounded-full"
+                    style={{ width: `${uploadPercent}%` }}
+                  />
+                </div>
               )}
             </div>
           </div>

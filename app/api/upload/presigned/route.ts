@@ -27,7 +27,11 @@ export async function POST(request: NextRequest) {
     }
 
     const validCategory: StorageCategory =
-      category === "creators" || category === "professionals" || category === "gigs"
+      category === "creators" ||
+      category === "professionals" ||
+      category === "gigs" ||
+      category === "customers" ||
+      category === "partners"
         ? category
         : "models";
 
@@ -38,6 +42,10 @@ export async function POST(request: NextRequest) {
         ? "crt"
         : validCategory === "professionals"
         ? "pro"
+        : validCategory === "customers"
+        ? "cst"
+        : validCategory === "partners"
+        ? "prt"
         : "mdl";
 
     const entityId =

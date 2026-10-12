@@ -70,7 +70,7 @@ export function getR2PublicUrl(keyOrUrl?: string | null): string {
   return baseUrl ? `${baseUrl}/${cleanKey}` : `/${cleanKey}`;
 }
 
-export type StorageCategory = "models" | "creators" | "professionals" | "gigs";
+export type StorageCategory = "models" | "creators" | "professionals" | "gigs" | "customers" | "partners";
 
 /**
  * Generates a standard R2 storage key for a profile photo:

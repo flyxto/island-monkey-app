@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getPartnerProfile, logoutApi } from "@/lib/api";
+import { getPartnerProfile, updatePartnerProfile, logoutApi } from "@/lib/api";
 
 export interface PartnerUser {
   id: string;
@@ -24,6 +24,7 @@ export interface PartnerContextType {
   isLoading: boolean;
   error: string | null;
   refreshPartner: () => Promise<void>;
+  updateProfile: (data: any) => Promise<void>;
   logout: () => void;
 }
 
@@ -67,6 +68,16 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
     fetchPartner();
   }, [router, fetchPartner]);
 
+  const handleUpdateProfile = async (updateData: any) => {
+    try {
+      const updated = await updatePartnerProfile(updateData);
+      setPartner((prev) => (prev ? { ...prev, ...updated } : null));
+    } catch (err) {
+      console.error("Failed to update partner profile:", err);
+      throw err;
+    }
+  };
+
   const logout = useCallback(() => {
     logoutApi();
     setPartner(null);
@@ -82,6 +93,7 @@ export function PartnerProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         error,
         refreshPartner: fetchPartner,
+        updateProfile: handleUpdateProfile,
         logout,
       }}
     >

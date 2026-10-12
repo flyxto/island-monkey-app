@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePartner } from "@/lib/portal/PartnerContext";
 import { MOCK_STORE_PROFILE } from "@/lib/mock-data/partner-portal";
@@ -18,16 +18,27 @@ import {
   ChevronRight,
   X,
   Check,
+  Loader2,
 } from "lucide-react";
+import { uploadDirectToR2 } from "@/lib/upload";
+import { ImageCropperModal } from "@/components/ui/image-cropper-modal";
 
 export default function PartnerProfilePage() {
-  const { partner, dailyPointsProcessed, transactionsProcessedCount, logout } = usePartner();
+  const { partner, dailyPointsProcessed, transactionsProcessedCount, logout, updateProfile } = usePartner();
   const [store, setStore] = useState(MOCK_STORE_PROFILE);
   const [isAcceptingPoints, setIsAcceptingPoints] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSpecsModalOpen, setIsSpecsModalOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [saveToast, setSaveToast] = useState(false);
+
+  // Avatar upload states
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarUploadError, setAvatarUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [imageToCropSrc, setImageToCropSrc] = useState<string>("");
+  const [uploadPercent, setUploadPercent] = useState<number>(0);
 
   // Form edit states
   const [formData, setFormData] = useState({
@@ -52,24 +63,98 @@ export default function PartnerProfilePage() {
     }
   }, [partner]);
 
-  // Listen for open edit modal trigger from top orange card
+  // Listen for open edit modal and avatar upload triggers from top orange card
   useEffect(() => {
     const handleOpenEdit = () => setIsEditModalOpen(true);
+    const handleTriggerAvatarUpload = () => {
+      fileInputRef.current?.click();
+    };
+
     window.addEventListener("open-partner-edit-modal", handleOpenEdit);
-    return () => window.removeEventListener("open-partner-edit-modal", handleOpenEdit);
+    window.addEventListener("trigger-partner-avatar-upload", handleTriggerAvatarUpload);
+    return () => {
+      window.removeEventListener("open-partner-edit-modal", handleOpenEdit);
+      window.removeEventListener("trigger-partner-avatar-upload", handleTriggerAvatarUpload);
+    };
   }, []);
 
-  const handleSaveStore = (e: React.FormEvent) => {
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please select a valid image file (JPEG, PNG, WEBP).");
+      return;
+    }
+
+    if (file.size > 15 * 1024 * 1024) {
+      alert("Image file size must be less than 15MB.");
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    setImageToCropSrc(objectUrl);
+    setCropperOpen(true);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleCroppedUpload = async (_blob: Blob, croppedFile: File) => {
+    setCropperOpen(false);
+    if (imageToCropSrc) {
+      URL.revokeObjectURL(imageToCropSrc);
+      setImageToCropSrc("");
+    }
+
+    try {
+      setIsUploadingAvatar(true);
+      setUploadPercent(0);
+      setAvatarUploadError(null);
+
+      const result = await uploadDirectToR2(croppedFile, {
+        type: "profile",
+        modelId: partner?.id,
+        category: "partners",
+        onProgress: (percent) => setUploadPercent(percent),
+      });
+
+      await updateProfile({
+        avatarUrl: result.r2Key,
+      });
+
+      setSaveToast(true);
+      setTimeout(() => setSaveToast(false), 2500);
+    } catch (err: any) {
+      console.error("Partner avatar upload failed:", err);
+      setAvatarUploadError(err.message || "Failed to update store photo");
+      alert(err.message || "Failed to update store photo. Please try again.");
+    } finally {
+      setIsUploadingAvatar(false);
+      setUploadPercent(0);
+    }
+  };
+
+  const handleSaveStore = async (e: React.FormEvent) => {
     e.preventDefault();
     const updated = {
       ...store,
       ...formData,
     };
     setStore(updated);
-    window.dispatchEvent(new CustomEvent("partner-store-updated", { detail: updated }));
-    setIsEditModalOpen(false);
-    setSaveToast(true);
-    setTimeout(() => setSaveToast(false), 2000);
+    try {
+      await updateProfile({
+        storeName: formData.storeName,
+        phone: formData.phone,
+      });
+      window.dispatchEvent(new CustomEvent("partner-store-updated", { detail: updated }));
+      setIsEditModalOpen(false);
+      setSaveToast(true);
+      setTimeout(() => setSaveToast(false), 2000);
+    } catch (err: any) {
+      alert(err.message || "Failed to save store changes.");
+    }
   };
 
   return (
@@ -585,6 +670,64 @@ export default function PartnerProfilePage() {
                 Close
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Hidden File Input for Partner Avatar Upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/jpg"
+        className="hidden"
+        onChange={handleAvatarFileChange}
+      />
+
+      {/* 1:1 Round Image Cropper Modal */}
+      <ImageCropperModal
+        isOpen={cropperOpen}
+        imageSrc={imageToCropSrc}
+        aspect={1}
+        cropShape="round"
+        title="Crop Store Logo / Picture"
+        subtitle="Adjust and position your store picture or logo"
+        onCancel={() => {
+          setCropperOpen(false);
+          if (imageToCropSrc) {
+            URL.revokeObjectURL(imageToCropSrc);
+            setImageToCropSrc("");
+          }
+        }}
+        onCropComplete={handleCroppedUpload}
+      />
+
+      {/* Avatar Uploading Progress Overlay */}
+      {isUploadingAvatar && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 shadow-2xl flex flex-col items-center gap-3.5 max-w-xs w-full text-center border border-black/5 animate-in zoom-in-95 duration-200">
+            <div className="relative w-14 h-14 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center text-[#FF6433]">
+              <Loader2 className="w-7 h-7 animate-spin" />
+            </div>
+            <div className="flex flex-col gap-1 w-full">
+              <h4 className="text-[15px] font-medium text-slate-900 tracking-tight">
+                Saving Store Photo
+              </h4>
+              <p className="text-[12px] font-medium text-slate-500">
+                {uploadPercent > 0 && uploadPercent < 100
+                  ? `Uploading photo (${uploadPercent}%)...`
+                  : uploadPercent === 100
+                  ? "Almost done! Updating store profile..."
+                  : "Optimizing and updating your store picture..."}
+              </p>
+              {uploadPercent > 0 && uploadPercent < 100 && (
+                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-2">
+                  <div
+                    className="bg-[#FF6433] h-full transition-all duration-200 rounded-full"
+                    style={{ width: `${uploadPercent}%` }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
