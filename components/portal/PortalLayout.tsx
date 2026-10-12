@@ -60,11 +60,12 @@ export function PortalLayout({
   const isCustomerHome = pathname === "/customer";
   const isCustomerPackages = pathname === "/customer/packages";
   const isCustomerSessions = pathname === "/customer/sessions";
+  const isCustomerModels = pathname === "/customer/models";
   const isCustomerPackageDetail = pathname.startsWith("/customer/packages/") && pathname !== "/customer/packages";
   const isCustomerBooking = pathname.startsWith("/customer/booking");
   const isCustomerDetail = isCustomerPackageDetail;
   const isCustomerProfile = pathname === "/customer/profile";
-  const isCompactCustomerHeader = isCustomerPackages || isCustomerSessions;
+  const isCompactCustomerHeader = isCustomerPackages || isCustomerSessions || isCustomerModels;
   const showCustomerHeader = isCustomer && (isCustomerHome || isCompactCustomerHeader || isCustomerProfile);
 
   const shouldHideTopBar = hideTopAppBar ?? (

@@ -166,6 +166,26 @@ export async function getModelProfile() {
   return response.json();
 }
 
+export async function getModels(search?: string) {
+  const url = new URL(`${API_URL}/models`);
+  if (search) url.searchParams.append('search', search);
+  const response = await fetchWithAuth(url.toString(), { method: 'GET' });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to fetch models');
+  }
+  return response.json();
+}
+
+export async function getModelDetail(id: string) {
+  const response = await fetchWithAuth(`${API_URL}/models/${id}`, { method: 'GET' });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to fetch model details');
+  }
+  return response.json();
+}
+
 export async function getGigs(status?: string) {
   const url = new URL(`${API_URL}/gigs`);
   if (status) url.searchParams.append('status', status);
