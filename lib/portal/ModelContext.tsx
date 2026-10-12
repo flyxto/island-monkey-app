@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getModelProfile, updateModelAvailability, logoutApi } from "@/lib/api";
+import { getModelProfile, updateModelAvailability, updateModelProfile, logoutApi } from "@/lib/api";
 
 export interface ModelUser {
   id: string;
@@ -23,11 +23,13 @@ export interface ModelBalanceInfo {
 
 export interface ModelContextType {
   user: ModelUser | null;
+  profileData: any | null;
   balance: ModelBalanceInfo | null;
   isLoadingUser: boolean;
   error: string | null;
   refreshModel: () => Promise<void>;
   updateAvailability: (availability: "Available" | "Unavailable") => Promise<void>;
+  updateProfile: (data: any) => Promise<void>;
   logout: () => void;
 }
 
@@ -37,6 +39,7 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [user, setUser] = useState<ModelUser | null>(null);
+  const [profileData, setProfileData] = useState<any | null>(null);
   const [balance, setBalance] = useState<ModelBalanceInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,6 +48,7 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
       setIsLoadingUser(true);
       setError(null);
       const data = await getModelProfile();
+      setProfileData(data);
       setUser({
         id: data.userId || data.id,
         profileId: data.id,
@@ -93,9 +97,32 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const handleUpdateProfile = async (updateData: any) => {
+    try {
+      const updated = await updateModelProfile(updateData);
+      setProfileData((prev: any) => ({ ...prev, ...updated }));
+      if (updated?.user) {
+        setUser((prev: any) =>
+          prev
+            ? {
+                ...prev,
+                firstName: updated.user.firstName || prev.firstName,
+                lastName: updated.user.lastName || prev.lastName,
+                phone: updated.user.phone || prev.phone,
+              }
+            : null
+        );
+      }
+    } catch (err) {
+      console.error("Failed to update profile:", err);
+      throw err;
+    }
+  };
+
   const logout = React.useCallback(() => {
     logoutApi();
     setUser(null);
+    setProfileData(null);
     setBalance(null);
     router.replace("/login");
   }, [router]);
@@ -104,11 +131,13 @@ export function ModelProvider({ children }: { children: React.ReactNode }) {
     <ModelContext.Provider
       value={{
         user,
+        profileData,
         balance,
         isLoadingUser,
         error,
         refreshModel: fetchUser,
         updateAvailability: handleUpdateAvailability,
+        updateProfile: handleUpdateProfile,
         logout,
       }}
     >

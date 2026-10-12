@@ -278,6 +278,18 @@ export async function updateModelAvailability(id: string, availability: 'Availab
   return response.json();
 }
 
+export async function updateModelProfile(data: any) {
+  const response = await fetchWithAuth(`${API_URL}/models/me`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to update model profile');
+  }
+  return response.json();
+}
+
 // ─── Partner Portal APIs ───────────────────────────────────────────────────────
 
 export async function getPartnerProfile() {

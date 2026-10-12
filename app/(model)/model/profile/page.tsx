@@ -19,16 +19,18 @@ import {
   ChevronRight,
   X,
   Check,
+  Loader2,
 } from "lucide-react";
 
 export default function ModelProfilePage() {
-  const { user, balance, updateAvailability, logout } = useModel();
+  const { user, profileData, balance, updateAvailability, updateProfile, logout } = useModel();
   const [profile, setProfile] = useState(MOCK_MODEL_PROFILE);
   const [isAvailable, setIsAvailable] = useState(user?.status === "Available");
   const [isUpdatingAvailability, setIsUpdatingAvailability] = useState(false);
   const [bookingsCount, setBookingsCount] = useState<number>(0);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSpecsModalOpen, setIsSpecsModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [saveToast, setSaveToast] = useState(false);
 
@@ -36,12 +38,27 @@ export default function ModelProfilePage() {
   const [formData, setFormData] = useState({
     firstName: user?.firstName || profile.firstName,
     lastName: user?.lastName || profile.lastName,
-    handle: profile.handle || "@shalini_perera",
-    email: user?.email || profile.email || "shalini.perera@islandmonkey.io",
-    phone: user?.phone || profile.phone || "+94 77 234 5678",
-    bio: profile.bio || "",
-    location: profile.location || "Colombo, Sri Lanka",
-    instagram: profile.instagram || "@shalini.modele",
+    handle: profileData?.handle || profile.handle || "@model",
+    email: user?.email || profile.email || "",
+    phone: user?.phone || profile.phone || "",
+    bio: profileData?.bio || profile.bio || "",
+    location: profileData?.location || profile.location || "Colombo, Sri Lanka",
+    instagram: profileData?.instagram || profile.instagram || "",
+    whatsapp: profileData?.whatsapp || "",
+  });
+
+  // Physical Comp Card Specs state
+  const [specsData, setSpecsData] = useState({
+    height: profileData?.height || profile.height || "175 cm / 5' 9\"",
+    weight: profileData?.weight || "55 kg / 121 lbs",
+    bust: profileData?.bust || "84 cm / 33 in",
+    waist: profileData?.waist || "60 cm / 23.5 in",
+    hips: profileData?.hips || "89 cm / 35 in",
+    shoeSize: profileData?.shoeSize || profile.shoeSize || "39 EU / 8.5 US",
+    dressSize: profileData?.dressSize || "34 EU / 4 US",
+    hairColor: profileData?.hairColor || profile.hairColor || "Natural Black",
+    eyeColor: profileData?.eyeColor || profile.eyeColor || "Dark Brown",
+    skinComplexion: profileData?.skinComplexion || "Medium",
   });
 
   useEffect(() => {
@@ -56,6 +73,32 @@ export default function ModelProfilePage() {
       }));
     }
   }, [user]);
+
+  useEffect(() => {
+    if (profileData) {
+      setFormData((prev) => ({
+        ...prev,
+        handle: profileData.handle || prev.handle,
+        bio: profileData.bio || prev.bio,
+        location: profileData.location || prev.location,
+        instagram: profileData.instagram || prev.instagram,
+        whatsapp: profileData.whatsapp || prev.whatsapp,
+      }));
+      setSpecsData((prev) => ({
+        ...prev,
+        height: profileData.height || prev.height,
+        weight: profileData.weight || prev.weight,
+        bust: profileData.bust || prev.bust,
+        waist: profileData.waist || prev.waist,
+        hips: profileData.hips || prev.hips,
+        shoeSize: profileData.shoeSize || prev.shoeSize,
+        dressSize: profileData.dressSize || prev.dressSize,
+        hairColor: profileData.hairColor || prev.hairColor,
+        eyeColor: profileData.eyeColor || prev.eyeColor,
+        skinComplexion: profileData.skinComplexion || prev.skinComplexion,
+      }));
+    }
+  }, [profileData]);
 
   useEffect(() => {
     getModelBookings()
@@ -84,24 +127,60 @@ export default function ModelProfilePage() {
     }
   };
 
-  // Listen for open edit modal event from top orange card
+  // Listen for open edit modal event from top card
   useEffect(() => {
     const handleOpenEdit = () => setIsEditModalOpen(true);
     window.addEventListener("open-model-edit-modal", handleOpenEdit);
     return () => window.removeEventListener("open-model-edit-modal", handleOpenEdit);
   }, []);
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    const updated = {
-      ...profile,
-      ...formData,
-    };
-    setProfile(updated);
-    window.dispatchEvent(new CustomEvent("model-profile-updated", { detail: updated }));
-    setIsEditModalOpen(false);
-    setSaveToast(true);
-    setTimeout(() => setSaveToast(false), 2000);
+    setIsSaving(true);
+    try {
+      await updateProfile({
+        handle: formData.handle,
+        bio: formData.bio,
+        location: formData.location,
+        instagram: formData.instagram,
+        whatsapp: formData.whatsapp,
+      });
+      setIsEditModalOpen(false);
+      setSaveToast(true);
+      setTimeout(() => setSaveToast(false), 2500);
+    } catch (err) {
+      console.error("Failed to save profile:", err);
+      alert("Failed to save profile. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveSpecs = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    try {
+      await updateProfile({
+        height: specsData.height,
+        weight: specsData.weight,
+        bust: specsData.bust,
+        waist: specsData.waist,
+        hips: specsData.hips,
+        shoeSize: specsData.shoeSize,
+        dressSize: specsData.dressSize,
+        hairColor: specsData.hairColor,
+        eyeColor: specsData.eyeColor,
+        skinComplexion: specsData.skinComplexion,
+      });
+      setIsSpecsModalOpen(false);
+      setSaveToast(true);
+      setTimeout(() => setSaveToast(false), 2500);
+    } catch (err) {
+      console.error("Failed to save specs:", err);
+      alert("Failed to save specs. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -237,8 +316,8 @@ export default function ModelProfilePage() {
                 <span className="text-[14px] font-medium text-slate-800">
                   Physical Specifications
                 </span>
-                <span className="text-[11px] font-medium text-slate-400">
-                  {profile.height} • {profile.measurements} • {profile.shoeSize}
+                <span className="text-[11px] font-medium text-slate-400 truncate max-w-[220px]">
+                  {specsData.height || profile.height} • {specsData.bust ? `${specsData.bust} / ${specsData.waist}` : profile.measurements} • {specsData.shoeSize || profile.shoeSize}
                 </span>
               </div>
             </div>
@@ -466,15 +545,18 @@ export default function ModelProfilePage() {
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="flex-1 h-11 rounded-full bg-slate-100 text-slate-700 text-[14px] font-medium hover:bg-slate-200 transition-colors cursor-pointer"
+                  disabled={isSaving}
+                  className="flex-1 h-11 rounded-full bg-slate-100 text-slate-700 text-[14px] font-medium hover:bg-slate-200 transition-colors cursor-pointer disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 h-11 rounded-full bg-[#FF6433] text-white text-[14px] font-medium hover:bg-[#E84A23] transition-colors shadow-xs cursor-pointer"
+                  disabled={isSaving}
+                  className="flex-1 h-11 rounded-full bg-[#FF6433] text-white text-[14px] font-medium hover:bg-[#E84A23] transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
                 >
-                  Save Changes
+                  {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSaving ? "Saving..." : "Save Changes"}
                 </button>
               </div>
             </form>
@@ -500,57 +582,139 @@ export default function ModelProfilePage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 py-2 text-xs">
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <span className="text-slate-400 font-medium block">Height</span>
-                <span className="text-slate-800 font-medium text-[14px] mt-0.5 block">
-                  {profile.height}
-                </span>
+            <form onSubmit={handleSaveSpecs} className="flex flex-col gap-3 max-h-[65vh] overflow-y-auto pr-1">
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[12px] font-medium text-slate-500">Height</label>
+                  <input
+                    type="text"
+                    value={specsData.height}
+                    onChange={(e) => setSpecsData({ ...specsData, height: e.target.value })}
+                    placeholder="e.g. 175 cm / 5' 9&quot;"
+                    className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#FF6433]"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[12px] font-medium text-slate-500">Weight</label>
+                  <input
+                    type="text"
+                    value={specsData.weight}
+                    onChange={(e) => setSpecsData({ ...specsData, weight: e.target.value })}
+                    placeholder="e.g. 55 kg / 121 lbs"
+                    className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#FF6433]"
+                  />
+                </div>
               </div>
 
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <span className="text-slate-400 font-medium block">Bust / Waist / Hips</span>
-                <span className="text-slate-800 font-medium text-[14px] mt-0.5 block">
-                  {profile.measurements}
-                </span>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[12px] font-medium text-slate-500">Bust</label>
+                  <input
+                    type="text"
+                    value={specsData.bust}
+                    onChange={(e) => setSpecsData({ ...specsData, bust: e.target.value })}
+                    placeholder="84 cm / 33&quot;"
+                    className="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#FF6433]"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[12px] font-medium text-slate-500">Waist</label>
+                  <input
+                    type="text"
+                    value={specsData.waist}
+                    onChange={(e) => setSpecsData({ ...specsData, waist: e.target.value })}
+                    placeholder="60 cm / 23.5&quot;"
+                    className="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#FF6433]"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[12px] font-medium text-slate-500">Hips</label>
+                  <input
+                    type="text"
+                    value={specsData.hips}
+                    onChange={(e) => setSpecsData({ ...specsData, hips: e.target.value })}
+                    placeholder="89 cm / 35&quot;"
+                    className="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#FF6433]"
+                  />
+                </div>
               </div>
 
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <span className="text-slate-400 font-medium block">Shoe Size</span>
-                <span className="text-slate-800 font-medium text-[14px] mt-0.5 block">
-                  {profile.shoeSize}
-                </span>
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[12px] font-medium text-slate-500">Shoe Size</label>
+                  <input
+                    type="text"
+                    value={specsData.shoeSize}
+                    onChange={(e) => setSpecsData({ ...specsData, shoeSize: e.target.value })}
+                    placeholder="e.g. 39 EU / 8.5 US"
+                    className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#FF6433]"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[12px] font-medium text-slate-500">Dress Size</label>
+                  <input
+                    type="text"
+                    value={specsData.dressSize}
+                    onChange={(e) => setSpecsData({ ...specsData, dressSize: e.target.value })}
+                    placeholder="e.g. 34 EU / 4 US"
+                    className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#FF6433]"
+                  />
+                </div>
               </div>
 
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <span className="text-slate-400 font-medium block">Eyes / Hair</span>
-                <span className="text-slate-800 font-medium text-[14px] mt-0.5 block">
-                  {profile.eyeColor} • {profile.hairColor}
-                </span>
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[12px] font-medium text-slate-500">Hair Color</label>
+                  <input
+                    type="text"
+                    value={specsData.hairColor}
+                    onChange={(e) => setSpecsData({ ...specsData, hairColor: e.target.value })}
+                    placeholder="e.g. Natural Black"
+                    className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#FF6433]"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[12px] font-medium text-slate-500">Eye Color</label>
+                  <input
+                    type="text"
+                    value={specsData.eyeColor}
+                    onChange={(e) => setSpecsData({ ...specsData, eyeColor: e.target.value })}
+                    placeholder="e.g. Dark Brown"
+                    className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#FF6433]"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="flex flex-col gap-1.5 pt-1">
-              <span className="text-[12px] font-medium text-slate-500">Categories</span>
-              <div className="flex flex-wrap gap-1.5">
-                {profile.categories?.map((cat) => (
-                  <span
-                    key={cat}
-                    className="px-2.5 py-1 bg-orange-50 text-[#FF6433] border border-orange-200/60 rounded-full text-[12px] font-medium"
-                  >
-                    {cat}
-                  </span>
-                ))}
+              <div className="flex flex-col gap-1">
+                <label className="text-[12px] font-medium text-slate-500">Skin Complexion</label>
+                <input
+                  type="text"
+                  value={specsData.skinComplexion}
+                  onChange={(e) => setSpecsData({ ...specsData, skinComplexion: e.target.value })}
+                  placeholder="e.g. Medium / Olive"
+                  className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#FF6433]"
+                />
               </div>
-            </div>
 
-            <button
-              type="button"
-              onClick={() => setIsSpecsModalOpen(false)}
-              className="w-full h-11 rounded-full bg-slate-900 text-white text-[14px] font-medium hover:bg-slate-800 transition-colors cursor-pointer mt-1"
-            >
-              Done
-            </button>
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsSpecsModalOpen(false)}
+                  disabled={isSaving}
+                  className="flex-1 h-11 rounded-full bg-slate-100 text-slate-700 text-[14px] font-medium hover:bg-slate-200 transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="flex-1 h-11 rounded-full bg-[#FF6433] text-white text-[14px] font-medium hover:bg-[#E84A23] transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
+                >
+                  {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSaving ? "Saving..." : "Save Comp Card"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
