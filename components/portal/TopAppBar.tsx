@@ -74,18 +74,7 @@ export function TopAppBar({
       <div className="flex items-center gap-1">
         {actions && actions.length > 0 ? (
           actions.map((act, idx) => renderActionItem(act, idx))
-        ) : (
-          /* Fallback Notification Bell */
-          <button
-            onClick={onNotificationClick}
-            type="button"
-            className="relative p-2 rounded-full text-im-body hover:bg-im-accent-light transition-colors focus:outline-none cursor-pointer"
-            aria-label="Notifications"
-          >
-            <Bell className="w-6 h-6" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-im-accent rounded-full ring-2 ring-white" />
-          </button>
-        )}
+        ) : null}
       </div>
     </header>
   );

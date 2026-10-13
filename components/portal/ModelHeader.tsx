@@ -153,8 +153,8 @@ export function ModelHeader({ isCompact = false, isProfile = false }: ModelHeade
           </div>
         </div>
 
-        {/* Right Side: Notification Bell */}
-        <div
+        {/* Right Side: Notification Bell (temporarily hidden) */}
+        {/* <div
           className={`flex items-center gap-2 shrink-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             isProfile ? "self-start pt-1" : "self-center"
           }`}
@@ -167,7 +167,7 @@ export function ModelHeader({ isCompact = false, isProfile = false }: ModelHeade
             <Bell className="w-5 h-5 text-white" />
             <span className="absolute top-2 right-2 w-2 h-2 bg-amber-300 rounded-full ring-2 ring-[#E84A23]" />
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Centered Points Display: smoothly collapses using CSS grid row transition */}

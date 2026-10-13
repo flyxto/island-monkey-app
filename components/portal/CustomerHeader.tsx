@@ -173,7 +173,8 @@ export function CustomerHeader({ isCompact = false, isProfile = false }: Custome
             isProfile ? "self-start pt-1" : "self-center"
           }`}
         >
-          <button
+          {/* Notification button temporarily hidden */}
+          {/* <button
             type="button"
             aria-label="Notifications"
             className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 backdrop-blur-xs flex items-center justify-center text-white transition-colors focus:outline-none cursor-pointer relative shrink-0"
@@ -181,7 +182,7 @@ export function CustomerHeader({ isCompact = false, isProfile = false }: Custome
           >
             <Bell className="w-5 h-5 text-white" />
             <span className="absolute top-2 right-2 w-2 h-2 bg-amber-300 rounded-full ring-2 ring-[#E84A23]" />
-          </button>
+          </button> */}
 
           <div
             className={`overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-center ${

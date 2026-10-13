@@ -80,14 +80,9 @@ export function PortalLayout({
 
   // Auto-resolve Partner rightAction if not explicitly supplied as a prop
   const resolveTopBarActions = (): TopAppBarAction[] => {
-    // Customer Portal: Notifications + Settings
+    // Customer Portal: Settings (Notification Bell hidden for now)
     if (config.portalId === "customer") {
       return [
-        {
-          icon: Bell,
-          badgeDot: true,
-          ariaLabel: "Notifications",
-        },
         {
           icon: Settings,
           href: "/customer/profile",
@@ -96,7 +91,7 @@ export function PortalLayout({
       ];
     }
 
-    // Partner Portal: QR Scanner Link to /partner/scan
+    // Partner Portal: QR Scanner Link to /partner/scan (Notification Bell hidden for now)
     if (config.portalId === "partner") {
       return [
         {
@@ -104,22 +99,11 @@ export function PortalLayout({
           href: "/partner/scan",
           ariaLabel: "Scan Customer QR Code",
         },
-        {
-          icon: Bell,
-          badgeDot: true,
-          ariaLabel: "Notifications",
-        },
       ];
     }
 
-    // Model Portal (or default): Notification Bell only
-    return [
-      {
-        icon: Bell,
-        badgeDot: true,
-        ariaLabel: "Notifications",
-      },
-    ];
+    // Model Portal (or default): Notification Bell hidden for now
+    return [];
   };
 
   const resolvedAction = rightAction ? [rightAction] : resolveTopBarActions();
