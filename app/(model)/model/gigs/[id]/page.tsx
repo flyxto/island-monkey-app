@@ -5,7 +5,7 @@ import Link from "next/link";
 import { getGig, updateGig } from "@/lib/api";
 import { getR2PublicUrl } from "@/lib/r2";
 import { ProgressiveBlur } from "@/components/portal/ProgressiveBlur";
-import { ChevronLeft, Check, ChevronDown, ChevronUp, Pencil, Loader2, Image as ImageIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, ChevronDown, ChevronUp, Pencil, Loader2, Image as ImageIcon } from "lucide-react";
 
 export default function SingleGigDetailPage({
   params,
@@ -26,7 +26,9 @@ export default function SingleGigDetailPage({
   const [isExpanded, setIsExpanded] = useState(false);
   const [coverUrl, setCoverUrl] = useState<string>("");
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
-  const [selectedHeroImage, setSelectedHeroImage] = useState<string>("");
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchDeltaX, setTouchDeltaX] = useState<number>(0);
 
   useEffect(() => {
     setIsLoading(true);
@@ -41,7 +43,7 @@ export default function SingleGigDetailPage({
           setCoverUrl(cover);
           const gallery = Array.isArray(data.galleryImages) ? data.galleryImages : [];
           setGalleryImages(gallery);
-          setSelectedHeroImage(cover);
+          setActiveImageIndex(0);
         }
       })
       .catch((err) => {
@@ -52,7 +54,44 @@ export default function SingleGigDetailPage({
       });
   }, [resolvedParams.id]);
 
-  const heroImage = getR2PublicUrl(selectedHeroImage || coverUrl);
+  const allImages: string[] = [
+    ...(coverUrl ? [coverUrl] : []),
+    ...galleryImages.filter((img) => img && img !== coverUrl),
+  ];
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+    setTouchDeltaX(0);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    setTouchDeltaX(e.touches[0].clientX - touchStartX);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartX === null) return;
+    const threshold = 40;
+    if (touchDeltaX < -threshold) {
+      // Swiped Left -> Next Image
+      setActiveImageIndex((prev) => (prev < allImages.length - 1 ? prev + 1 : 0));
+    } else if (touchDeltaX > threshold) {
+      // Swiped Right -> Previous Image
+      setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : allImages.length - 1));
+    }
+    setTouchStartX(null);
+    setTouchDeltaX(0);
+  };
+
+  const goToPrev = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : allImages.length - 1));
+  };
+
+  const goToNext = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setActiveImageIndex((prev) => (prev < allImages.length - 1 ? prev + 1 : 0));
+  };
 
   const variants = [
     ...(gigData?.venueName
@@ -114,20 +153,69 @@ export default function SingleGigDetailPage({
   }
 
   return (
-    <div className="fixed inset-0 w-full h-full h-svh max-h-svh flex flex-col justify-between overflow-hidden overscroll-none touch-none select-none">
-      {/* Full Background Image / Neutral Background behind Card */}
-      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden pointer-events-none">
-        {heroImage ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src={heroImage}
-            alt={title}
-            className="w-full h-full object-cover object-center"
-          />
+    <div className="fixed inset-0 w-full h-full h-svh max-h-svh flex flex-col justify-between overflow-hidden overscroll-none select-none">
+      {/* Hero Swipe Carousel Area */}
+      <div
+        className="absolute inset-0 w-full h-full z-0 overflow-hidden touch-pan-y"
+        onTouchStart={allImages.length > 1 ? handleTouchStart : undefined}
+        onTouchMove={allImages.length > 1 ? handleTouchMove : undefined}
+        onTouchEnd={allImages.length > 1 ? handleTouchEnd : undefined}
+      >
+        {allImages.length > 0 ? (
+          <div
+            className="flex h-full w-full transition-transform duration-300 ease-out"
+            style={{
+              transform: `translateX(-${activeImageIndex * 100}%)`,
+            }}
+          >
+            {allImages.map((imgKey, idx) => (
+              <div key={idx} className="relative w-full h-full shrink-0 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={getR2PublicUrl(imgKey)}
+                  alt={`${title} - photo ${idx + 1}`}
+                  className="w-full h-full object-cover object-center pointer-events-none select-none"
+                  draggable={false}
+                />
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="w-full h-full bg-gradient-to-b from-neutral-800 via-neutral-900 to-black flex flex-col items-center justify-center text-white/30 gap-2">
             <ImageIcon className="w-16 h-16 stroke-[1.2]" />
             <span className="text-[13px] font-medium text-white/40">No cover photo</span>
+          </div>
+        )}
+
+        {/* Desktop Left / Right Navigation Chevrons */}
+        {allImages.length > 1 && (
+          <div className="absolute inset-x-4 top-[22%] -translate-y-1/2 z-20 hidden sm:flex items-center justify-between pointer-events-none">
+            <button
+              type="button"
+              onClick={goToPrev}
+              className="w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 border border-white/20 backdrop-blur-md text-white flex items-center justify-center transition-all pointer-events-auto cursor-pointer shadow-lg active:scale-95"
+              aria-label="Previous photo"
+            >
+              <ChevronLeft className="w-5 h-5 -ml-0.5" />
+            </button>
+            <button
+              type="button"
+              onClick={goToNext}
+              className="w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 border border-white/20 backdrop-blur-md text-white flex items-center justify-center transition-all pointer-events-auto cursor-pointer shadow-lg active:scale-95"
+              aria-label="Next photo"
+            >
+              <ChevronRight className="w-5 h-5 -mr-0.5" />
+            </button>
+          </div>
+        )}
+
+        {/* Floating Top-Right Counter Pill Badge */}
+        {allImages.length > 1 && (
+          <div className="absolute top-4 right-4 z-30 pointer-events-auto">
+            <div className="px-3 py-1.5 rounded-full bg-black/45 backdrop-blur-md border border-white/20 text-white text-[12px] font-medium tracking-tight shadow-lg flex items-center gap-1.5">
+              <ImageIcon className="w-3.5 h-3.5 text-white/80" />
+              <span>{activeImageIndex + 1} / {allImages.length}</span>
+            </div>
           </div>
         )}
       </div>
@@ -135,7 +223,7 @@ export default function SingleGigDetailPage({
       {/* Progressive Blur behind the Card */}
       <ProgressiveBlur
         className="absolute inset-x-0 bottom-0 z-10 w-full pointer-events-none"
-        height="h-[65vh]"
+        height="h-[52vh]"
       />
 
       {/* Top Floating Back Button */}
@@ -149,11 +237,34 @@ export default function SingleGigDetailPage({
         </Link>
       </div>
 
-      {/* Spacer to push card to bottom while revealing background hero image */}
-      <div className="flex-1 min-h-0 pointer-events-none" />
+      {/* Dedicated Spacer to guarantee at least ~42vh reserved for the hero carousel */}
+      <div className="min-h-[38vh] sm:min-h-[42vh] flex-1 pointer-events-none transition-all duration-300" />
+
+      {/* Floating Pill Dot Indicators right above the bottom drawer */}
+      {allImages.length > 1 && (
+        <div className="relative z-30 flex items-center justify-center pb-2 pointer-events-none">
+          <div className="px-3 py-1.5 rounded-full bg-black/45 backdrop-blur-md border border-white/20 flex items-center gap-1.5 pointer-events-auto shadow-lg">
+            {allImages.map((_, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setActiveImageIndex(idx)}
+                className={`transition-all duration-300 cursor-pointer ${
+                  activeImageIndex === idx
+                    ? "w-5 h-1.5 bg-[#FF6433] rounded-full shadow-[0_1px_6px_rgba(255,100,51,0.7)]"
+                    : "w-1.5 h-1.5 bg-white/60 hover:bg-white rounded-full"
+                }`}
+                aria-label={`Go to photo ${idx + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Bottom Sheet Card Container */}
-      <div className="relative z-20 mx-2.5 sm:mx-4 mb-2.5 sm:mb-4 bg-white rounded-[36px] p-5 sm:p-6 pt-3 flex flex-col gap-3.5 shadow-2xl shrink-0 max-h-[85vh] overflow-hidden">
+      <div className={`relative z-20 mx-2.5 sm:mx-4 mb-2.5 sm:mb-4 bg-white rounded-[36px] p-5 sm:p-6 pt-3 flex flex-col gap-3.5 shadow-2xl shrink-0 transition-all duration-300 overflow-hidden ${
+        isExpanded ? "max-h-[58vh]" : "max-h-[44vh]"
+      }`}>
         {/* Top Notch Indicator */}
         <div className="w-10 h-1 bg-[#FF6433] rounded-full mx-auto my-1 shrink-0" />
 
@@ -214,7 +325,7 @@ export default function SingleGigDetailPage({
                 isExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
               }`}
             >
-              <div className="overflow-hidden max-h-[38vh] overflow-y-auto overscroll-contain touch-auto pr-0.5 flex flex-col gap-3.5 pt-1">
+              <div className="overflow-hidden max-h-[26vh] overflow-y-auto overscroll-contain touch-auto pr-0.5 flex flex-col gap-3.5 pt-1">
                 {/* Highlights Box */}
                 {gigData?.highlightTitle && (
                   <div className="bg-[#F6F8F7] border border-[#E3E8E5] rounded-2xl p-3.5 flex flex-col gap-1">
@@ -229,60 +340,45 @@ export default function SingleGigDetailPage({
                   </div>
                 )}
 
-                {/* Lookbook & Gallery Images Strip */}
-                {galleryImages.length > 0 && (
+                {/* Lookbook & Gallery Images Strip (Synced with Hero Carousel) */}
+                {allImages.length > 0 && (
                   <div className="flex flex-col gap-2 pt-1">
                     <div className="flex items-center justify-between">
                       <span className="text-[13px] font-medium text-slate-800">
-                        Lookbook & Portfolio ({galleryImages.length})
+                        Lookbook & Portfolio ({allImages.length})
                       </span>
-                      <span className="text-[11px] text-slate-400">Tap photo to view</span>
+                      <span className="text-[11px] text-slate-400">Tap photo to view in hero</span>
                     </div>
 
                     <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none">
-                      {/* Cover Photo Thumbnail */}
-                      {coverUrl && (
-                        <button
-                          type="button"
-                          onClick={() => setSelectedHeroImage(coverUrl)}
-                          className={`relative w-16 h-20 rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
-                            (selectedHeroImage === coverUrl || (!selectedHeroImage && coverUrl))
-                              ? "border-[#FF6433] ring-2 ring-[#FF6433]/30 scale-[1.02]"
-                              : "border-slate-200 opacity-70 hover:opacity-100"
-                          }`}
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={getR2PublicUrl(coverUrl)}
-                            alt="Cover"
-                            className="w-full h-full object-cover"
-                          />
-                          <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] font-medium py-0.5 text-center">
-                            Cover
-                          </span>
-                        </button>
-                      )}
-
-                      {/* Gallery Thumbnails */}
-                      {galleryImages.map((imgKey, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => setSelectedHeroImage(imgKey)}
-                          className={`relative w-16 h-20 rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
-                            selectedHeroImage === imgKey
-                              ? "border-[#FF6433] ring-2 ring-[#FF6433]/30 scale-[1.02]"
-                              : "border-slate-200 opacity-70 hover:opacity-100"
-                          }`}
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={getR2PublicUrl(imgKey)}
-                            alt={`Gallery ${idx + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                        </button>
-                      ))}
+                      {allImages.map((imgKey, idx) => {
+                        const isCover = imgKey === coverUrl;
+                        const isActive = activeImageIndex === idx;
+                        return (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setActiveImageIndex(idx)}
+                            className={`relative w-16 h-20 rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
+                              isActive
+                                ? "border-[#FF6433] ring-2 ring-[#FF6433]/30 scale-[1.02]"
+                                : "border-slate-200 opacity-70 hover:opacity-100"
+                            }`}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={getR2PublicUrl(imgKey)}
+                              alt={isCover ? "Cover" : `Gallery ${idx}`}
+                              className="w-full h-full object-cover"
+                            />
+                            {isCover && (
+                              <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] font-medium py-0.5 text-center">
+                                Cover
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
