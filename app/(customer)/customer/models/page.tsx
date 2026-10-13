@@ -8,18 +8,16 @@ import { Input } from "@/components/ui/input";
 import {
   Search,
   Sparkles,
-  Star,
   MapPin,
   X,
   Camera,
-  Layers,
-  ChevronRight,
   ArrowRight,
-  ArrowUpRight,
   Loader2,
   AlertCircle,
   RefreshCw,
   User,
+  Globe,
+  Tag,
 } from "lucide-react";
 
 export interface ModelPerson {
@@ -32,16 +30,9 @@ export interface ModelPerson {
   bio?: string | null;
   location?: string | null;
   availability: "Available" | "Unavailable" | string;
-  height?: string | null;
-  bust?: string | null;
-  waist?: string | null;
-  hips?: string | null;
-  shoeSize?: string | null;
-  hairColor?: string | null;
-  eyeColor?: string | null;
-  skinComplexion?: string | null;
-  instagram?: string | null;
-  whatsapp?: string | null;
+  gender?: string | null;
+  origin?: string | null;
+  availableForInternational: boolean;
   tags: string[];
   portfolioImages: string[];
 }
@@ -99,16 +90,9 @@ export default function CustomerModelsPage() {
             bio: m.bio || null,
             location: m.location || "Sri Lanka",
             availability: m.availability || "Available",
-            height: m.height || null,
-            bust: m.bust || null,
-            waist: m.waist || null,
-            hips: m.hips || null,
-            shoeSize: m.shoeSize || null,
-            hairColor: m.hairColor || null,
-            eyeColor: m.eyeColor || null,
-            skinComplexion: m.skinComplexion || null,
-            instagram: m.instagram || null,
-            whatsapp: m.whatsapp || null,
+            gender: m.gender || null,
+            origin: m.origin || null,
+            availableForInternational: Boolean(m.availableForInternational),
             tags,
             portfolioImages: gigImages,
           };
@@ -377,66 +361,57 @@ export default function CustomerModelsPage() {
                 </p>
               </div>
 
-              {/* Physical Comp Card Specs (if available) */}
-              {(selectedModel.height ||
-                selectedModel.bust ||
-                selectedModel.waist ||
-                selectedModel.hips ||
-                selectedModel.shoeSize ||
-                selectedModel.hairColor) && (
+              {/* Public Casting Demographics */}
+              <div className="flex flex-col gap-2">
+                <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
+                  Casting & Demographics
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  {selectedModel.gender && (
+                    <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100 flex flex-col">
+                      <span className="text-[11px] font-medium text-slate-400">Gender</span>
+                      <span className="text-[13px] font-medium text-slate-800 mt-0.5">
+                        {selectedModel.gender}
+                      </span>
+                    </div>
+                  )}
+                  {selectedModel.origin && (
+                    <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100 flex flex-col">
+                      <span className="text-[11px] font-medium text-slate-400">Origin / Citizenship</span>
+                      <span className="text-[13px] font-medium text-slate-800 mt-0.5">
+                        {selectedModel.origin}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* International Travel badge */}
+                {selectedModel.availableForInternational && (
+                  <div className="flex items-center gap-2 p-2.5 bg-orange-50/60 rounded-xl border border-[#FF6433]/20 text-[#E84A23]">
+                    <Globe className="w-4 h-4 shrink-0 text-[#FF6433]" />
+                    <span className="text-[12px] font-medium">
+                      Available for International Shoot Travel
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Modeling Categories & Tags */}
+              {selectedModel.tags.length > 0 && (
                 <div className="flex flex-col gap-2">
                   <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400">
-                    Comp Card Measurements
+                    Modeling Categories
                   </span>
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    {selectedModel.height && (
-                      <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100 flex flex-col">
-                        <span className="text-[11px] font-medium text-slate-400">Height</span>
-                        <span className="text-[13px] font-medium text-slate-800 mt-0.5">
-                          {selectedModel.height}
-                        </span>
-                      </div>
-                    )}
-                    {selectedModel.bust && (
-                      <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100 flex flex-col">
-                        <span className="text-[11px] font-medium text-slate-400">Bust / Chest</span>
-                        <span className="text-[13px] font-medium text-slate-800 mt-0.5">
-                          {selectedModel.bust}
-                        </span>
-                      </div>
-                    )}
-                    {selectedModel.waist && (
-                      <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100 flex flex-col">
-                        <span className="text-[11px] font-medium text-slate-400">Waist</span>
-                        <span className="text-[13px] font-medium text-slate-800 mt-0.5">
-                          {selectedModel.waist}
-                        </span>
-                      </div>
-                    )}
-                    {selectedModel.hips && (
-                      <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100 flex flex-col">
-                        <span className="text-[11px] font-medium text-slate-400">Hips</span>
-                        <span className="text-[13px] font-medium text-slate-800 mt-0.5">
-                          {selectedModel.hips}
-                        </span>
-                      </div>
-                    )}
-                    {selectedModel.shoeSize && (
-                      <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100 flex flex-col">
-                        <span className="text-[11px] font-medium text-slate-400">Shoe Size</span>
-                        <span className="text-[13px] font-medium text-slate-800 mt-0.5">
-                          {selectedModel.shoeSize}
-                        </span>
-                      </div>
-                    )}
-                    {selectedModel.hairColor && (
-                      <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100 flex flex-col">
-                        <span className="text-[11px] font-medium text-slate-400">Hair & Eyes</span>
-                        <span className="text-[13px] font-medium text-slate-800 mt-0.5 truncate">
-                          {selectedModel.hairColor}
-                        </span>
-                      </div>
-                    )}
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedModel.tags.map((tag, tagIdx) => (
+                      <span
+                        key={tagIdx}
+                        className="px-3 py-1 bg-slate-100 border border-slate-200/80 rounded-full text-[12px] font-medium text-slate-700 flex items-center gap-1"
+                      >
+                        <Tag className="w-3 h-3 text-slate-400" />
+                        {tag}
+                      </span>
+                    ))}
                   </div>
                 </div>
               )}

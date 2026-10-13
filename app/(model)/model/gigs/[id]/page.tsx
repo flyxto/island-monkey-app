@@ -355,8 +355,8 @@ export default function SingleGigDetailPage({
               )}
             </div>
 
-            {/* Description */}
-            <p className="text-[14px] font-normal text-slate-500 leading-relaxed">
+            {/* Description (Truncated to 2 lines when collapsed, expands when read more opened) */}
+            <p className={`text-[14px] font-normal text-slate-500 leading-relaxed break-words ${!isExpanded ? "line-clamp-2" : ""}`}>
               {description}
             </p>
 

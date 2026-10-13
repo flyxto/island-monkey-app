@@ -163,7 +163,7 @@ export default function MyGigsPage() {
                     </div>
 
                     {/* Tagline / Description */}
-                    <p className="text-[13px] font-medium text-white/80 line-clamp-2 leading-relaxed">
+                    <p className="text-[13px] font-medium text-white/80 line-clamp-2 leading-relaxed break-words">
                       {gig.description}
                     </p>
 
