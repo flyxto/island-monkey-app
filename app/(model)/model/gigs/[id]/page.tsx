@@ -30,6 +30,38 @@ export default function SingleGigDetailPage({
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [touchDeltaX, setTouchDeltaX] = useState<number>(0);
 
+  // Drawer Drag-to-Close State
+  const [dragStartY, setDragStartY] = useState<number | null>(null);
+  const [dragDeltaY, setDragDeltaY] = useState<number>(0);
+  const [isDraggingDrawer, setIsDraggingDrawer] = useState(false);
+
+  const handleDrawerDragStart = (clientY: number) => {
+    if (!isExpanded) return;
+    setDragStartY(clientY);
+    setDragDeltaY(0);
+    setIsDraggingDrawer(true);
+  };
+
+  const handleDrawerDragMove = (clientY: number) => {
+    if (dragStartY === null || !isExpanded) return;
+    const diff = clientY - dragStartY;
+    if (diff > 0) {
+      setDragDeltaY(diff);
+    } else {
+      setDragDeltaY(0);
+    }
+  };
+
+  const handleDrawerDragEnd = () => {
+    if (dragStartY === null) return;
+    if (dragDeltaY > 35) {
+      setIsExpanded(false);
+    }
+    setDragStartY(null);
+    setDragDeltaY(0);
+    setIsDraggingDrawer(false);
+  };
+
   useEffect(() => {
     setIsLoading(true);
     getGig(resolvedParams.id)
@@ -237,8 +269,24 @@ export default function SingleGigDetailPage({
         </Link>
       </div>
 
+      {/* Click Outside Backdrop Area when Drawer is Expanded */}
+      {isExpanded && (
+        <div
+          onClick={() => setIsExpanded(false)}
+          className="fixed inset-0 z-15 bg-black/20 backdrop-blur-[1.5px] transition-opacity duration-300 cursor-pointer pointer-events-auto"
+          aria-label="Click outside to collapse details"
+        />
+      )}
+
       {/* Dedicated Spacer to guarantee at least ~42vh reserved for the hero carousel */}
-      <div className="min-h-[38vh] sm:min-h-[42vh] flex-1 pointer-events-none transition-all duration-300" />
+      <div 
+        onClick={() => {
+          if (isExpanded) setIsExpanded(false);
+        }}
+        className={`min-h-[38vh] sm:min-h-[42vh] flex-1 transition-all duration-300 ${
+          isExpanded ? "cursor-pointer pointer-events-auto" : "pointer-events-none"
+        }`} 
+      />
 
       {/* Floating Pill Dot Indicators right above the bottom drawer */}
       {allImages.length > 1 && (
@@ -262,17 +310,49 @@ export default function SingleGigDetailPage({
       )}
 
       {/* Bottom Sheet Card Container */}
-      <div className={`relative z-20 mx-2.5 sm:mx-4 mb-2.5 sm:mb-4 bg-white rounded-[36px] p-5 sm:p-6 pt-3 flex flex-col gap-3.5 shadow-2xl shrink-0 transition-all duration-300 overflow-hidden ${
-        isExpanded ? "max-h-[58vh]" : "max-h-[44vh]"
-      }`}>
-        {/* Top Notch Indicator */}
-        <div className="w-10 h-1 bg-[#FF6433] rounded-full mx-auto my-1 shrink-0" />
+      <div 
+        style={{
+          transform: isDraggingDrawer && dragDeltaY > 0 ? `translateY(${Math.min(dragDeltaY, 120)}px)` : undefined,
+          transition: isDraggingDrawer ? "none" : undefined,
+        }}
+        className={`relative z-20 mx-2.5 sm:mx-4 mb-2.5 sm:mb-4 bg-white rounded-[36px] p-5 sm:p-6 pt-3 flex flex-col gap-3.5 shadow-2xl shrink-0 transition-all duration-300 overflow-hidden ${
+          isExpanded ? "max-h-[58vh]" : "max-h-[44vh]"
+        }`}
+      >
+        {/* Top Notch Indicator / Drag Handle */}
+        <div
+          className="w-full py-1.5 -mt-1 cursor-grab active:cursor-grabbing flex items-center justify-center touch-none select-none"
+          onTouchStart={(e) => handleDrawerDragStart(e.touches[0].clientY)}
+          onTouchMove={(e) => handleDrawerDragMove(e.touches[0].clientY)}
+          onTouchEnd={handleDrawerDragEnd}
+          onMouseDown={(e) => handleDrawerDragStart(e.clientY)}
+          onMouseMove={(e) => {
+            if (isDraggingDrawer) handleDrawerDragMove(e.clientY);
+          }}
+          onMouseUp={handleDrawerDragEnd}
+          onClick={() => {
+            if (isExpanded) setIsExpanded(false);
+          }}
+          title={isExpanded ? "Drag down or tap to collapse" : undefined}
+        >
+          <div className="w-12 h-1.5 bg-[#FF6433] rounded-full mx-auto" />
+        </div>
 
         {!isEditing ? (
           /* View Mode */
           <>
-            {/* Title & Tag */}
-            <div className="flex items-start justify-between gap-3">
+            {/* Title & Tag (also draggable to collapse when expanded) */}
+            <div 
+              className={`flex items-start justify-between gap-3 select-none ${isExpanded ? "cursor-grab active:cursor-grabbing" : ""}`}
+              onTouchStart={(e) => handleDrawerDragStart(e.touches[0].clientY)}
+              onTouchMove={(e) => handleDrawerDragMove(e.touches[0].clientY)}
+              onTouchEnd={handleDrawerDragEnd}
+              onMouseDown={(e) => handleDrawerDragStart(e.clientY)}
+              onMouseMove={(e) => {
+                if (isDraggingDrawer) handleDrawerDragMove(e.clientY);
+              }}
+              onMouseUp={handleDrawerDragEnd}
+            >
               <h1 className="text-[22px] sm:text-[24px] font-medium text-slate-900 leading-tight tracking-tight flex-1">
                 {title}
               </h1>
