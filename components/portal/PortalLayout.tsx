@@ -117,11 +117,11 @@ export function PortalLayout({
     <div
       className={`w-full ${
         isDarkLayout
-          ? "fixed inset-0 w-full h-full overflow-hidden overscroll-none bg-[#000002] pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] px-1 justify-between gap-3 sm:gap-4"
+          ? "fixed inset-0 w-full h-full overflow-hidden overscroll-none bg-[linear-gradient(305deg,#0D0E12_0%,#18191F_51%,#4C525E_100%)] pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] px-1 justify-between gap-3 sm:gap-4"
           : isModelProfile || isPartnerProfile || isCustomerProfile
           ? "min-h-svh bg-gradient-to-b from-[#FFEFE8] via-[#FAF6F3] to-[#F6F7F9] relative"
           : isModelDetail || isPartnerDetail || isCustomerDetail
-          ? "fixed inset-0 w-full h-full overflow-hidden overscroll-none bg-[#000002] pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] px-1"
+          ? "fixed inset-0 w-full h-full overflow-hidden overscroll-none bg-[linear-gradient(305deg,#0D0E12_0%,#18191F_51%,#4C525E_100%)] pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] px-1"
           : "min-h-svh bg-linear-to-b from-[#f8f9ff] to-[#ffffff] relative"
       } flex flex-col`}
     >

@@ -230,7 +230,7 @@ export function PartnerHeader({ isCompact = false, isProfile = false }: PartnerH
       {/* Half-overflowed Tag at the bottom of the orange card */}
       {!isProfile && (
         <div
-          className={`absolute -bottom-4 left-1/2 -translate-x-1/2 z-20 bg-white text-slate-800 shadow-[0_4px_16px_rgba(0,0,0,0.12)] border-4 border-[#000002] rounded-full px-4 py-1.5 flex items-center gap-1.5 text-[11px] font-medium whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`absolute -bottom-4 left-1/2 -translate-x-1/2 z-20 bg-white text-slate-800 shadow-[0_4px_16px_rgba(0,0,0,0.12)] border-4 border-[#18191F] rounded-full px-4 py-1.5 flex items-center gap-1.5 text-[11px] font-medium whitespace-nowrap transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             isCompact
               ? "opacity-0 pointer-events-none translate-y-2 scale-85"
               : "opacity-100 translate-y-0 scale-100"

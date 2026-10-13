@@ -51,7 +51,7 @@ export function RoleRouteGuard({ expectedRole, children }: RoleRouteGuardProps) 
 
   if (!isAuthorized) {
     return (
-      <div className="fixed inset-0 w-full h-full bg-[#000002] flex flex-col items-center justify-center gap-3 z-50">
+      <div className="fixed inset-0 w-full h-full bg-[linear-gradient(305deg,#0D0E12_0%,#18191F_51%,#4C525E_100%)] flex flex-col items-center justify-center gap-3 z-50">
         <Loader2 className="w-8 h-8 animate-spin text-[#FF6433]" />
         <span className="text-xs font-medium text-white/60 tracking-tight">
           Verifying access...
