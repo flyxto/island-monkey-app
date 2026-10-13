@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["192.168.18.50"], // use YOUR computer's IP
+
   images: {
     remotePatterns: [
       {

@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useCustomer } from "@/lib/portal/CustomerContext";
 import { getCustomerBookings } from "@/lib/api";
-import { Sparkles, Package, Camera, ArrowRight, Loader2, AlertCircle } from "lucide-react";
+import { Sparkles, Package, Camera, QrCode, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 
 export default function CustomerHomePage() {
-  const { user, balance, isLoadingUser, error, refreshCustomer } = useCustomer();
+  const { user, balance, isLoadingUser, error, refreshCustomer, setIsQRModalOpen } = useCustomer();
   const [bookings, setBookings] = useState<any[]>([]);
   const [isLoadingBookings, setIsLoadingBookings] = useState(true);
 
@@ -79,7 +79,7 @@ export default function CustomerHomePage() {
 
   return (
     <div className="flex-1 flex flex-col w-full overflow-hidden justify-between gap-3 sm:gap-4">
-      {/* Quick Actions Row: Models | Camera in middle | Packages */}
+      {/* Quick Actions Row: IM Talent | QR in middle | IM Studio */}
       <div className="px-3 pt-2 pb-0.5 flex items-center gap-2.5 shrink-0">
         <Link
           href="/customer/models"
@@ -87,19 +87,24 @@ export default function CustomerHomePage() {
         >
           {/* Upper Specular Glass Sheen */}
           <div className="absolute inset-x-2 top-0.5 h-[46%] bg-gradient-to-b from-white/95 via-white/40 to-transparent rounded-t-2xl pointer-events-none" />
-          <span className="relative z-10 text-slate-900 tracking-tight">Models</span>
+          <span className="relative z-10 text-slate-900 tracking-tight">IM Talent</span>
           <Sparkles className="relative z-10 w-4 h-4 text-slate-700 group-hover:text-slate-950 transition-colors" />
         </Link>
 
-        <Link
-          href="/customer/sessions"
+        <button
+          type="button"
+          onClick={() => {
+            setIsQRModalOpen(true);
+            window.dispatchEvent(new CustomEvent("open-customer-qr-modal"));
+          }}
           className="relative overflow-hidden w-12 h-12 bg-gradient-to-b from-white via-[#F6F8FA] to-[#E3E7EC] border border-white rounded-2xl text-slate-900 flex items-center justify-center shrink-0 shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,1),inset_0_-2px_4px_rgba(0,0,0,0.08),0_8px_24px_rgba(0,0,0,0.15)] hover:brightness-105 active:scale-[0.985] transition-all cursor-pointer"
-          title="My Sessions"
+          title="Show QR Code"
+          aria-label="Show QR Code"
         >
           {/* Upper Specular Glass Sheen */}
           <div className="absolute inset-x-1.5 top-0.5 h-[46%] bg-gradient-to-b from-white/95 via-white/40 to-transparent rounded-t-2xl pointer-events-none" />
-          <Camera className="relative z-10 w-4.5 h-4.5 text-slate-800" />
-        </Link>
+          <QrCode className="relative z-10 w-4.5 h-4.5 text-slate-800" />
+        </button>
 
         <Link
           href="/customer/packages"
@@ -107,7 +112,7 @@ export default function CustomerHomePage() {
         >
           {/* Upper Specular Glass Sheen */}
           <div className="absolute inset-x-2 top-0.5 h-[46%] bg-gradient-to-b from-white/95 via-white/40 to-transparent rounded-t-2xl pointer-events-none" />
-          <span className="relative z-10 text-slate-900 tracking-tight">Packages</span>
+          <span className="relative z-10 text-slate-900 tracking-tight">IM Studio</span>
           <Package className="relative z-10 w-4 h-4 text-slate-700 group-hover:text-slate-950 transition-colors" />
         </Link>
       </div>

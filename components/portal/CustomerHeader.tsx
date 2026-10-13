@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
-import { Bell, QrCode, CheckCircle2, Pencil, Info, Camera } from "lucide-react";
+import { Bell, CheckCircle2, Pencil, Info, Camera, Settings } from "lucide-react";
 import { useCustomer } from "@/lib/portal/CustomerContext";
 import { getR2PublicUrl } from "@/lib/r2";
 
@@ -33,10 +33,6 @@ export function CustomerHeader({ isCompact = false, isProfile = false }: Custome
 
   const handleOpenEdit = () => {
     window.dispatchEvent(new CustomEvent("open-customer-edit-modal"));
-  };
-
-  const handleOpenQR = () => {
-    window.dispatchEvent(new CustomEvent("open-customer-qr-modal"));
   };
 
   return (
@@ -171,7 +167,7 @@ export function CustomerHeader({ isCompact = false, isProfile = false }: Custome
           </div>
         </div>
 
-        {/* Right Side: QR Code Shortcut + Notification Bell */}
+        {/* Right Side: Notifications + Settings */}
         <div
           className={`flex items-center gap-2 shrink-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             isProfile ? "self-start pt-1" : "self-center"
@@ -179,22 +175,30 @@ export function CustomerHeader({ isCompact = false, isProfile = false }: Custome
         >
           <button
             type="button"
-            onClick={handleOpenQR}
-            aria-label="Show Member QR Code"
-            className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 backdrop-blur-xs flex items-center justify-center text-white transition-colors cursor-pointer"
-            title="My QR Code"
-          >
-            <QrCode className="w-5 h-5 text-white" />
-          </button>
-
-          <button
-            type="button"
             aria-label="Notifications"
-            className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 backdrop-blur-xs flex items-center justify-center text-white transition-colors focus:outline-none cursor-pointer relative"
+            className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 backdrop-blur-xs flex items-center justify-center text-white transition-colors focus:outline-none cursor-pointer relative shrink-0"
+            title="Notifications"
           >
             <Bell className="w-5 h-5 text-white" />
             <span className="absolute top-2 right-2 w-2 h-2 bg-amber-300 rounded-full ring-2 ring-[#E84A23]" />
           </button>
+
+          <div
+            className={`overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-center ${
+              isProfile
+                ? "w-0 opacity-0 scale-75 pointer-events-none -ml-2"
+                : "w-10 opacity-100 scale-100"
+            }`}
+          >
+            <Link
+              href="/customer/profile"
+              aria-label="Settings"
+              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 backdrop-blur-xs flex items-center justify-center text-white transition-colors cursor-pointer shrink-0"
+              title="Settings"
+            >
+              <Settings className="w-5 h-5 text-white" />
+            </Link>
+          </div>
         </div>
       </div>
 

@@ -10,7 +10,7 @@ import { PartnerHeader } from "./PartnerHeader";
 import { CustomerHeader } from "./CustomerHeader";
 import { PortalNavConfig } from "@/lib/portal/nav-config";
 import { useOptionalCustomer } from "@/lib/portal/CustomerContext";
-import { QrCode, ScanLine, Bell} from "lucide-react";
+import { QrCode, ScanLine, Bell, Settings } from "lucide-react";
 
 export interface PortalLayoutProps {
   config: PortalNavConfig;
@@ -80,24 +80,18 @@ export function PortalLayout({
 
   // Auto-resolve Partner rightAction if not explicitly supplied as a prop
   const resolveTopBarActions = (): TopAppBarAction[] => {
-    // Customer Portal: QR Modal Button + Notification Bell
+    // Customer Portal: Notifications + Settings
     if (config.portalId === "customer") {
       return [
-        {
-          icon: QrCode,
-          onClick: () => {
-            if (setIsQRModalOpen) {
-              setIsQRModalOpen(true);
-            } else if (typeof window !== "undefined") {
-              window.dispatchEvent(new CustomEvent("open-customer-qr-modal"));
-            }
-          },
-          ariaLabel: "Open My QR Code",
-        },
         {
           icon: Bell,
           badgeDot: true,
           ariaLabel: "Notifications",
+        },
+        {
+          icon: Settings,
+          href: "/customer/profile",
+          ariaLabel: "Settings",
         },
       ];
     }
