@@ -1,13 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import { useModel } from "@/lib/portal/ModelContext";
 import { getModelBookings } from "@/lib/api";
 import { MOCK_MODEL_PROFILE } from "@/lib/mock-data/model-portal";
 import {
   Camera,
-  Calendar,
   Clock,
   Sliders,
   CreditCard,
@@ -15,7 +13,6 @@ import {
   Bell,
   MessageSquare,
   LogOut,
-  Star,
   ChevronRight,
   X,
   Check,
@@ -48,29 +45,29 @@ export default function ModelProfilePage() {
 
   // Form edit states
   const [formData, setFormData] = useState({
-    firstName: user?.firstName || profile.firstName,
-    lastName: user?.lastName || profile.lastName,
-    handle: profileData?.handle || profile.handle || "@model",
+    firstName: user?.firstName || profile.firstName || "",
+    lastName: user?.lastName || profile.lastName || "",
+    handle: profileData?.handle || (user?.firstName ? `@${user.firstName.toLowerCase()}${user?.lastName ? `_${user.lastName.toLowerCase()}` : ""}` : ""),
     email: user?.email || profile.email || "",
     phone: user?.phone || profile.phone || "",
     bio: profileData?.bio || profile.bio || "",
-    location: profileData?.location || profile.location || "Colombo, Sri Lanka",
+    location: profileData?.location || profile.location || "",
     instagram: profileData?.instagram || profile.instagram || "",
     whatsapp: profileData?.whatsapp || "",
   });
 
-  // Physical Comp Card Specs state
+  // Physical Comp Card Specs state (strictly dynamic without fake fallbacks)
   const [specsData, setSpecsData] = useState({
-    height: profileData?.height || profile.height || "175 cm / 5' 9\"",
-    weight: profileData?.weight || "55 kg / 121 lbs",
-    bust: profileData?.bust || "84 cm / 33 in",
-    waist: profileData?.waist || "60 cm / 23.5 in",
-    hips: profileData?.hips || "89 cm / 35 in",
-    shoeSize: profileData?.shoeSize || profile.shoeSize || "39 EU / 8.5 US",
-    dressSize: profileData?.dressSize || "34 EU / 4 US",
-    hairColor: profileData?.hairColor || profile.hairColor || "Natural Black",
-    eyeColor: profileData?.eyeColor || profile.eyeColor || "Dark Brown",
-    skinComplexion: profileData?.skinComplexion || "Medium",
+    height: profileData?.height || "",
+    weight: profileData?.weight || "",
+    bust: profileData?.bust || "",
+    waist: profileData?.waist || "",
+    hips: profileData?.hips || "",
+    shoeSize: profileData?.shoeSize || "",
+    dressSize: profileData?.dressSize || "",
+    hairColor: profileData?.hairColor || "",
+    eyeColor: profileData?.eyeColor || "",
+    skinComplexion: profileData?.skinComplexion || "",
   });
 
   useEffect(() => {
@@ -80,6 +77,7 @@ export default function ModelProfilePage() {
         ...prev,
         firstName: user.firstName || prev.firstName,
         lastName: user.lastName || prev.lastName,
+        handle: prev.handle || (user.firstName ? `@${user.firstName.toLowerCase()}${user.lastName ? `_${user.lastName.toLowerCase()}` : ""}` : ""),
         email: user.email || prev.email,
         phone: user.phone || prev.phone,
       }));
@@ -98,16 +96,16 @@ export default function ModelProfilePage() {
       }));
       setSpecsData((prev) => ({
         ...prev,
-        height: profileData.height || prev.height,
-        weight: profileData.weight || prev.weight,
-        bust: profileData.bust || prev.bust,
-        waist: profileData.waist || prev.waist,
-        hips: profileData.hips || prev.hips,
-        shoeSize: profileData.shoeSize || prev.shoeSize,
-        dressSize: profileData.dressSize || prev.dressSize,
-        hairColor: profileData.hairColor || prev.hairColor,
-        eyeColor: profileData.eyeColor || prev.eyeColor,
-        skinComplexion: profileData.skinComplexion || prev.skinComplexion,
+        height: profileData.height ?? prev.height,
+        weight: profileData.weight ?? prev.weight,
+        bust: profileData.bust ?? prev.bust,
+        waist: profileData.waist ?? prev.waist,
+        hips: profileData.hips ?? prev.hips,
+        shoeSize: profileData.shoeSize ?? prev.shoeSize,
+        dressSize: profileData.dressSize ?? prev.dressSize,
+        hairColor: profileData.hairColor ?? prev.hairColor,
+        eyeColor: profileData.eyeColor ?? prev.eyeColor,
+        skinComplexion: profileData.skinComplexion ?? prev.skinComplexion,
       }));
     }
   }, [profileData]);
@@ -265,12 +263,20 @@ export default function ModelProfilePage() {
     }
   };
 
+  // Helper to compute specs preview label
+  const specsSummaryParts = [
+    specsData.height,
+    specsData.bust && specsData.waist ? `${specsData.bust} / ${specsData.waist}` : (specsData.bust || specsData.waist),
+    specsData.shoeSize,
+  ].filter(Boolean);
+  const specsSummary = specsSummaryParts.length > 0 ? specsSummaryParts.join(" • ") : "Tap to add your measurements";
+
   return (
     <div className="flex flex-col gap-5 w-full max-w-md mx-auto select-none">
-      {/* 3 Model Metric Stat Cards (Mirroring Reference Layout) */}
-      <div className="grid grid-cols-3 gap-2.5">
+      {/* 2 Model Metric Stat Cards (Rating Removed) */}
+      <div className="grid grid-cols-2 gap-2.5">
         {/* Completed Bookings */}
-        <div className="bg-white rounded-[22px] py-3.5 px-2 flex flex-col items-center justify-center shadow-xs border border-black/5">
+        <div className="bg-white rounded-[22px] py-3.5 px-3 flex flex-col items-center justify-center shadow-xs border border-black/5">
           <span className="text-[18px] font-medium text-slate-900 tracking-tight leading-none">
             {bookingsCount}
           </span>
@@ -279,21 +285,8 @@ export default function ModelProfilePage() {
           </span>
         </div>
 
-        {/* Client Rating */}
-        <div className="bg-white rounded-[22px] py-3.5 px-2 flex flex-col items-center justify-center shadow-xs border border-black/5">
-          <div className="flex items-center gap-1 leading-none">
-            <span className="text-[18px] font-medium text-slate-900 tracking-tight">
-              4.9
-            </span>
-            <Star className="w-3.5 h-3.5 fill-[#F59E0B] text-[#F59E0B]" />
-          </div>
-          <span className="text-[12px] font-medium text-slate-400 mt-1.5">
-            Rating
-          </span>
-        </div>
-
         {/* Points / Earnings */}
-        <div className="bg-white rounded-[22px] py-3.5 px-2 flex flex-col items-center justify-center shadow-xs border border-black/5">
+        <div className="bg-white rounded-[22px] py-3.5 px-3 flex flex-col items-center justify-center shadow-xs border border-black/5">
           <span className="text-[18px] font-medium text-[#FF6433] tracking-tight leading-none">
             {balance?.formattedPoints || (typeof balance?.pointsBalance === "number" ? balance.pointsBalance.toLocaleString() : "0")}
           </span>
@@ -303,55 +296,13 @@ export default function ModelProfilePage() {
         </div>
       </div>
 
-      {/* Section 1: Work & Portfolio */}
+      {/* Section 1: Availability & Specifications */}
       <div className="flex flex-col gap-2">
         <h2 className="text-[15px] font-medium text-slate-900 px-1">
-          Work & Portfolio
+          Talent Status & Comp Card
         </h2>
 
         <div className="bg-white rounded-[24px] p-1.5 sm:p-2 shadow-xs border border-black/5 flex flex-col">
-          {/* My Gigs & Packages */}
-          <Link
-            href="/model/gigs"
-            className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <Camera className="w-5 h-5 text-slate-700 stroke-[1.8]" />
-              <div className="flex flex-col">
-                <span className="text-[14px] font-medium text-slate-800">
-                  My Gigs & Packages
-                </span>
-                <span className="text-[11px] font-medium text-slate-400">
-                  Active shoot packages & hourly rates
-                </span>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
-          </Link>
-
-          <div className="h-px bg-slate-100 mx-3" />
-
-          {/* Booking History */}
-          <Link
-            href="/model/bookings"
-            className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <Calendar className="w-5 h-5 text-slate-700 stroke-[1.8]" />
-              <div className="flex flex-col">
-                <span className="text-[14px] font-medium text-slate-800">
-                  Booking History
-                </span>
-                <span className="text-[11px] font-medium text-slate-400">
-                  {bookingsCount} fulfilled sessions & client history
-                </span>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
-          </Link>
-
-          <div className="h-px bg-slate-100 mx-3" />
-
           {/* Availability Status Toggle */}
           <div className="flex items-center justify-between p-3 rounded-2xl">
             <div className="flex items-center gap-3">
@@ -365,22 +316,22 @@ export default function ModelProfilePage() {
                 </span>
               </div>
             </div>
+            {/* Themed Toggle Switch */}
             <button
               type="button"
+              role="switch"
+              aria-checked={isAvailable}
               disabled={isUpdatingAvailability}
               onClick={handleToggleAvailability}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-medium transition-colors cursor-pointer ${
-                isAvailable
-                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                  : "bg-slate-100 text-slate-600 border border-slate-200"
+              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 ${
+                isAvailable ? "bg-[#FF6433]" : "bg-slate-200"
               }`}
             >
               <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  isAvailable ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                  isAvailable ? "translate-x-6" : "translate-x-1"
                 }`}
               />
-              <span>{isAvailable ? "Available" : "Paused"}</span>
             </button>
           </div>
 
@@ -399,7 +350,7 @@ export default function ModelProfilePage() {
                   Physical Specifications
                 </span>
                 <span className="text-[11px] font-medium text-slate-400 truncate max-w-[220px]">
-                  {specsData.height || profile.height} • {specsData.bust ? `${specsData.bust} / ${specsData.waist}` : profile.measurements} • {specsData.shoeSize || profile.shoeSize}
+                  {specsSummary}
                 </span>
               </div>
             </div>
