@@ -278,49 +278,39 @@ export default function SingleGigDetailPage({
         />
       )}
 
-      {/* Top Spacer / Backdrop Area */}
-      <div 
-        onClick={() => {
-          if (isExpanded) setIsExpanded(false);
-        }}
-        className={`flex-1 transition-all duration-300 ${
-          isExpanded 
-            ? "min-h-[80px] cursor-pointer pointer-events-auto" 
-            : "min-h-[38vh] sm:min-h-[42vh] pointer-events-none"
-        }`} 
-      />
-
-      {/* Floating Pill Dot Indicators right above the bottom drawer */}
-      {allImages.length > 1 && (
-        <div className="relative z-30 flex items-center justify-center pb-2 pointer-events-none">
-          <div className="px-3 py-1.5 rounded-full bg-black/45 backdrop-blur-md border border-white/20 flex items-center gap-1.5 pointer-events-auto shadow-lg">
-            {allImages.map((_, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setActiveImageIndex(idx)}
-                className={`transition-all duration-300 cursor-pointer ${
-                  activeImageIndex === idx
-                    ? "w-5 h-1.5 bg-[#FF6433] rounded-full shadow-[0_1px_6px_rgba(255,100,51,0.7)]"
-                    : "w-1.5 h-1.5 bg-white/60 hover:bg-white rounded-full"
-                }`}
-                aria-label={`Go to photo ${idx + 1}`}
-              />
-            ))}
+      {/* Bottom Sheet Fixed Anchored Container - strictly anchored to bottom */}
+      <div className="fixed bottom-2.5 sm:bottom-4 inset-x-2.5 sm:inset-x-4 z-20 flex flex-col justify-end pointer-events-none">
+        {/* Floating Pill Dot Indicators right above the bottom drawer */}
+        {allImages.length > 1 && (
+          <div className="flex items-center justify-center pb-2 pointer-events-none shrink-0">
+            <div className="px-3 py-1.5 rounded-full bg-black/45 backdrop-blur-md border border-white/20 flex items-center gap-1.5 pointer-events-auto shadow-lg">
+              {allImages.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setActiveImageIndex(idx)}
+                  className={`transition-all duration-300 cursor-pointer ${
+                    activeImageIndex === idx
+                      ? "w-5 h-1.5 bg-[#FF6433] rounded-full shadow-[0_1px_6px_rgba(255,100,51,0.7)]"
+                      : "w-1.5 h-1.5 bg-white/60 hover:bg-white rounded-full"
+                  }`}
+                  aria-label={`Go to photo ${idx + 1}`}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Bottom Sheet Card Container */}
-      <div 
-        style={{
-          transform: isDraggingDrawer && dragDeltaY > 0 ? `translateY(${Math.min(dragDeltaY, 120)}px)` : undefined,
-          transition: isDraggingDrawer ? "none" : undefined,
-        }}
-        className={`relative z-20 mx-2.5 sm:mx-4 mb-2.5 sm:mb-4 bg-white rounded-[36px] p-5 sm:p-6 pt-3 flex flex-col gap-3.5 shadow-2xl shrink-0 transition-all duration-300 h-fit ${
-          isExpanded ? "max-h-[calc(100svh-90px)]" : "max-h-[46vh]"
-        } overflow-hidden`}
-      >
+        {/* Bottom Sheet Card Container */}
+        <div 
+          style={{
+            transform: isDraggingDrawer && dragDeltaY > 0 ? `translateY(${Math.min(dragDeltaY, 120)}px)` : undefined,
+            transition: isDraggingDrawer ? "none" : undefined,
+          }}
+          className={`w-full bg-white rounded-[36px] p-5 sm:p-6 pt-3 flex flex-col gap-3.5 shadow-2xl shrink-0 transition-all duration-300 h-fit ${
+            isExpanded ? "max-h-[calc(100svh-90px)]" : "max-h-[46vh]"
+          } overflow-hidden pointer-events-auto`}
+        >
         {/* Top Notch Indicator / Drag Handle */}
         <div
           className="w-full py-1.5 -mt-1 cursor-grab active:cursor-grabbing flex items-center justify-center touch-none select-none"
@@ -407,8 +397,11 @@ export default function SingleGigDetailPage({
                 isExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
               }`}
             >
-              <div className="overflow-hidden min-h-0 flex flex-col">
-                <div className="overflow-y-auto overscroll-contain touch-auto pr-0.5 flex flex-col gap-3.5 pt-1 min-h-0">
+              <div className="overflow-hidden min-h-0 flex flex-col relative">
+                {/* Top Subtle Fade Gradient below header buttons */}
+                <div className="absolute top-0 inset-x-0 h-3 bg-gradient-to-b from-white to-transparent pointer-events-none z-10" />
+
+                <div className="overflow-y-auto overscroll-contain touch-auto pr-0.5 flex flex-col gap-3.5 pt-1.5 pb-4 min-h-0 scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 {/* Highlights Box */}
                 {gigData?.highlightTitle && (
                   <div className="bg-[#F6F8F7] border border-[#E3E8E5] rounded-2xl p-3.5 flex flex-col gap-1">
@@ -583,7 +576,12 @@ export default function SingleGigDetailPage({
           </div>
 
             {/* Bottom Action Bar: (Read More or Edit Gig) */}
-            <div className="pt-2">
+            <div className="relative pt-2 shrink-0">
+              {/* Fade Gradient above the button indicating more content below */}
+              {isExpanded && (
+                <div className="absolute -top-7 inset-x-0 h-7 bg-gradient-to-t from-white via-white/85 to-transparent pointer-events-none z-10" />
+              )}
+
               {!isExpanded ? (
                 /* First: Show Read More button with Gigs Card Glass Style (White) */
                 <button
@@ -620,7 +618,7 @@ export default function SingleGigDetailPage({
           </>
         ) : (
           /* Edit Mode */
-          <div className="flex flex-col gap-3 max-h-[70vh] overflow-y-auto overscroll-contain touch-auto pr-0.5 pt-1">
+          <div className="flex flex-col gap-3 max-h-[70vh] overflow-y-auto overscroll-contain touch-auto pr-0.5 pt-1 scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             <span className="text-[15px] font-medium text-slate-900">
               Edit Gig Details
             </span>
@@ -696,6 +694,7 @@ export default function SingleGigDetailPage({
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   );
