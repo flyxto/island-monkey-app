@@ -194,6 +194,8 @@ body {
     @apply font-sans;
     overscroll-behavior-y: none;
     -webkit-tap-highlight-color: transparent;
+    touch-action: pan-x pan-y;
+    -webkit-text-size-adjust: 100%;
   }
   body {
     @apply bg-background text-foreground;
@@ -202,6 +204,7 @@ body {
     -webkit-touch-callout: none;
     user-select: none;
     -webkit-user-select: none;
+    touch-action: pan-x pan-y;
   }
   input,
   textarea {

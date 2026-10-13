@@ -38,6 +38,25 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                // Prevent iOS 2-finger pinch-to-zoom gestures
+                document.addEventListener('gesturestart', function(e) { e.preventDefault(); }, { passive: false });
+                document.addEventListener('gesturechange', function(e) { e.preventDefault(); }, { passive: false });
+                document.addEventListener('gestureend', function(e) { e.preventDefault(); }, { passive: false });
+                document.addEventListener('touchstart', function(e) {
+                  if (e.touches && e.touches.length > 1) {
+                    e.preventDefault();
+                  }
+                }, { passive: false });
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         {children}
         <Script src="https://www.payhere.lk/lib/payhere.js" strategy="lazyOnload" />
