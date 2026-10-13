@@ -123,6 +123,13 @@ export default function MyGigsPage() {
                     />
                     {gig.status}
                   </div>
+                  {/* Category Tag Badge */}
+                  {gig.tag && (
+                    <div className="absolute top-5 right-5 z-20 px-3 py-1.5 rounded-full text-[11px] font-semibold backdrop-blur-md bg-white/15 text-white/90 border border-white/20">
+                      {gig.tag}
+                    </div>
+                  )}
+
                   {/* Full Background Image or Neutral Placeholder */}
                   {(gig.coverImageUrl || gig.imageUrl) ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
@@ -143,14 +150,16 @@ export default function MyGigsPage() {
 
                   {/* Bottom Content Container */}
                   <div className="relative z-10 p-5 sm:p-6 flex flex-col gap-3.5">
-                    {/* Title + Verified Badge */}
+                    {/* Title + Verified Badge (if verified) */}
                     <div className="flex items-center gap-1.5">
                       <h2 className="text-[20px] font-medium text-white tracking-tight leading-tight">
                         {gig.title || gig.name}
                       </h2>
-                      <span className="w-5 h-5 rounded-full bg-[#1D9BF0] flex items-center justify-center text-white shrink-0 shadow-xs">
-                        <Check className="w-3 h-3 stroke-[3]" />
-                      </span>
+                      {gig.isVerified && (
+                        <span className="w-5 h-5 rounded-full bg-[#1D9BF0] flex items-center justify-center text-white shrink-0 shadow-xs">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </span>
+                      )}
                     </div>
 
                     {/* Tagline / Description */}
@@ -158,28 +167,48 @@ export default function MyGigsPage() {
                       {gig.description}
                     </p>
 
-                    {/* 3 Metrics Row with Vertical Dividers */}
+                    {/* Metrics Row with Vertical Dividers */}
                     <div className="flex items-center justify-between py-1 px-1">
-                      {/* Metric 1: Rating */}
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 fill-[#F59E0B] text-[#F59E0B]" />
-                          <span className="text-[16px] font-medium text-white leading-none">
-                            4.8
+                      {/* Metric 1: Real Rating if exists, or Venue */}
+                      {gig.rating ? (
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-1">
+                            <Star className="w-4 h-4 fill-[#F59E0B] text-[#F59E0B]" />
+                            <span className="text-[16px] font-medium text-white leading-none">
+                              {gig.rating}
+                            </span>
+                          </div>
+                          <span className="text-[11px] font-medium text-white/60 mt-1.5">
+                            Rating
                           </span>
                         </div>
-                        <span className="text-[11px] font-medium text-white/60 mt-1.5">
-                          Rating
-                        </span>
-                      </div>
+                      ) : gig.venueName ? (
+                        <div className="flex flex-col">
+                          <span className="text-[15px] font-medium text-white leading-none truncate max-w-[110px]">
+                            {gig.venueName}
+                          </span>
+                          <span className="text-[11px] font-medium text-white/60 mt-1.5">
+                            Venue
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col">
+                          <span className="text-[15px] font-medium text-white leading-none truncate max-w-[110px]">
+                            {gig.tag || "Standard"}
+                          </span>
+                          <span className="text-[11px] font-medium text-white/60 mt-1.5">
+                            Category
+                          </span>
+                        </div>
+                      )}
 
                       {/* Divider */}
                       <div className="w-[1px] h-7 bg-white/20" />
 
-                      {/* Metric 2: Duration */}
+                      {/* Metric 2: Duration (from database) */}
                       <div className="flex flex-col items-center">
                         <span className="text-[16px] font-medium text-white leading-none">
-                          {gig.durationHours || "2 Hours"}
+                          {gig.durationHours || "Flexible"}
                         </span>
                         <span className="text-[11px] font-medium text-white/60 mt-1.5">
                           Duration

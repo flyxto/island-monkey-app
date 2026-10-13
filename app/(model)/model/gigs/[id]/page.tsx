@@ -160,10 +160,17 @@ export default function SingleGigDetailPage({
         {!isEditing ? (
           /* View Mode */
           <>
-            {/* Title */}
-            <h1 className="text-[22px] sm:text-[24px] font-medium text-slate-900 leading-tight tracking-tight">
-              {title}
-            </h1>
+            {/* Title & Tag */}
+            <div className="flex items-start justify-between gap-3">
+              <h1 className="text-[22px] sm:text-[24px] font-medium text-slate-900 leading-tight tracking-tight flex-1">
+                {title}
+              </h1>
+              {gigData?.tag && (
+                <span className="px-3 py-1 bg-slate-100 text-slate-700 text-[12px] font-medium rounded-full shrink-0 border border-slate-200/60">
+                  {gigData.tag}
+                </span>
+              )}
+            </div>
 
             {/* Description */}
             <p className="text-[14px] font-normal text-slate-500 leading-relaxed">
@@ -176,28 +183,30 @@ export default function SingleGigDetailPage({
             </div>
 
             {/* Variant / Options Pills Row */}
-            <div className="flex items-center gap-2.5 flex-wrap pt-1">
-              {variants.map((v, idx) => {
-                const isSelected = selectedVariant === idx;
-                return (
-                  <button
-                    key={v.id}
-                    type="button"
-                    onClick={() => setSelectedVariant(idx)}
-                    className={`py-2.5 px-4 sm:px-5 rounded-full text-[14px] font-medium flex items-center gap-3 transition-all cursor-pointer ${
-                      isSelected
-                        ? "bg-[#F1F3F2] text-slate-900 ring-1 ring-black/10"
-                        : "bg-[#F1F3F2] text-slate-600 hover:text-slate-900"
-                    }`}
-                  >
-                    <span>{v.label}</span>
-                    {v.price && (
-                      <span className="text-[#FF6433] font-medium">{v.price}</span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+            {variants.length > 0 && (
+              <div className="flex items-center gap-2.5 flex-wrap pt-1">
+                {variants.map((v, idx) => {
+                  const isSelected = selectedVariant === idx;
+                  return (
+                    <button
+                      key={v.id}
+                      type="button"
+                      onClick={() => setSelectedVariant(idx)}
+                      className={`py-2.5 px-4 sm:px-5 rounded-full text-[14px] font-medium flex items-center gap-3 transition-all cursor-pointer ${
+                        isSelected
+                          ? "bg-[#F1F3F2] text-slate-900 ring-1 ring-black/10"
+                          : "bg-[#F1F3F2] text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      <span>{v.label}</span>
+                      {v.price && (
+                        <span className="text-[#FF6433] font-medium">{v.price}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Expandable Details Container */}
             <div
