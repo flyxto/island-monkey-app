@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import { Sparkles } from "lucide-react";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -12,11 +13,15 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-orange-600/10 rounded-full blur-[100px] pointer-events-none" />
 
         {/* Top Brand Mark */}
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#FF7A45] via-[#FF6433] to-[#E84A23] flex items-center justify-center shadow-md shadow-[#FF6433]/30 border border-white/20">
-            <span className="text-white font-bold text-lg leading-none tracking-tight">IM</span>
-          </div>
-          <span className="text-[20px] font-medium tracking-tight text-white">Island Monkey</span>
+        <div className="relative z-10 flex items-center">
+          <Image
+            src="/logo.webp"
+            alt="Island Monkey"
+            width={48}
+            height={48}
+            className="w-12 h-12 object-contain rounded-2xl"
+            priority
+          />
         </div>
 
         {/* Central Hero Message */}
@@ -45,13 +50,17 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
       {/* Right Pane - Form Content Container */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 lg:p-12">
-        <div className="w-full max-w-[420px] bg-white rounded-[32px] p-6 sm:p-8 border border-black/5 shadow-[0_10px_30px_rgba(0,0,0,0.04)] space-y-6 animate-in fade-in zoom-in-95 duration-300">
+        <div className="w-full max-w-[420px] bg-white rounded-[32px] p-6 sm:p-8 border border-black/5 shadow-[0_10px_30px_rgba(0,0,0,0.04)] animate-in fade-in zoom-in-95 duration-300">
           {/* Mobile Logo */}
-          <div className="flex lg:hidden items-center gap-2.5 justify-center mb-2">
-            <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#FF7A45] via-[#FF6433] to-[#E84A23] flex items-center justify-center shadow-md shadow-[#FF6433]/30 border border-white/20">
-              <span className="text-white font-bold text-base leading-none">IM</span>
-            </div>
-            <span className="text-lg font-medium tracking-tight text-slate-900">Island Monkey</span>
+          <div className="flex lg:hidden items-center justify-center mb-1">
+            <Image
+              src="/logo.webp"
+              alt="Island Monkey"
+              width={96}
+              height={96}
+              className="w-24 h-24 object-contain rounded-2xl drop-shadow-sm"
+              priority
+            />
           </div>
 
           {children}
