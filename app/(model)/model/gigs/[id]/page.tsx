@@ -423,46 +423,127 @@ export default function SingleGigDetailPage({
                   </div>
                 )}
 
-                {/* Lookbook & Gallery Images Strip (Synced with Hero Carousel) */}
+                {/* In-Container 4:3 Landscape Image Carousel (Synced with Hero) */}
                 {allImages.length > 0 && (
                   <div className="flex flex-col gap-2 pt-1">
                     <div className="flex items-center justify-between">
                       <span className="text-[13px] font-medium text-slate-800">
-                        Lookbook & Portfolio ({allImages.length})
+                        Lookbook & Photos ({allImages.length})
                       </span>
-                      <span className="text-[11px] text-slate-400">Tap photo to view in hero</span>
+                      <span className="text-[11px] text-slate-400">
+                        {allImages.length > 1 ? "Swipe or tap to view" : "Cover photo"}
+                      </span>
                     </div>
 
-                    <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none">
-                      {allImages.map((imgKey, idx) => {
-                        const isCover = imgKey === coverUrl;
-                        const isActive = activeImageIndex === idx;
-                        return (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => setActiveImageIndex(idx)}
-                            className={`relative w-16 h-20 rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
-                              isActive
-                                ? "border-[#FF6433] ring-2 ring-[#FF6433]/30 scale-[1.02]"
-                                : "border-slate-200 opacity-70 hover:opacity-100"
-                            }`}
-                          >
+                    {/* 4:3 Landscape Aspect Ratio Carousel */}
+                    <div 
+                      className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden bg-neutral-900 shadow-md border border-slate-200/60 select-none group touch-pan-y"
+                      onTouchStart={allImages.length > 1 ? handleTouchStart : undefined}
+                      onTouchMove={allImages.length > 1 ? handleTouchMove : undefined}
+                      onTouchEnd={allImages.length > 1 ? handleTouchEnd : undefined}
+                    >
+                      <div 
+                        className="flex h-full w-full transition-transform duration-300 ease-out"
+                        style={{
+                          transform: `translateX(-${activeImageIndex * 100}%)`,
+                        }}
+                      >
+                        {allImages.map((imgKey, idx) => (
+                          <div key={idx} className="relative w-full h-full shrink-0 overflow-hidden bg-neutral-950">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={getR2PublicUrl(imgKey)}
-                              alt={isCover ? "Cover" : `Gallery ${idx}`}
-                              className="w-full h-full object-cover"
+                              alt={`Lookbook photo ${idx + 1}`}
+                              className="w-full h-full object-cover object-center pointer-events-none select-none"
+                              draggable={false}
                             />
-                            {isCover && (
-                              <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] font-medium py-0.5 text-center">
-                                Cover
+                            {imgKey === coverUrl && (
+                              <span className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[10px] font-medium border border-white/20">
+                                Cover Photo
                               </span>
                             )}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Desktop / Touch Left and Right Chevrons */}
+                      {allImages.length > 1 && (
+                        <div className="absolute inset-x-2.5 top-1/2 -translate-y-1/2 z-10 flex items-center justify-between pointer-events-none">
+                          <button
+                            type="button"
+                            onClick={goToPrev}
+                            className="w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 border border-white/20 backdrop-blur-md text-white flex items-center justify-center transition-all pointer-events-auto cursor-pointer shadow-md active:scale-95"
+                            aria-label="Previous photo"
+                          >
+                            <ChevronLeft className="w-4 h-4 -ml-0.5" />
                           </button>
-                        );
-                      })}
+                          <button
+                            type="button"
+                            onClick={goToNext}
+                            className="w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 border border-white/20 backdrop-blur-md text-white flex items-center justify-center transition-all pointer-events-auto cursor-pointer shadow-md active:scale-95"
+                            aria-label="Next photo"
+                          >
+                            <ChevronRight className="w-4 h-4 -mr-0.5" />
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Floating Counter Badge in 4:3 Carousel */}
+                      {allImages.length > 1 && (
+                        <div className="absolute top-2.5 right-2.5 z-10 px-2.5 py-1 rounded-full bg-black/55 backdrop-blur-md text-white text-[10px] font-medium border border-white/20">
+                          {activeImageIndex + 1} / {allImages.length}
+                        </div>
+                      )}
+
+                      {/* Bottom Frosted Pill Indicators inside 4:3 Carousel */}
+                      {allImages.length > 1 && (
+                        <div className="absolute inset-x-0 bottom-2.5 z-10 flex items-center justify-center pointer-events-none">
+                          <div className="px-2.5 py-1 rounded-full bg-black/45 backdrop-blur-md border border-white/20 flex items-center gap-1.5 pointer-events-auto shadow-sm">
+                            {allImages.map((_, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => setActiveImageIndex(idx)}
+                                className={`transition-all duration-300 cursor-pointer ${
+                                  activeImageIndex === idx
+                                    ? "w-4 h-1 bg-[#FF6433] rounded-full shadow-xs"
+                                    : "w-1 h-1 bg-white/60 hover:bg-white rounded-full"
+                                }`}
+                                aria-label={`Photo ${idx + 1}`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
+
+                    {/* Quick Thumbnail Jump Strip Below 4:3 Carousel */}
+                    {allImages.length > 1 && (
+                      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none pt-0.5">
+                        {allImages.map((imgKey, idx) => {
+                          const isActive = activeImageIndex === idx;
+                          return (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => setActiveImageIndex(idx)}
+                              className={`relative w-14 h-11 rounded-lg overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
+                                isActive
+                                  ? "border-[#FF6433] ring-2 ring-[#FF6433]/30 scale-[1.02]"
+                                  : "border-slate-200/80 opacity-70 hover:opacity-100"
+                              }`}
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={getR2PublicUrl(imgKey)}
+                                alt={`Thumbnail ${idx + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
 
