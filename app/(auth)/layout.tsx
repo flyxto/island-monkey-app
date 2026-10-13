@@ -58,7 +58,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               alt="Island Monkey"
               width={96}
               height={96}
-              className="w-24 h-24 object-contain rounded-2xl drop-shadow-sm"
+              className="w-24 h-24 object-contain"
               priority
             />
           </div>
