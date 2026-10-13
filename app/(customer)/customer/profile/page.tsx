@@ -552,24 +552,31 @@ export default function CustomerProfilePage() {
         </div>
       )}
 
-      {/* Info / Confirmation Modals */}
+      {/* Info / Confirmation Drawer */}
       {activeInfoModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-sm rounded-[32px] p-6 shadow-2xl border border-black/5 flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-[17px] font-medium text-slate-900">
+        <div
+          onClick={() => setActiveInfoModal(null)}
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md bg-white rounded-t-[32px] sm:rounded-[32px] p-6 shadow-2xl flex flex-col gap-4 animate-in slide-in-from-bottom-5 duration-200"
+          >
+            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto -mt-1 mb-1 sm:hidden" />
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="text-[17px] font-medium text-slate-900 tracking-tight">
                 {activeInfoModal}
               </h3>
               <button
                 type="button"
                 onClick={() => setActiveInfoModal(null)}
-                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 cursor-pointer"
+                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <p className="text-[13px] font-medium text-slate-600 leading-relaxed">
+            <p className="text-[14px] font-medium text-slate-600 leading-relaxed py-1">
               {activeInfoModal === "Payment Methods"
                 ? "Primary card: Visa ending in •••• 4242. To add or modify payment methods or link Apple Pay, please contact studio administration."
                 : activeInfoModal === "Member Terms & Conditions"
@@ -583,7 +590,7 @@ export default function CustomerProfilePage() {
                   <button
                     type="button"
                     onClick={() => setActiveInfoModal(null)}
-                    className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[14px] font-medium rounded-full cursor-pointer transition-colors"
+                    className="relative overflow-hidden flex-1 py-3 bg-gradient-to-b from-white via-[#F6F8FA] to-[#E3E7EC] border border-white rounded-full font-medium text-[14px] text-slate-700 shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,1),inset_0_-2px_4px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.06)] hover:brightness-105 active:scale-[0.985] transition-all cursor-pointer flex items-center justify-center"
                   >
                     Cancel
                   </button>
@@ -593,7 +600,7 @@ export default function CustomerProfilePage() {
                       setActiveInfoModal(null);
                       logout();
                     }}
-                    className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white text-[14px] font-medium rounded-full cursor-pointer transition-colors"
+                    className="relative overflow-hidden flex-1 py-3 bg-gradient-to-b from-rose-500 via-rose-600 to-rose-700 border border-white/30 rounded-full font-medium text-[14px] text-white shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,0.6),inset_0_-2px_4px_rgba(0,0,0,0.2),0_4px_16px_rgba(225,29,72,0.3)] hover:brightness-105 active:scale-[0.985] transition-all cursor-pointer flex items-center justify-center"
                   >
                     Sign Out
                   </button>
@@ -602,7 +609,7 @@ export default function CustomerProfilePage() {
                 <button
                   type="button"
                   onClick={() => setActiveInfoModal(null)}
-                  className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[14px] font-medium rounded-full cursor-pointer transition-colors"
+                  className="relative overflow-hidden w-full py-3 bg-gradient-to-b from-white via-[#F6F8FA] to-[#E3E7EC] border border-white rounded-full font-medium text-[14px] text-slate-700 shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,1),inset_0_-2px_4px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.06)] hover:brightness-105 active:scale-[0.985] transition-all cursor-pointer flex items-center justify-center"
                 >
                   Close
                 </button>
