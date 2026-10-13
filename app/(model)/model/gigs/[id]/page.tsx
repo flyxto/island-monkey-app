@@ -278,13 +278,15 @@ export default function SingleGigDetailPage({
         />
       )}
 
-      {/* Dedicated Spacer to guarantee at least ~42vh reserved for the hero carousel */}
+      {/* Top Spacer / Backdrop Area */}
       <div 
         onClick={() => {
           if (isExpanded) setIsExpanded(false);
         }}
-        className={`min-h-[38vh] sm:min-h-[42vh] flex-1 transition-all duration-300 ${
-          isExpanded ? "cursor-pointer pointer-events-auto" : "pointer-events-none"
+        className={`flex-1 transition-all duration-300 ${
+          isExpanded 
+            ? "min-h-[80px] cursor-pointer pointer-events-auto" 
+            : "min-h-[38vh] sm:min-h-[42vh] pointer-events-none"
         }`} 
       />
 
@@ -315,9 +317,9 @@ export default function SingleGigDetailPage({
           transform: isDraggingDrawer && dragDeltaY > 0 ? `translateY(${Math.min(dragDeltaY, 120)}px)` : undefined,
           transition: isDraggingDrawer ? "none" : undefined,
         }}
-        className={`relative z-20 mx-2.5 sm:mx-4 mb-2.5 sm:mb-4 bg-white rounded-[36px] p-5 sm:p-6 pt-3 flex flex-col gap-3.5 shadow-2xl shrink-0 transition-all duration-300 overflow-hidden ${
-          isExpanded ? "max-h-[58vh]" : "max-h-[44vh]"
-        }`}
+        className={`relative z-20 mx-2.5 sm:mx-4 mb-2.5 sm:mb-4 bg-white rounded-[36px] p-5 sm:p-6 pt-3 flex flex-col gap-3.5 shadow-2xl shrink-0 transition-all duration-300 h-fit ${
+          isExpanded ? "max-h-[calc(100svh-90px)]" : "max-h-[46vh]"
+        } overflow-hidden`}
       >
         {/* Top Notch Indicator / Drag Handle */}
         <div
@@ -401,11 +403,12 @@ export default function SingleGigDetailPage({
 
             {/* Expandable Details Container */}
             <div
-              className={`grid transition-[grid-template-rows] duration-500 ease-in-out ${
+              className={`grid transition-[grid-template-rows] duration-500 ease-in-out min-h-0 ${
                 isExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
               }`}
             >
-              <div className="overflow-hidden max-h-[26vh] overflow-y-auto overscroll-contain touch-auto pr-0.5 flex flex-col gap-3.5 pt-1">
+              <div className="overflow-hidden min-h-0 flex flex-col">
+                <div className="overflow-y-auto overscroll-contain touch-auto pr-0.5 flex flex-col gap-3.5 pt-1 min-h-0">
                 {/* Highlights Box */}
                 {gigData?.highlightTitle && (
                   <div className="bg-[#F6F8F7] border border-[#E3E8E5] rounded-2xl p-3.5 flex flex-col gap-1">
@@ -496,6 +499,7 @@ export default function SingleGigDetailPage({
                 </button>
               </div>
             </div>
+          </div>
 
             {/* Bottom Action Bar: (Read More or Edit Gig) */}
             <div className="pt-2">
