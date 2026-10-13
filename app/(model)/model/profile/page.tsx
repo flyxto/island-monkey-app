@@ -54,6 +54,11 @@ export default function ModelProfilePage() {
     location: profileData?.location || profile.location || "",
     instagram: profileData?.instagram || profile.instagram || "",
     whatsapp: profileData?.whatsapp || "",
+    gender: profileData?.gender || "",
+    origin: profileData?.origin || "",
+    dateOfBirth: profileData?.dateOfBirth ? new Date(profileData.dateOfBirth).toISOString().split("T")[0] : "",
+    modelingType: Array.isArray(profileData?.modelingType) ? (profileData.modelingType as string[]) : [],
+    availableForInternational: Boolean(profileData?.availableForInternational),
   });
 
   // Physical Comp Card Specs state (strictly dynamic without fake fallbacks)
@@ -93,6 +98,11 @@ export default function ModelProfilePage() {
         location: profileData.location || prev.location,
         instagram: profileData.instagram || prev.instagram,
         whatsapp: profileData.whatsapp || prev.whatsapp,
+        gender: profileData.gender || prev.gender,
+        origin: profileData.origin || prev.origin,
+        dateOfBirth: profileData.dateOfBirth ? new Date(profileData.dateOfBirth).toISOString().split("T")[0] : prev.dateOfBirth,
+        modelingType: Array.isArray(profileData.modelingType) ? profileData.modelingType : prev.modelingType,
+        availableForInternational: profileData.availableForInternational !== undefined ? Boolean(profileData.availableForInternational) : prev.availableForInternational,
       }));
       setSpecsData((prev) => ({
         ...prev,
@@ -219,11 +229,19 @@ export default function ModelProfilePage() {
     setIsSaving(true);
     try {
       await updateProfile({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
         handle: formData.handle,
         bio: formData.bio,
         location: formData.location,
         instagram: formData.instagram,
         whatsapp: formData.whatsapp,
+        gender: formData.gender || undefined,
+        origin: formData.origin || undefined,
+        dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth).toISOString() : undefined,
+        modelingType: formData.modelingType,
+        availableForInternational: formData.availableForInternational,
       });
       setIsEditModalOpen(false);
       setSaveToast(true);
@@ -564,17 +582,17 @@ export default function ModelProfilePage() {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-[12px] font-medium text-slate-500">
-                  Email Address
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-[12px] font-medium text-slate-500">
+                    Email Address
+                  </label>
+                  <span className="text-[10px] font-medium text-slate-400">Read-only account login</span>
+                </div>
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#FF6433]"
-                  required
+                  disabled
+                  className="w-full h-11 px-3.5 bg-slate-100 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-500 cursor-not-allowed select-none"
                 />
               </div>
 
@@ -588,8 +606,154 @@ export default function ModelProfilePage() {
                   onChange={(e) =>
                     setFormData({ ...formData, phone: e.target.value })
                   }
+                  placeholder="+94 77 123 4567"
                   className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#FF6433]"
                 />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[12px] font-medium text-slate-500">
+                  Location / Base City
+                </label>
+                <input
+                  type="text"
+                  value={formData.location}
+                  onChange={(e) =>
+                    setFormData({ ...formData, location: e.target.value })
+                  }
+                  placeholder="e.g. Colombo, Sri Lanka"
+                  className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#FF6433]"
+                />
+              </div>
+
+              {/* Casting Demographics */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[12px] font-medium text-slate-500">
+                    Date of Birth
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.dateOfBirth}
+                    onChange={(e) =>
+                      setFormData({ ...formData, dateOfBirth: e.target.value })
+                    }
+                    className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[13px] font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#FF6433]"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[12px] font-medium text-slate-500">
+                    Gender
+                  </label>
+                  <select
+                    value={formData.gender}
+                    onChange={(e) =>
+                      setFormData({ ...formData, gender: e.target.value })
+                    }
+                    className="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#FF6433]"
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                    <option value="Non-Binary">Non-Binary</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[12px] font-medium text-slate-500">
+                    Origin / Citizenship
+                  </label>
+                  <select
+                    value={formData.origin}
+                    onChange={(e) =>
+                      setFormData({ ...formData, origin: e.target.value })
+                    }
+                    className="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-xl text-[13px] font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#FF6433]"
+                  >
+                    <option value="">Select Origin</option>
+                    <option value="Sri Lankan">Sri Lankan</option>
+                    <option value="Foreign">Foreign / International</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[12px] font-medium text-slate-500">
+                    WhatsApp
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.whatsapp}
+                    onChange={(e) =>
+                      setFormData({ ...formData, whatsapp: e.target.value })
+                    }
+                    placeholder="+94 77 123 4567"
+                    className="w-full h-11 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[13px] font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#FF6433]"
+                  />
+                </div>
+              </div>
+
+              {/* Modeling Types Multi-Select Pills */}
+              <div className="flex flex-col gap-1.5 pt-0.5">
+                <label className="text-[12px] font-medium text-slate-500">
+                  Modeling Categories
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {["Fashion", "Commercial", "Runway", "Editorial", "Fitness", "Swimwear", "Parts"].map((cat) => {
+                    const isSelected = formData.modelingType.includes(cat);
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => {
+                          const next = isSelected
+                            ? formData.modelingType.filter((t) => t !== cat)
+                            : [...formData.modelingType, cat];
+                          setFormData({ ...formData, modelingType: next });
+                        }}
+                        className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-[#FF6433] text-white shadow-2xs"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* International Travel Toggle */}
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                <div className="flex flex-col">
+                  <span className="text-[13px] font-medium text-slate-800">
+                    Available for International Casting
+                  </span>
+                  <span className="text-[11px] font-medium text-slate-400">
+                    Willing to travel abroad for projects
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={formData.availableForInternational}
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      availableForInternational: !formData.availableForInternational,
+                    })
+                  }
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
+                    formData.availableForInternational ? "bg-[#FF6433]" : "bg-slate-200"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                      formData.availableForInternational ? "translate-x-5" : "translate-x-1"
+                    }`}
+                  />
+                </button>
               </div>
 
               <div className="flex flex-col gap-1">
