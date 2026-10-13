@@ -5,7 +5,8 @@ export interface NavItemConfig {
   id: string;
   label: string;
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<{ className?: string }>;
+  imageSrc?: string;
   matchPrefix?: boolean;
 }
 
@@ -45,7 +46,7 @@ export const PORTAL_CONFIGS: Record<string, PortalNavConfig> = {
         id: "models",
         label: "Models",
         href: "/customer/models",
-        icon: Sparkles,
+        imageSrc: "/model-icon.png",
         matchPrefix: true,
       },
       {

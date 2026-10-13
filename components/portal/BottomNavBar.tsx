@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { NavItemConfig } from "@/lib/portal/nav-config";
 
 export interface BottomNavBarProps {
@@ -47,13 +48,29 @@ export function BottomNavBar({
                   : "text-neutral-500 hover:text-black hover:bg-white/40"
               }`}
             >
-              <Icon
-                className={`w-6 h-6 shrink-0 transition-transform duration-300 ease-out ${
-                  active
-                    ? "text-black stroke-[2.2] scale-105"
-                    : "text-neutral-500 stroke-[1.8] scale-100"
-                }`}
-              />
+              {item.imageSrc ? (
+                <div
+                  className={`w-6 h-6 shrink-0 flex items-center justify-center transition-all duration-300 ease-out ${
+                    active ? "scale-105 opacity-100" : "scale-100 opacity-60 hover:opacity-100"
+                  }`}
+                >
+                  <Image
+                    src={item.imageSrc}
+                    alt={item.label}
+                    width={24}
+                    height={24}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              ) : Icon ? (
+                <Icon
+                  className={`w-6 h-6 shrink-0 transition-transform duration-300 ease-out ${
+                    active
+                      ? "text-black stroke-[2.2] scale-105"
+                      : "text-neutral-500 stroke-[1.8] scale-100"
+                  }`}
+                />
+              ) : null}
               <span
                 className={`overflow-hidden whitespace-nowrap text-[15px] font-medium text-black tracking-tight leading-none transition-all duration-300 ease-out ${
                   active
