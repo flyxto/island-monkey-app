@@ -10,11 +10,16 @@ export default function PackagesListPage() {
   const { user, packages, isLoadingPackages, setSelectedPackage } = useCustomer();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredPackages = packages.filter(
-    (pkg) =>
+  const [selectedCategory, setSelectedCategory] = useState<"ALL" | "STUDIO" | "PODCAST">("ALL");
+
+  const filteredPackages = packages.filter((pkg) => {
+    const matchesSearch =
       pkg.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      pkg.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      pkg.description.toLowerCase().includes(searchQuery.toLowerCase());
+    if (selectedCategory === "STUDIO") return matchesSearch && (pkg.category === "STUDIO" || !pkg.category);
+    if (selectedCategory === "PODCAST") return matchesSearch && pkg.category === "PODCAST";
+    return matchesSearch;
+  });
 
   return (
     <div className="flex-1 flex flex-col w-full overflow-hidden justify-between gap-3 sm:gap-4 min-h-0">
@@ -25,7 +30,7 @@ export default function PackagesListPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search studio packages..."
+            placeholder="Search studio & podcast packages..."
             className="w-full h-11 py-2 px-4 bg-[#1a1a1e] border border-white/10 rounded-xl text-[14px] font-medium text-white placeholder-white/40 focus-visible:ring-im-accent focus-visible:border-im-accent shadow-none"
           />
         </div>
@@ -51,6 +56,43 @@ export default function PackagesListPage() {
           <span className="px-2.5 py-1 bg-black/10 text-slate-700 text-[12px] font-medium rounded-full">
             {filteredPackages.length} Available
           </span>
+        </div>
+
+        {/* Category Filter Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 shrink-0">
+          <button
+            type="button"
+            onClick={() => setSelectedCategory("ALL")}
+            className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all shrink-0 cursor-pointer ${
+              selectedCategory === "ALL"
+                ? "bg-[#0B1C30] text-white shadow-xs"
+                : "bg-white/80 text-slate-700 border border-black/5 hover:bg-white"
+            }`}
+          >
+            All Rates
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedCategory("STUDIO")}
+            className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all shrink-0 cursor-pointer ${
+              selectedCategory === "STUDIO"
+                ? "bg-[#FF6433] text-white shadow-xs"
+                : "bg-white/80 text-slate-700 border border-black/5 hover:bg-white"
+            }`}
+          >
+            Studio Space
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedCategory("PODCAST")}
+            className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all shrink-0 cursor-pointer ${
+              selectedCategory === "PODCAST"
+                ? "bg-[#FF6433] text-white shadow-xs"
+                : "bg-white/80 text-slate-700 border border-black/5 hover:bg-white"
+            }`}
+          >
+            Podcast Studio
+          </button>
         </div>
 
         {/* Packages List */}

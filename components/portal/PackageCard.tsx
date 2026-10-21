@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PackageItem } from "@/lib/mock-data/customer-portal";
-import { Camera, ArrowRight, Clock, Building2, Users, Pencil } from "lucide-react";
+import { Camera, ArrowRight, Clock, Building2, Users, Pencil, Mic } from "lucide-react";
 import { StatusBadge, StatusType } from "./StatusBadge";
 
 export interface PackageCardProps {
@@ -63,6 +63,11 @@ export function PackageCard({
         <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none">
           {statusBadge ? (
             <StatusBadge status={statusBadge} />
+          ) : packageItem.category === 'PODCAST' ? (
+            <span className="px-3 py-1 bg-[#0B1C30]/80 backdrop-blur-md border border-white/20 text-white text-[11px] font-medium rounded-full shadow-xs flex items-center gap-1">
+              <Mic className="w-3 h-3 text-[#FF6433]" />
+              Podcast
+            </span>
           ) : packageItem.isBestSeller ? (
             <span className="px-3 py-1 bg-[#FF6433] text-white text-[11px] font-medium rounded-full shadow-xs">
               Best Seller
@@ -128,9 +133,16 @@ export function PackageCard({
 
         {/* Bottom Row: Price & Specular Button */}
         <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-          <span className="text-[18px] font-medium text-slate-900 tracking-tight">
-            {formattedPrice}
-          </span>
+          <div className="flex flex-col">
+            <span className="text-[18px] font-medium text-slate-900 tracking-tight">
+              {formattedPrice}
+            </span>
+            {packageItem.additionalHourPriceLKR && packageItem.additionalHourPriceLKR > 0 ? (
+              <span className="text-[11px] font-medium text-emerald-600">
+                +LKR {packageItem.additionalHourPriceLKR.toLocaleString()}/hr extra
+              </span>
+            ) : null}
+          </div>
 
           <div className="relative overflow-hidden h-9 px-4 bg-gradient-to-b from-white via-[#F8FAFC] to-[#EDF2F7] border border-slate-200/90 rounded-full font-medium text-[12px] text-slate-900 inline-flex items-center gap-1.5 shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,1),inset_0_-1px_2px_rgba(0,0,0,0.04),0_1px_3px_rgba(0,0,0,0.05)] group-hover:brightness-95 transition-all">
             <div className="absolute inset-x-1 top-0.5 h-[44%] bg-gradient-to-b from-white/95 via-white/40 to-transparent rounded-t-full pointer-events-none" />

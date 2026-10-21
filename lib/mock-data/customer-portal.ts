@@ -17,11 +17,16 @@ export interface BalanceInfo {
   lastUpdated: string;
 }
 
+export type PackageCategory = 'STUDIO' | 'PODCAST';
+export type AddonType = 'EQUIPMENT' | 'EDITING';
+
 export interface PackageItem {
   id: string;
   name: string;
   description: string;
   priceLKR: number; // Single source of truth for package price
+  additionalHourPriceLKR?: number;
+  category?: PackageCategory;
   isBestSeller?: boolean;
   durationHours: string; // e.g. "4 Hours"
   studioName: string; // e.g. "Studio A"
@@ -33,6 +38,16 @@ export interface PackageItem {
   };
   whatsIncluded: string[];
   imageUrl?: string;
+}
+
+export interface AddonItem {
+  id: string;
+  name: string;
+  type: AddonType;
+  priceLKR: number;
+  description?: string;
+  imageUrl?: string;
+  isActive: boolean;
 }
 
 export interface SessionItem {

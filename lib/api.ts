@@ -92,12 +92,25 @@ export async function registerApi(data: any) {
   return response.json();
 }
 
-export async function getPackages() {
-  const response = await fetchWithAuth(`${API_URL}/packages`, { method: 'GET' });
+export async function getPackages(category?: string) {
+  const query = category ? `?category=${category}` : '';
+  const response = await fetchWithAuth(`${API_URL}/packages${query}`, { method: 'GET' });
   
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || 'Failed to fetch packages');
+  }
+  
+  return response.json();
+}
+
+export async function getAddons(type?: string) {
+  const query = type ? `?type=${type}` : '';
+  const response = await fetchWithAuth(`${API_URL}/addons${query}`, { method: 'GET' });
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to fetch addons');
   }
   
   return response.json();

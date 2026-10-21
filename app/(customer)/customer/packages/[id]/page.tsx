@@ -18,6 +18,7 @@ import {
   Building2,
   Users,
   Loader2,
+  Mic,
 } from "lucide-react";
 
 const PACKAGE_IMAGES: Record<string, string> = {
@@ -52,6 +53,8 @@ export default function PackageDetailPage({
             name: apiPkg.name,
             description: apiPkg.description,
             priceLKR: Number(apiPkg.priceLkr || apiPkg.priceLKR || 0),
+            additionalHourPriceLKR: apiPkg.additionalHourPriceLkr ? Number(apiPkg.additionalHourPriceLkr) : 0,
+            category: apiPkg.category || 'STUDIO',
             isBestSeller: apiPkg.isBestSeller,
             durationHours: apiPkg.durationHours,
             studioName: apiPkg.studioName,
@@ -144,8 +147,17 @@ export default function PackageDetailPage({
       </div>
 
       {/* Top Floating Badge on the right */}
-      <div className="absolute top-4 right-4 z-30 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-[12px] font-medium text-white shadow-xs">
-        {pkg.isBestSeller ? "Best Seller" : "Studio Package"}
+      <div className="absolute top-4 right-4 z-30 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-[12px] font-medium text-white shadow-xs flex items-center gap-1.5">
+        {pkg.category === 'PODCAST' ? (
+          <>
+            <Mic className="w-3.5 h-3.5 text-[#FF6433]" />
+            <span>Podcast Setup</span>
+          </>
+        ) : pkg.isBestSeller ? (
+          "Best Seller"
+        ) : (
+          "Studio Space"
+        )}
       </div>
 
       {/* Spacer to push card to bottom while revealing background hero image */}
@@ -166,10 +178,17 @@ export default function PackageDetailPage({
           {pkg.description}
         </p>
 
-        {/* Price Tag */}
-        <div className="text-[18px] font-medium text-[#FF6433] leading-none flex items-center gap-1.5">
-          <Sparkles className="w-4.5 h-4.5" />
-          <span>{formattedPrice} All Inclusive</span>
+        {/* Price Tag & Additional Hour Note */}
+        <div className="flex items-baseline justify-between flex-wrap gap-2">
+          <div className="text-[18px] font-medium text-[#FF6433] leading-none flex items-center gap-1.5">
+            <Sparkles className="w-4.5 h-4.5" />
+            <span>{formattedPrice}</span>
+          </div>
+          {pkg.additionalHourPriceLKR && pkg.additionalHourPriceLKR > 0 ? (
+            <span className="text-[12px] font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
+              +LKR {pkg.additionalHourPriceLKR.toLocaleString()}/hr extra time
+            </span>
+          ) : null}
         </div>
 
         {/* Variant / Options Pills Row */}

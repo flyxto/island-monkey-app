@@ -89,6 +89,8 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
           name: apiPkg.name,
           description: apiPkg.description,
           priceLKR: Number(apiPkg.priceLkr),
+          additionalHourPriceLKR: apiPkg.additionalHourPriceLkr ? Number(apiPkg.additionalHourPriceLkr) : 0,
+          category: apiPkg.category || 'STUDIO',
           isBestSeller: apiPkg.isBestSeller,
           durationHours: apiPkg.durationHours,
           studioName: apiPkg.studioName,
