@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { getModels } from "@/lib/api";
 import { getR2PublicUrl } from "@/lib/r2";
@@ -20,11 +20,25 @@ import {
   Tag,
 } from "lucide-react";
 
+const MODEL_CATEGORIES = [
+  "Fashion",
+  "Commercial",
+  "Runway",
+  "Editorial",
+  "Beauty & Glamour",
+  "Fitness",
+  "Swimwear",
+  "Lifestyle",
+  "Parts & Hand",
+  "Promotional",
+] as const;
+
 export interface ModelPerson {
   id: string;
   name: string;
   initials: string;
   handle: string;
+  modelCode?: string | null;
   avatarUrl?: string | null;
   specialty?: string | null;
   bio?: string | null;
@@ -42,6 +56,7 @@ export default function CustomerModelsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [selectedModel, setSelectedModel] = useState<ModelPerson | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
@@ -85,6 +100,7 @@ export default function CustomerModelsPage() {
             name,
             initials,
             handle: m.handle || `@model_${m.id.slice(0, 5)}`,
+            modelCode: m.modelCode || null,
             avatarUrl: m.avatarUrl || null,
             specialty: m.specialty || "Talent / Model",
             bio: m.bio || null,
@@ -115,17 +131,39 @@ export default function CustomerModelsPage() {
     fetchModelList();
   }, []);
 
+  const categoryOptions = useMemo(() => {
+    const known = new Set(MODEL_CATEGORIES.map((category) => category.toLowerCase()));
+    const extras: string[] = [];
+    for (const model of models) {
+      for (const tag of model.tags) {
+        const normalized = tag.trim();
+        if (!normalized || known.has(normalized.toLowerCase())) continue;
+        if (extras.some((extra) => extra.toLowerCase() === normalized.toLowerCase())) continue;
+        extras.push(normalized);
+      }
+    }
+    return [...MODEL_CATEGORIES, ...extras];
+  }, [models]);
+
   const filteredModels = models.filter((m) => {
+    const matchesCategory =
+      selectedCategory === "ALL" ||
+      m.tags.some((tag) => tag.toLowerCase() === selectedCategory.toLowerCase());
+    if (!matchesCategory) return false;
+
     const query = searchQuery.trim().toLowerCase();
     if (!query) return true;
     return (
       m.name.toLowerCase().includes(query) ||
       m.handle.toLowerCase().includes(query) ||
+      (m.modelCode && m.modelCode.toLowerCase().includes(query)) ||
       (m.specialty && m.specialty.toLowerCase().includes(query)) ||
       (m.location && m.location.toLowerCase().includes(query)) ||
       m.tags.some((t) => t.toLowerCase().includes(query))
     );
   });
+
+  const hasActiveFilter = Boolean(searchQuery.trim()) || selectedCategory !== "ALL";
 
   return (
     <div className="flex-1 flex flex-col w-full overflow-hidden justify-between gap-3 sm:gap-4 min-h-0 select-none">
@@ -173,6 +211,35 @@ export default function CustomerModelsPage() {
           </span>
         </div>
 
+        {/* Category Filter Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 shrink-0 scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <button
+            type="button"
+            onClick={() => setSelectedCategory("ALL")}
+            className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all shrink-0 cursor-pointer ${
+              selectedCategory === "ALL"
+                ? "bg-[#0B1C30] text-white shadow-xs"
+                : "bg-white/80 text-slate-700 border border-black/5 hover:bg-white"
+            }`}
+          >
+            All Models
+          </button>
+          {categoryOptions.map((category) => (
+            <button
+              key={category}
+              type="button"
+              onClick={() => setSelectedCategory(category)}
+              className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all shrink-0 cursor-pointer ${
+                selectedCategory === category
+                  ? "bg-[#FF6433] text-white shadow-xs"
+                  : "bg-white/80 text-slate-700 border border-black/5 hover:bg-white"
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
         {/* Loading State */}
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
@@ -216,21 +283,26 @@ export default function CustomerModelsPage() {
             </div>
             <div className="flex flex-col gap-1">
               <h3 className="text-[16px] font-medium text-slate-800">
-                {searchQuery ? "No matching models found" : "No Models Registered Yet"}
+                {hasActiveFilter ? "No matching models found" : "No Models Registered Yet"}
               </h3>
               <p className="text-[13px] font-medium text-slate-500 max-w-xs">
-                {searchQuery
-                  ? `No talent profiles match "${searchQuery}". Try a different keyword.`
+                {hasActiveFilter
+                  ? selectedCategory !== "ALL"
+                    ? `No talent profiles match ${selectedCategory}${searchQuery.trim() ? ` and "${searchQuery.trim()}"` : ""}.`
+                    : `No talent profiles match "${searchQuery.trim()}". Try a different keyword.`
                   : "There are currently no model profiles registered in the studio system."}
               </p>
             </div>
-            {searchQuery && (
+            {hasActiveFilter && (
               <button
                 type="button"
-                onClick={() => setSearchQuery("")}
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedCategory("ALL");
+                }}
                 className="mt-1 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-[12px] font-medium rounded-full cursor-pointer transition-colors"
               >
-                Clear Search
+                Clear Filters
               </button>
             )}
           </div>
@@ -276,9 +348,12 @@ export default function CustomerModelsPage() {
                       <span className="text-[12px] sm:text-[13px] font-medium text-slate-900 truncate leading-tight">
                         {model.name}
                       </span>
-                      <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 truncate mt-0.5">
-                        {model.specialty || model.handle}
-                      </span>
+                      {model.modelCode && (
+                        <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 truncate mt-0.5">
+                          Model ID{" "}
+                          <span className="text-slate-800">{model.modelCode}</span>
+                        </span>
+                      )}
                     </div>
                     {/* Button matching the Package page button style: full rounded circle with just arrow */}
                     <div className="relative overflow-hidden w-8 h-8 rounded-full aspect-square bg-gradient-to-b from-white via-[#F8FAFC] to-[#EDF2F7] border border-slate-200/90 flex items-center justify-center shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,1),inset_0_-1px_2px_rgba(0,0,0,0.04),0_1px_3px_rgba(0,0,0,0.05)] group-hover:brightness-95 shrink-0 transition-all">
@@ -327,6 +402,11 @@ export default function CustomerModelsPage() {
                   <span className="text-[12px] font-medium text-slate-400">
                     {selectedModel.handle}
                   </span>
+                  {selectedModel.modelCode && (
+                    <span className="text-[12px] font-medium text-slate-700 mt-0.5">
+                      Model ID {selectedModel.modelCode}
+                    </span>
+                  )}
                   <div className="flex items-center gap-2 mt-1">
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />

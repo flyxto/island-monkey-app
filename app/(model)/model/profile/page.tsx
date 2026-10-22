@@ -316,9 +316,16 @@ export default function ModelProfilePage() {
 
       {/* Section 1: Availability & Specifications */}
       <div className="flex flex-col gap-2">
-        <h2 className="text-[15px] font-medium text-slate-900 px-1">
-          Talent Status & Comp Card
-        </h2>
+        <div className="flex items-center justify-between px-1">
+          <h2 className="text-[15px] font-medium text-slate-900">
+            Talent Status & Comp Card
+          </h2>
+          {profileData?.modelCode && (
+            <span className="px-2.5 py-1 rounded-full bg-[#FF6433]/10 text-[#FF6433] text-[12px] font-medium tracking-wide">
+              Model ID {profileData.modelCode}
+            </span>
+          )}
+        </div>
 
         <div className="bg-white rounded-[24px] p-1.5 sm:p-2 shadow-xs border border-black/5 flex flex-col">
           {/* Availability Status Toggle */}
