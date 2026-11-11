@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { getAvailableSlots, createBooking, initiatePayment, getPackage, getAddons } from "@/lib/api";
 
+const PAYHERE_ENABLED = process.env.NEXT_PUBLIC_PAYHERE_ENABLED === "true";
+
 declare global {
   interface Window {
     payhere: any;
@@ -207,17 +209,27 @@ export default function BookingPage({
         notes: "Booked via Island Monkey App",
       });
       
+      const queryParams = new URLSearchParams({
+        packageId: activePackage.id,
+        date: selectedDate,
+        time: selectedTime,
+        bookingCode: booking.bookingCode || "",
+        total: String(grandTotal),
+      });
+
+      // PayHere is temporarily disabled: the booking is sent to the studio as a pending
+      // request and the studio confirms it after verifying payment manually.
+      if (!PAYHERE_ENABLED) {
+        router.push(`/customer/booking/confirmation?${queryParams.toString()}`);
+        return;
+      }
+
       // 2. Fetch PayHere checkout payload using the booking ID
       const paymentData = await initiatePayment(booking.id);
-      
+
       // 3. Setup PayHere callbacks
       window.payhere.onCompleted = function onCompleted(orderId: string) {
-        const queryParams = new URLSearchParams({
-          packageId: activePackage?.id || "",
-          date: selectedDate,
-          time: selectedTime,
-          orderId,
-        });
+        queryParams.set("orderId", orderId);
         router.push(`/customer/booking/confirmation?${queryParams.toString()}`);
       };
 
@@ -565,7 +577,7 @@ export default function BookingPage({
             className="flex-1 py-3.5 px-6 bg-linear-to-b from-[#FF7A45] via-[#FF6433] to-[#E84A23] hover:from-[#FF8A55] hover:to-[#EA5A33] active:from-[#E84A23] active:to-[#D13F1A] text-white text-[14px] font-medium rounded-full transition-all shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,0.4),0_8px_20px_rgba(232,74,35,0.25)] active:scale-[0.98] cursor-pointer text-center disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isBooking && <Loader2 className="w-4 h-4 animate-spin text-white" />}
-            <span>Proceed to Confirm</span>
+            <span>{PAYHERE_ENABLED ? "Proceed to Confirm" : "Send Booking Request"}</span>
           </button>
         </div>
       </div>

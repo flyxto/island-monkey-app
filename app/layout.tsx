@@ -59,7 +59,9 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         {children}
-        <Script src="https://www.payhere.lk/lib/payhere.js" strategy="lazyOnload" />
+        {process.env.NEXT_PUBLIC_PAYHERE_ENABLED === "true" && (
+          <Script src="https://www.payhere.lk/lib/payhere.js" strategy="lazyOnload" />
+        )}
       </body>
     </html>
   );

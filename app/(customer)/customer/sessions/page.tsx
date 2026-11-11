@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Camera, CheckCircle2, Loader2 } from "lucide-react";
+import { Camera, ChevronDown, Loader2 } from "lucide-react";
+import { BookingStatusLabel } from "@/components/portal/BookingStatusLabel";
 import { getCustomerBookings } from "@/lib/api";
 
 export default function SessionsPage() {
   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
   const [bookings, setBookings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchBookings() {
@@ -114,13 +116,30 @@ export default function SessionsPage() {
               const title = session.package?.name || "Session";
               const studioTag = session.package?.studioName || "Studio";
               const isCompleted = session.status === "Completed";
-              const isApproved = session.status === "Approved";
+              const isExpanded = expandedId === session.id;
+              const fullDate = isNaN(new Date(session.dateTime).getTime())
+                ? ""
+                : new Date(session.dateTime).toLocaleDateString("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  });
+              const addons: any[] = session.addons || [];
 
               return (
                 <div
                   key={session.id}
-                  className="bg-white rounded-2xl p-3 shadow-xs border border-black/5 flex items-center gap-3.5 hover:shadow-sm transition-all shrink-0"
+                  className="bg-white rounded-2xl shadow-xs border border-black/5 hover:shadow-sm transition-all shrink-0 overflow-hidden"
                 >
+                  <button
+                    type="button"
+                    onClick={() => setExpandedId(isExpanded ? null : session.id)}
+                    aria-expanded={isExpanded}
+                    className={`w-full p-3 flex gap-3.5 text-left cursor-pointer ${
+                      isExpanded ? "items-start" : "items-center"
+                    }`}
+                  >
                   {/* Date Column with subtle vertical line */}
                   <div className="flex flex-col items-center justify-center w-7 shrink-0">
                     <span className="text-[11px] font-medium text-slate-400 uppercase tracking-tight">
@@ -148,10 +167,10 @@ export default function SessionsPage() {
 
                   {/* Title & Time */}
                   <div className="flex flex-col min-w-0 flex-1">
-                    <span className="text-[14px] font-medium text-slate-900 truncate">
+                    <span className={`text-[14px] font-medium text-slate-900 ${isExpanded ? "leading-snug" : "truncate"}`}>
                       {title}
                     </span>
-                    <span className="text-[12px] font-medium text-slate-400 truncate mt-0.5">
+                    <span className={`text-[12px] font-medium text-slate-400 mt-0.5 ${isExpanded ? "" : "truncate"}`}>
                       {time} • {studioTag}
                     </span>
                   </div>
@@ -161,23 +180,60 @@ export default function SessionsPage() {
                     <span className="px-2.5 py-1 bg-orange-50 text-[#FF6433] border border-orange-200/60 rounded-full text-[11px] font-medium">
                       {studioTag}
                     </span>
-                    {isCompleted ? (
-                      <span className="text-[11px] font-medium text-slate-400 mt-1 flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3 text-slate-400" />
-                        <span>Completed</span>
-                      </span>
-                    ) : isApproved ? (
-                      <span className="text-[11px] font-medium text-emerald-600 mt-1 flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                        <span>Confirmed</span>
-                      </span>
-                    ) : (
-                      <span className="text-[11px] font-medium text-amber-600 mt-1 flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                        <span>{session.status}</span>
-                      </span>
-                    )}
+                    <BookingStatusLabel status={session.status} />
+                    <ChevronDown
+                      className={`w-4 h-4 text-slate-300 mt-1 transition-transform duration-200 ${
+                        isExpanded ? "rotate-180" : ""
+                      }`}
+                    />
                   </div>
+                  </button>
+
+                  {isExpanded && (
+                    <div className="px-4 pb-4 pt-3 mx-3 mb-1 border-t border-dashed border-slate-200 flex flex-col gap-2.5 text-[13px]">
+                      {session.bookingCode && (
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-slate-400 font-medium">Booking Code</span>
+                          <span className="font-medium text-slate-900">{session.bookingCode}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-slate-400 font-medium">Date</span>
+                        <span className="font-medium text-slate-900 text-right">
+                          {fullDate} • {time}
+                        </span>
+                      </div>
+                      {session.duration && (
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-slate-400 font-medium">Duration</span>
+                          <span className="font-medium text-slate-900 text-right">{session.duration}</span>
+                        </div>
+                      )}
+                      {session.studioRoom && (
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-slate-400 font-medium">Studio</span>
+                          <span className="font-medium text-slate-900 text-right">{session.studioRoom}</span>
+                        </div>
+                      )}
+                      {addons.length > 0 && (
+                        <div className="flex flex-col gap-1">
+                          <span className="text-slate-400 font-medium">Add-ons</span>
+                          {addons.map((a: any) => (
+                            <span key={a.id} className="font-medium text-slate-900 leading-snug">
+                              {a.addon?.name || "Add-on"}
+                              {a.quantity > 1 ? ` × ${a.quantity}` : ""}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between gap-4 pt-2 border-t border-slate-100">
+                        <span className="font-medium text-slate-900">Total</span>
+                        <span className="font-medium text-[#FF6433]">
+                          LKR {Number(session.amountLkr || 0).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })

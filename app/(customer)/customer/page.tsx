@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCustomer } from "@/lib/portal/CustomerContext";
 import { getCustomerBookings } from "@/lib/api";
+import { BookingStatusLabel } from "@/components/portal/BookingStatusLabel";
 import { Camera, QrCode, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 
 export default function CustomerHomePage() {
@@ -210,15 +211,12 @@ export default function CustomerHomePage() {
                     </span>
                   </div>
 
-                  {/* Studio Tag & Confirmed Badge */}
+                  {/* Studio Tag & Status */}
                   <div className="flex flex-col items-end shrink-0 pl-1">
                     <span className="px-2.5 py-1 bg-orange-50 text-[#FF6433] border border-orange-200/60 rounded-full text-[11px] font-medium">
                       {studioTag}
                     </span>
-                    <span className="text-[11px] font-medium text-emerald-600 mt-1 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      <span>{session.status === "Approved" ? "Confirmed" : session.status}</span>
-                    </span>
+                    <BookingStatusLabel status={session.status} />
                   </div>
                 </Link>
               );

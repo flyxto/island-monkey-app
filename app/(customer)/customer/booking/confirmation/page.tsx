@@ -5,12 +5,12 @@ import Link from "next/link";
 import { useCustomer } from "@/lib/portal/CustomerContext";
 import { PackageItem } from "@/lib/mock-data/customer-portal";
 import { getPackage } from "@/lib/api";
-import { Check, Calendar, Sparkles, ArrowRight, Loader2 } from "lucide-react";
+import { Check, ArrowRight } from "lucide-react";
 
 export default function BookingConfirmationPage({
   searchParams,
 }: {
-  searchParams: Promise<{ date?: string; time?: string; packageId?: string; orderId?: string }>;
+  searchParams: Promise<{ date?: string; time?: string; packageId?: string; orderId?: string; bookingCode?: string; total?: string }>;
 }) {
   const resolvedParams = use(searchParams);
   const { selectedPackage, setSelectedPackage, packages, isLoadingPackages } = useCustomer();
@@ -62,7 +62,9 @@ export default function BookingConfirmationPage({
 
   const activePackage = (selectedPackage?.id === targetPkgId ? selectedPackage : null) || directPkg || selectedPackage;
 
-  const formattedPrice = `LKR ${activePackage?.priceLKR?.toLocaleString() || 0}`;
+  const isPaid = !!resolvedParams.orderId;
+  const totalAmount = resolvedParams.total ? Number(resolvedParams.total) : activePackage?.priceLKR || 0;
+  const formattedPrice = `LKR ${totalAmount.toLocaleString()}`;
   const bookingDate = resolvedParams.date || "2026-06-18";
   const bookingTime = resolvedParams.time || "2:00 PM";
 
@@ -75,14 +77,9 @@ export default function BookingConfirmationPage({
             <Check className="w-4 h-4 stroke-[2.5]" />
           </div>
           <span className="text-[15px] font-medium text-white tracking-tight">
-            Booking Confirmed
+            {isPaid ? "Booking Confirmed" : "Request Sent"}
           </span>
         </div>
-
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-[11px] font-medium rounded-full">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          Active Reservation
-        </span>
       </div>
 
       {/* Bottom Card Container: Light curved panel with notch */}
@@ -97,48 +94,42 @@ export default function BookingConfirmationPage({
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="px-3 py-0.5 bg-emerald-50 text-emerald-700 text-[11px] font-medium rounded-full self-center border border-emerald-200/50">
-              Studio Reservation
+            <span className="inline-flex items-center gap-1.5 px-3 py-0.5 bg-emerald-50 text-emerald-700 text-[11px] font-medium rounded-full self-center border border-emerald-200/50">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              {isPaid ? "Confirmed" : "Pending Confirmation"}
             </span>
             <h1 className="text-[20px] font-medium text-slate-900 mt-1">
-              Session Reserved
+              {isPaid ? "Session Reserved" : "Booking Request Sent"}
             </h1>
             <p className="text-[12px] font-medium text-slate-500 max-w-xs leading-relaxed">
-              Your studio booking details are locked in. Present your member QR code when arriving at the studio.
+              {isPaid
+                ? "Your studio booking details are locked in."
+                : "Your time slot is on hold until the studio verifies your payment."}
             </p>
           </div>
 
           {/* Breakdown Card Details */}
           <div className="w-full pt-4 border-t border-dashed border-slate-200 flex flex-col gap-3 text-left">
-            <div className="flex items-center justify-between text-[13px]">
+            <div className="flex flex-col gap-0.5 text-[13px]">
               <span className="text-slate-400 font-medium">Package</span>
-              <span className="font-medium text-slate-900 text-right">
+              <span className="font-medium text-slate-900 leading-snug">
                 {activePackage?.name || "Studio Package"}
               </span>
             </div>
 
             <div className="flex items-center justify-between text-[13px]">
               <span className="text-slate-400 font-medium">Date & Time</span>
-              <span className="font-medium text-slate-900 flex items-center gap-1.5 text-right">
-                <Calendar className="w-4 h-4 text-[#FF6433]" />
+              <span className="font-medium text-slate-900 text-right">
                 {bookingDate} • {bookingTime}
               </span>
             </div>
 
-            <div className="flex items-center justify-between text-[13px]">
-              <span className="text-slate-400 font-medium">Studio & Crew</span>
-              <span className="font-medium text-slate-700 text-right">
-                {activePackage?.metaLine || "Standard Session"}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between text-[13px]">
-              <span className="text-slate-400 font-medium">Status</span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/50">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Confirmed
-              </span>
-            </div>
+            {resolvedParams.bookingCode && (
+              <div className="flex items-center justify-between text-[13px]">
+                <span className="text-slate-400 font-medium">Booking Code</span>
+                <span className="font-medium text-slate-900">{resolvedParams.bookingCode}</span>
+              </div>
+            )}
 
             <div className="flex items-center justify-between pt-3 border-t border-slate-100">
               <span className="font-medium text-slate-900 text-[14px]">Total Amount</span>
@@ -149,16 +140,12 @@ export default function BookingConfirmationPage({
           </div>
         </div>
 
-        {/* Integration Handoff Notice */}
-        <div className="p-3.5 bg-amber-50/80 border border-amber-200/60 rounded-[20px] flex items-start gap-2.5 text-amber-900 text-[12px] leading-relaxed">
-          <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-          <div>
-            <span className="font-medium block text-amber-950">
-              Payment & Points Integration Point
-            </span>
-            This completes the booking reservation flow. Member points balance will update upon studio check-in.
-          </div>
-        </div>
+        {/* Notice */}
+        <p className="px-2 text-center text-[12px] text-slate-500 leading-relaxed">
+          {isPaid
+            ? "Present your member QR code when arriving at the studio."
+            : "Please arrange payment with the studio. Track this request under My Sessions."}
+        </p>
 
         {/* Navigation Actions */}
         <div className="flex flex-col gap-2 pt-1 shrink-0">
