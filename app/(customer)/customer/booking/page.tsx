@@ -328,7 +328,7 @@ export default function BookingPage({
               </div>
 
               {/* Counter Buttons */}
-              <div className="flex items-center gap-3 bg-[#FAF6F0] border border-[#E8E1D5] rounded-full p-1">
+              <div className="flex items-center gap-3 bg-slate-100 border border-slate-200/70 rounded-full p-1">
                 <button
                   type="button"
                   onClick={() => setExtraHours((prev) => Math.max(0, prev - 1))}
@@ -338,7 +338,7 @@ export default function BookingPage({
                 >
                   <Minus className="w-3.5 h-3.5" />
                 </button>
-                <span className="font-mono font-semibold text-sm w-8 text-center text-[#0B1C30]">
+                <span className="font-medium text-[13px] w-9 text-center text-slate-900">
                   +{extraHours}h
                 </span>
                 <button
@@ -361,8 +361,8 @@ export default function BookingPage({
                   onClick={() => setExtraHours(hrs)}
                   className={`px-3 py-1 text-[11px] font-medium rounded-full transition-all cursor-pointer ${
                     extraHours === hrs
-                      ? "bg-[#0B1C30] text-white"
-                      : "bg-[#F1F3F2] text-slate-600 hover:text-slate-900"
+                      ? "bg-[#FF6433] text-white"
+                      : "bg-slate-100 text-slate-600 hover:text-slate-900"
                   }`}
                 >
                   {hrs === 0 ? "Standard" : `+${hrs} Hour${hrs > 1 ? "s" : ""}`}
@@ -393,15 +393,15 @@ export default function BookingPage({
                     className={`p-3 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
                       isSelected
                         ? "bg-[#FFF0EB] border-[#FF6433]/40 shadow-xs"
-                        : "bg-[#FAF6F0]/60 border-[#E8E1D5] hover:bg-[#FAF6F0]"
+                        : "bg-slate-50 border-slate-200 hover:bg-slate-100"
                     }`}
                   >
-                    <div>
-                      <p className="text-[13px] font-semibold text-[#0B1C30]">{addon.name}</p>
-                      <p className="text-[11px] text-[#8C8880]">{addon.description || "Studio rental kit"}</p>
+                    <div className="min-w-0 flex-1 pr-3">
+                      <p className="text-[13px] font-medium text-slate-900">{addon.name}</p>
+                      <p className="text-[11px] text-slate-500">{addon.description || "Studio rental kit"}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-[12px] font-semibold text-[#FF6433]">
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-[12px] font-medium text-[#FF6433] whitespace-nowrap w-24 text-right tabular-nums">
                         +LKR {addon.priceLKR.toLocaleString()}
                       </span>
                       <div
@@ -442,15 +442,15 @@ export default function BookingPage({
                     className={`p-3 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
                       isSelected
                         ? "bg-[#FFF0EB] border-[#FF6433]/40 shadow-xs"
-                        : "bg-[#FAF6F0]/60 border-[#E8E1D5] hover:bg-[#FAF6F0]"
+                        : "bg-slate-50 border-slate-200 hover:bg-slate-100"
                     }`}
                   >
-                    <div>
-                      <p className="text-[13px] font-semibold text-[#0B1C30]">{addon.name}</p>
-                      <p className="text-[11px] text-[#8C8880]">{addon.description || "Full post-production"}</p>
+                    <div className="min-w-0 flex-1 pr-3">
+                      <p className="text-[13px] font-medium text-slate-900">{addon.name}</p>
+                      <p className="text-[11px] text-slate-500">{addon.description || "Full post-production"}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-[12px] font-semibold text-[#FF6433]">
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-[12px] font-medium text-[#FF6433] whitespace-nowrap w-24 text-right tabular-nums">
                         +LKR {addon.priceLKR.toLocaleString()}
                       </span>
                       <div
@@ -490,7 +490,7 @@ export default function BookingPage({
           <div className="flex w-full flex-wrap items-center gap-2.5 min-h-[44px]">
             {isLoadingSlots ? (
               <div className="flex w-full items-center justify-center p-4">
-                <Loader2 className="w-6 h-6 animate-spin text-im-accent" />
+                <Loader2 className="w-6 h-6 animate-spin text-[#FF6433]" />
               </div>
             ) : timeSlots.length > 0 ? (
               timeSlots.map((slot) => (
@@ -503,7 +503,7 @@ export default function BookingPage({
                 />
               ))
             ) : (
-              <p className="text-im-muted text-[14px]">No slots available for this date.</p>
+              <p className="text-slate-500 text-[14px]">No slots available for this date.</p>
             )}
           </div>
         </div>
@@ -512,7 +512,7 @@ export default function BookingPage({
         <div className="bg-white rounded-[24px] p-4 sm:p-5 border border-black/5 shadow-xs flex flex-col gap-2 text-xs">
           <div className="flex justify-between py-1 text-slate-600">
             <span>Base Package ({activePackage?.durationHours})</span>
-            <span className="font-mono font-semibold text-slate-900">
+            <span className="font-medium text-slate-900">
               LKR {basePrice.toLocaleString()}
             </span>
           </div>
@@ -520,7 +520,7 @@ export default function BookingPage({
           {extraHours > 0 && (
             <div className="flex justify-between py-1 text-emerald-700">
               <span>Overtime (+{extraHours} hr{extraHours > 1 ? "s" : ""})</span>
-              <span className="font-mono font-semibold">
+              <span className="font-medium">
                 +LKR {overtimeTotal.toLocaleString()}
               </span>
             </div>
@@ -529,15 +529,15 @@ export default function BookingPage({
           {addonsTotal > 0 && (
             <div className="flex justify-between py-1 text-[#FF6433]">
               <span>Equipment & Editing Add-ons</span>
-              <span className="font-mono font-semibold">
+              <span className="font-medium">
                 +LKR {addonsTotal.toLocaleString()}
               </span>
             </div>
           )}
 
           <div className="border-t border-slate-100 pt-2.5 mt-1 flex justify-between items-baseline">
-            <span className="font-semibold text-slate-900 text-sm">Estimated Total</span>
-            <span className="font-mono font-bold text-slate-900 text-base">
+            <span className="font-medium text-slate-900 text-[14px]">Estimated Total</span>
+            <span className="font-medium text-slate-900 text-[16px]">
               {formattedGrandTotal}
             </span>
           </div>
