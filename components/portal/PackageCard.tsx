@@ -55,7 +55,7 @@ export function PackageCard({
     <Link
       href={targetHref}
       onClick={() => onSelect?.(packageItem)}
-      className="group block w-full bg-white rounded-3xl border border-black/5 shadow-xs hover:shadow-md transition-all overflow-hidden cursor-pointer"
+      className="group block w-full bg-white rounded-3xl border border-black/5 shadow-xs hover:shadow-md active:scale-[0.98] transition-all overflow-hidden cursor-pointer touch-manipulation"
     >
       {/* Hero Image with overlaid meta + title */}
       <div className="relative h-56 sm:h-64 w-full overflow-hidden bg-slate-100 rounded-3xl">
@@ -105,7 +105,7 @@ export function PackageCard({
                   e.stopPropagation();
                   router.push(editHref);
                 }}
-                className="w-7 h-7 bg-white/90 hover:bg-white text-slate-800 rounded-full shadow-sm flex items-center justify-center transition-colors backdrop-blur-sm cursor-pointer"
+                className="w-7 h-7 bg-white/90 hover:bg-white text-slate-800 rounded-full shadow-sm flex items-center justify-center transition-all active:scale-90 backdrop-blur-sm cursor-pointer"
                 aria-label="Edit Gig"
               >
                 <Pencil className="w-3.5 h-3.5" />
@@ -139,7 +139,7 @@ export function PackageCard({
             ) : null}
           </div>
 
-          <div className="relative overflow-hidden h-9 px-4 bg-gradient-to-b from-white via-[#F8FAFC] to-[#EDF2F7] border border-slate-200/90 rounded-full font-medium text-[12px] text-slate-900 inline-flex items-center gap-1.5 shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,1),inset_0_-1px_2px_rgba(0,0,0,0.04),0_1px_3px_rgba(0,0,0,0.05)] group-hover:brightness-95 transition-all">
+          <div className="relative overflow-hidden h-9 px-4 bg-gradient-to-b from-white via-[#F8FAFC] to-[#EDF2F7] border border-slate-200/90 rounded-full font-medium text-[12px] text-slate-900 inline-flex items-center gap-1.5 shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,1),inset_0_-1px_2px_rgba(0,0,0,0.04),0_1px_3px_rgba(0,0,0,0.05)] group-hover:brightness-95 group-active:brightness-90 transition-all">
             <div className="absolute inset-x-1 top-0.5 h-[44%] bg-gradient-to-b from-white/95 via-white/40 to-transparent rounded-t-full pointer-events-none" />
             <span className="relative z-10 tracking-tight">View Package</span>
             <ArrowRight className="relative z-10 w-3.5 h-3.5 text-slate-600 group-hover:translate-x-0.5 transition-transform" />

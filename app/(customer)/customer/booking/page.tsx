@@ -261,7 +261,7 @@ export default function BookingPage({
       <div className="px-3 pt-2 pb-0.5 flex items-center justify-between shrink-0">
         <Link
           href={`/customer/packages/${activePackage?.id || ""}`}
-          className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-xs flex items-center justify-center text-white transition-all cursor-pointer"
+          className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 active:scale-90 border border-white/20 backdrop-blur-xs flex items-center justify-center text-white transition-all cursor-pointer"
           aria-label="Back to package detail"
         >
           <ChevronLeft className="w-5 h-5 -ml-0.5 text-white" />
@@ -333,7 +333,7 @@ export default function BookingPage({
                   type="button"
                   onClick={() => setExtraHours((prev) => Math.max(0, prev - 1))}
                   disabled={extraHours <= 0}
-                  className="w-8 h-8 rounded-full bg-white text-slate-800 disabled:opacity-40 flex items-center justify-center shadow-xs transition-transform active:scale-90 cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-white text-slate-800 disabled:opacity-40 flex items-center justify-center shadow-xs transition-transform active:scale-90 active:bg-slate-100 cursor-pointer"
                   aria-label="Decrease hours"
                 >
                   <Minus className="w-3.5 h-3.5" />
@@ -344,7 +344,7 @@ export default function BookingPage({
                 <button
                   type="button"
                   onClick={() => setExtraHours((prev) => prev + 1)}
-                  className="w-8 h-8 rounded-full bg-[#FF6433] text-white flex items-center justify-center shadow-xs transition-transform active:scale-90 cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-[#FF6433] text-white flex items-center justify-center shadow-xs transition-transform active:scale-90 active:bg-[#E84A23] cursor-pointer"
                   aria-label="Increase hours"
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -359,7 +359,7 @@ export default function BookingPage({
                   key={hrs}
                   type="button"
                   onClick={() => setExtraHours(hrs)}
-                  className={`px-3 py-1 text-[11px] font-medium rounded-full transition-all cursor-pointer ${
+                  className={`px-3 py-1 text-[11px] font-medium rounded-full transition-all cursor-pointer active:scale-95 ${
                     extraHours === hrs
                       ? "bg-[#FF6433] text-white"
                       : "bg-slate-100 text-slate-600 hover:text-slate-900"
@@ -390,10 +390,10 @@ export default function BookingPage({
                     key={addon.id}
                     type="button"
                     onClick={() => toggleAddon(addon.id)}
-                    className={`p-3 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+                    className={`p-3 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer active:scale-[0.98] ${
                       isSelected
                         ? "bg-[#FFF0EB] border-[#FF6433]/40 shadow-xs"
-                        : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+                        : "bg-slate-50 border-slate-200 hover:bg-slate-100 active:bg-slate-200/70"
                     }`}
                   >
                     <div className="min-w-0 flex-1 pr-3">
@@ -439,10 +439,10 @@ export default function BookingPage({
                     key={addon.id}
                     type="button"
                     onClick={() => toggleAddon(addon.id)}
-                    className={`p-3 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+                    className={`p-3 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer active:scale-[0.98] ${
                       isSelected
                         ? "bg-[#FFF0EB] border-[#FF6433]/40 shadow-xs"
-                        : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+                        : "bg-slate-50 border-slate-200 hover:bg-slate-100 active:bg-slate-200/70"
                     }`}
                   >
                     <div className="min-w-0 flex-1 pr-3">
@@ -489,9 +489,15 @@ export default function BookingPage({
 
           <div className="flex w-full flex-wrap items-center gap-2.5 min-h-[44px]">
             {isLoadingSlots ? (
-              <div className="flex w-full items-center justify-center p-4">
-                <Loader2 className="w-6 h-6 animate-spin text-[#FF6433]" />
-              </div>
+              Array.from({ length: Math.max(timeSlots.length, 6) }).map((_, i) => (
+                <div
+                  key={`slot-skeleton-${i}`}
+                  className="px-4 py-2.5 min-w-28 flex-initial rounded-full border border-transparent bg-slate-100 animate-pulse text-[14px] font-medium text-transparent select-none"
+                  aria-hidden="true"
+                >
+                  00:00 AM
+                </div>
+              ))
             ) : timeSlots.length > 0 ? (
               timeSlots.map((slot) => (
                 <TimeSlotChip
@@ -556,7 +562,7 @@ export default function BookingPage({
             type="button"
             onClick={handleProceed}
             disabled={isBooking || !selectedTime}
-            className="flex-1 py-3.5 px-6 bg-linear-to-b from-[#FF7A45] via-[#FF6433] to-[#E84A23] hover:from-[#FF8A55] hover:to-[#EA5A33] text-white text-[14px] font-medium rounded-full transition-all shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,0.4),0_8px_20px_rgba(232,74,35,0.25)] active:scale-[0.98] cursor-pointer text-center disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="flex-1 py-3.5 px-6 bg-linear-to-b from-[#FF7A45] via-[#FF6433] to-[#E84A23] hover:from-[#FF8A55] hover:to-[#EA5A33] active:from-[#E84A23] active:to-[#D13F1A] text-white text-[14px] font-medium rounded-full transition-all shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,0.4),0_8px_20px_rgba(232,74,35,0.25)] active:scale-[0.98] cursor-pointer text-center disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isBooking && <Loader2 className="w-4 h-4 animate-spin text-white" />}
             <span>Proceed to Confirm</span>

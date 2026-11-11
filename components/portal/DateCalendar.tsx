@@ -53,7 +53,7 @@ export function DateCalendar({ selectedDate, onSelectDate }: DateCalendarProps) 
             <button
               type="button"
               onClick={handlePrevMonth}
-              className="p-1 hover:text-slate-900 transition-colors"
+              className="p-1 hover:text-slate-900 active:scale-90 active:text-slate-900 transition-all touch-manipulation"
               aria-label="Previous Month"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -61,7 +61,7 @@ export function DateCalendar({ selectedDate, onSelectDate }: DateCalendarProps) 
             <button
               type="button"
               onClick={handleNextMonth}
-              className="p-1 hover:text-slate-900 transition-colors"
+              className="p-1 hover:text-slate-900 active:scale-90 active:text-slate-900 transition-all touch-manipulation"
               aria-label="Next Month"
             >
               <ChevronRight className="w-5 h-5" />
@@ -105,12 +105,12 @@ export function DateCalendar({ selectedDate, onSelectDate }: DateCalendarProps) 
                 type="button"
                 disabled={isPast}
                 onClick={() => onSelectDate(dateString)}
-                className={`h-9 w-9 mx-auto flex items-center justify-center text-[14px] font-medium rounded-full transition-all ${
+                className={`h-9 w-9 mx-auto flex items-center justify-center text-[14px] font-medium rounded-full transition-all touch-manipulation active:scale-90 ${
                   isSelected
                     ? "bg-[#FF6433] text-white shadow-md shadow-[#FF6433]/30 font-medium"
                     : isPast
                     ? "text-slate-300 cursor-not-allowed opacity-40"
-                    : "text-slate-700 hover:bg-[#FFF0EB] hover:text-[#FF6433]"
+                    : "text-slate-700 hover:bg-[#FFF0EB] hover:text-[#FF6433] active:bg-[#FFE5DC] active:text-[#FF6433]"
                 }`}
               >
                 {dayNum}
