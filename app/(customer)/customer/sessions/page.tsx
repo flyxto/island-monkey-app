@@ -1,12 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { Camera, ChevronDown, Loader2 } from "lucide-react";
 import { BookingStatusLabel } from "@/components/portal/BookingStatusLabel";
 import { getCustomerBookings } from "@/lib/api";
+import { ModelRequestList } from "@/components/portal/ModelRequestList";
 
-export default function SessionsPage() {
-  const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
+export default function SessionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  // ?tab=models deep-links here from the model request confirmation
+  const { tab } = use(searchParams);
+  const [activeTab, setActiveTab] = useState<"upcoming" | "past" | "models">(
+    tab === "models" ? "models" : "upcoming"
+  );
   const [bookings, setBookings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -87,6 +96,23 @@ export default function SessionsPage() {
           />
           <span>Past ({pastSessions.length})</span>
         </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("models")}
+          className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-medium transition-all cursor-pointer ${
+            activeTab === "models"
+              ? "bg-[#FF6433] text-white shadow-xs"
+              : "bg-white/80 text-slate-700 hover:bg-white hover:text-slate-900 border border-slate-300/60"
+          }`}
+        >
+          <span
+            className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+              activeTab === "models" ? "bg-white" : "bg-[#FF6433]"
+            }`}
+          />
+          <span>Models</span>
+        </button>
       </div>
 
       {/* Bottom Card Container: Light curved panel with notch */}
@@ -94,6 +120,10 @@ export default function SessionsPage() {
         {/* Drag Notch Indicator */}
         <div className="w-10 h-1 bg-slate-400/50 rounded-full mx-auto my-0.5 shrink-0" />
 
+        {activeTab === "models" ? (
+          <ModelRequestList />
+        ) : (
+        <>
         {/* Header: Title and Count */}
         <div className="flex items-center justify-between px-1 shrink-0">
           <h1 className="text-[16px] font-medium text-slate-900 tracking-tight">
@@ -245,6 +275,8 @@ export default function SessionsPage() {
             </div>
           )}
         </div>
+        </>
+        )}
       </div>
     </div>
   );

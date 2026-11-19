@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getModels } from "@/lib/api";
 import { getR2PublicUrl } from "@/lib/r2";
 import { Input } from "@/components/ui/input";
+import { ModelRequestPanel } from "@/components/portal/ModelRequestPanel";
 import {
   Search,
   Sparkles,
@@ -540,6 +541,16 @@ export default function CustomerModelsPage() {
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* Request booking footer */}
+            <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-slate-100 bg-white">
+              <ModelRequestPanel
+                key={selectedModel.id}
+                modelId={selectedModel.id}
+                modelName={selectedModel.name}
+                isAvailable={selectedModel.availability === "Available"}
+              />
             </div>
           </div>
         </div>

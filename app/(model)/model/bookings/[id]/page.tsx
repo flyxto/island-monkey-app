@@ -5,6 +5,7 @@ import Link from "next/link";
 import { StatusBadge } from "@/components/portal/StatusBadge";
 import { ProgressiveBlur } from "@/components/portal/ProgressiveBlur";
 import { getModelBooking, acceptModelBooking, rejectModelBooking } from "@/lib/api";
+import { formatStudioDateTime } from "@/lib/utils";
 import {
   ChevronLeft,
   Calendar,
@@ -176,9 +177,16 @@ export default function SingleBookingDetailPage({
           <StatusBadge status={activeStatus} className="shrink-0" />
         </div>
 
+        {/* Direct bookings come from a customer request arranged by the studio */}
+        {!booking.gigId && (
+          <p className="-mt-2 text-[12px] font-medium text-[#FF6433]">
+            Booked by the studio{booking.request?.requestCode ? ` · ${booking.request.requestCode}` : ""}
+          </p>
+        )}
+
         {/* Short Subtitle / Notes preview */}
         <p className="text-[14px] font-normal text-slate-500 leading-relaxed line-clamp-2">
-          {booking.notes || "Commercial shoot session booking with client."}
+          {booking.notes || (booking.gigId ? "Commercial shoot session booking with client." : "Contact the studio for any questions about this booking.")}
         </p>
 
         {/* Total Payment Highlight */}
@@ -195,11 +203,7 @@ export default function SingleBookingDetailPage({
         <div className="flex items-center gap-2 flex-wrap pt-0.5">
           <div className="py-2 px-3.5 rounded-full text-[13px] font-medium bg-[#F1F3F2] text-slate-700 flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-slate-500" />
-            <span>
-              {booking.dateTime?.includes("-") || booking.dateTime?.includes("T")
-                ? new Date(booking.dateTime).toLocaleDateString()
-                : booking.dateTime || "Scheduled"}
-            </span>
+            <span>{formatStudioDateTime(booking.dateTime) || "Scheduled"}</span>
           </div>
           <div className="py-2 px-3.5 rounded-full text-[13px] font-medium bg-[#F1F3F2] text-slate-700 flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-slate-500" />
@@ -223,7 +227,7 @@ export default function SingleBookingDetailPage({
               <div className="bg-[#F6F8F7] border border-[#E3E8E5] rounded-2xl p-3.5 flex flex-col gap-1.5">
                 <span className="text-[13px] font-medium text-slate-900 flex items-center gap-1.5">
                   <FileText className="w-4 h-4 text-[#FF6433]" />
-                  Client Instructions & Notes
+                  {booking.gigId ? "Client Instructions & Notes" : "Notes from the Studio"}
                 </span>
                 <span className="text-[13px] font-normal text-slate-600 leading-relaxed">
                   {booking.notes}

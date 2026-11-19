@@ -6,6 +6,7 @@ import { StatusBadge, StatusType } from "@/components/portal/StatusBadge";
 import { Input } from "@/components/ui/input";
 import { Search, Calendar, Clock, MapPin, Eye, Camera, Loader2 } from "lucide-react";
 import { getModelBookings } from "@/lib/api";
+import { formatStudioDateTime } from "@/lib/utils";
 
 export default function MyBookingsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,6 +31,7 @@ export default function MyBookingsPage() {
   const normalizedBookings = bookings.map((b: any) => ({
     id: b.id,
     clientName: b.gig?.title || b.clientName || "Editorial Shoot",
+    isDirect: !b.gigId,
     location: b.location || "Island Monkey Studio",
     duration: b.duration || "4 Hours",
     dateTime: b.dateTime || new Date().toISOString(),
@@ -144,13 +146,12 @@ export default function MyBookingsPage() {
                       <h2 className="text-[15px] font-medium text-slate-900 tracking-tight truncate">
                         {booking.clientName}
                       </h2>
+                      {booking.isDirect && (
+                        <span className="text-[11px] font-medium text-[#FF6433]">Booked by the studio</span>
+                      )}
                       <div className="flex items-center gap-1 text-[12px] font-medium text-slate-500 mt-0.5">
                         <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>
-                          {booking.dateTime?.includes("-") || booking.dateTime?.includes("T")
-                            ? new Date(booking.dateTime).toLocaleDateString()
-                            : booking.dateTime}
-                        </span>
+                        <span className="truncate">{formatStudioDateTime(booking.dateTime)}</span>
                       </div>
                     </div>
                   </div>

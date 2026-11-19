@@ -291,6 +291,37 @@ export async function getCustomerBookings() {
   return response.json();
 }
 
+// ─── Model Requests (customer asks the studio to book a model) ──────────────────
+
+export async function createModelRequest(data: { modelId: string; preferredDate?: string; notes?: string }) {
+  const response = await fetchWithAuth(`${API_URL}/model-requests`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to send model request');
+  }
+  return response.json();
+}
+
+export async function getMyModelRequests() {
+  const response = await fetchWithAuth(`${API_URL}/model-requests/mine`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch model requests');
+  }
+  return response.json();
+}
+
+export async function cancelModelRequest(id: string) {
+  const response = await fetchWithAuth(`${API_URL}/model-requests/${id}/cancel`, { method: 'PATCH' });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to cancel request');
+  }
+  return response.json();
+}
+
 export async function getPackage(id: string) {
   const response = await fetch(`${API_URL}/packages/${id}`);
   if (!response.ok) {
